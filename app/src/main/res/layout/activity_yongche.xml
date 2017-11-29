@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="申请人"/>
+
+            <TextView
+                android:id="@+id/name"
+                style="@style/WorkInfoRightTextView"
+                android:hint=""/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/ll_bumen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="申请部门"/>
+
+            <TextView
+                android:id="@+id/bumen"
+                style="@style/WorkInfoRightTextView"
+                android:hint=""/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/ll_start"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="开始时间"/>
+
+            <TextView
+                android:id="@+id/date_start"
+                style="@style/WorkInfoRightTextView"/>
+
+            <ImageView
+                style="@style/WorkInfoRightArrow"
+                android:src="@drawable/arrow_right_gray2"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_stop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="结束时间"/>
+
+            <TextView
+                android:id="@+id/date_stop"
+                style="@style/WorkInfoRightTextView"/>
+
+            <ImageView
+                style="@style/WorkInfoRightArrow"
+                android:src="@drawable/arrow_right_gray2"/>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/ll_yongche"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="是否使用本部车辆"/>
+
+            <TextView
+                android:id="@+id/shifouyongche"
+                style="@style/WorkInfoRightTextView"/>
+
+            <ImageView
+                style="@style/WorkInfoRightArrow"
+                android:src="@drawable/arrow_right_gray2"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="共计使用时间"/>
+
+            <EditText
+                android:id="@+id/total_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请输入使用时间（必填）"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:singleLine="true"
+                android:textSize="@dimen/dp_15"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="申请车辆类型"/>
+
+            <EditText
+                android:id="@+id/car_type"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请输入车辆类型（必填）"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:singleLine="true"
+                android:textSize="@dimen/dp_15"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="申请事由"/>
+
+            <EditText
+                android:id="@+id/shenqing_yuanyin"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请输入申请事由（必填）"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:maxLines="7"
+                android:textSize="@dimen/dp_15"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_caogao"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/text_blue_blank"
+            android:text="保存草稿"
+            android:textColor="@color/blue3"/>
+
+        <Button
+            android:id="@+id/btn_commit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/text_blue_shape"
+            android:text="提交数据"
+            android:textColor="@color/white"
+            android:textSize="@dimen/dp_15"/>
+
+    </LinearLayout>
+</RelativeLayout>

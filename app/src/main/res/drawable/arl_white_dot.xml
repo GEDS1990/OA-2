@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <!--width：dot纵向宽度-->
+    <!--<solid
+        android:width="2dp"
+        android:color="#FFF"
+        android:dashGap="@dimen/activity_horizontal_margin" />-->
+    <size android:height="7dp" android:width="7dp"></size>
+    <solid android:color="#FFF" />
+</shape>

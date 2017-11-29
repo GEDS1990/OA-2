@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="项目名称 :"
+                android:textColor="@color/black"
+                android:textSize="@dimen/dp_15"/>
+
+            <EditText
+                android:id="@+id/name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请输入项目名称"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:maxLines="7"
+                android:textSize="@dimen/dp_15"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="服务期 :"
+                android:textColor="@color/black"
+                android:textSize="@dimen/dp_15"/>
+
+            <EditText
+                android:id="@+id/fuwuqi"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请填写服务期"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:maxLines="7"
+                android:textSize="@dimen/dp_15"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="付款条件 :"
+                android:textColor="@color/black"
+                android:textSize="@dimen/dp_15"/>
+
+            <EditText
+                android:id="@+id/paytiaojian"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请输入呈请姓名"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:maxLines="7"
+                android:textSize="@dimen/dp_15"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="评标办法 :"
+                android:textColor="@color/black"
+                android:textSize="@dimen/dp_15"/>
+
+            <EditText
+                android:id="@+id/banfa"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请输入呈请姓名"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:maxLines="7"
+                android:textSize="@dimen/dp_15"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="控制价 :"
+                android:textColor="@color/black"
+                android:textSize="@dimen/dp_15"/>
+
+            <EditText
+                android:id="@+id/kongzhijia"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请输入呈请姓名"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:maxLines="7"
+                android:textSize="@dimen/dp_15"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="类型 :"
+                android:textColor="@color/black"
+                android:textSize="@dimen/dp_15"/>
+
+            <EditText
+                android:id="@+id/type"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="请输入类型"
+                android:lineSpacingExtra="@dimen/dp_3"
+                android:maxLines="7"
+                android:textSize="@dimen/dp_15"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_huiqian"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/dp_13">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="是否发起会签"
+                android:textColor="@color/black"
+                android:textSize="@dimen/dp_15"/>
+
+            <TextView
+                android:id="@+id/tv_huiqian"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="请选择 (是/否)"
+                android:textSize="15dp"/>
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/arrow_right_gray2"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_huiqianren"
+            style="@style/WorkInfoLinearLayout"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/WorkInfoLeftTextView"
+                android:text="会签人："/>
+
+            <TextView
+                android:id="@+id/tv_huiqianre"
+                style="@style/WorkInfoHuiqianrenTextView"/>
+
+            <ImageView
+                style="@style/WorkInfoRightArrow"
+                android:src="@drawable/icon_reimbursement_mail"/>
+        </LinearLayout>
+
+        <com.lsh.XXRecyclerview.XXRecycleView
+            android:id="@+id/xxre_huiqianren"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_caogao"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/text_blue_blank"
+            android:text="保存草稿"
+            android:textColor="@color/blue3"/>
+
+        <Button
+            android:id="@+id/btn_commit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/text_blue_shape"
+            android:text="提交数据"
+            android:textColor="@color/white"
+            android:textSize="@dimen/dp_15"/>
+
+    </LinearLayout>
+</RelativeLayout>

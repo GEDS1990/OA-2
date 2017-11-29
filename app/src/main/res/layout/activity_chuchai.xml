@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="申请人"/>
+
+                <TextView
+                    android:id="@+id/chuchai_name"
+                    style="@style/WorkInfoRightTextView"
+                    android:hint=""/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_bumen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="申请部门"/>
+
+                <TextView
+                    android:id="@+id/chuchai_bumen"
+                    style="@style/WorkInfoRightTextView"
+                    android:hint=""/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_gongju"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13"
+                >
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="交通工具"/>
+
+                <TextView
+                    android:id="@+id/chuchai_gongju"
+                    style="@style/WorkInfoRightTextView"/>
+
+                <ImageView
+                    style="@style/WorkInfoRightArrow"
+                    android:src="@drawable/arrow_right_gray2"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="开始时间"/>
+
+                <TextView
+                    android:id="@+id/chuchai_start"
+                    style="@style/WorkInfoRightTextView"/>
+
+                <ImageView
+                    style="@style/WorkInfoRightArrow"
+                    android:src="@drawable/arrow_right_gray2"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_stop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="结束时间"/>
+
+                <TextView
+                    android:id="@+id/chuchai_stop"
+                    style="@style/WorkInfoRightTextView"/>
+
+                <ImageView
+                    style="@style/WorkInfoRightArrow"
+                    android:src="@drawable/arrow_right_gray2"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="出差地点"/>
+
+                <EditText
+                    android:id="@+id/chuchai_didian"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入出差地点（必填）"
+                    android:maxLines="3"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="出差事由"/>
+
+                <EditText
+                    android:id="@+id/chuchai_shiyou"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入出差事由（必填）"
+                    android:lineSpacingExtra="@dimen/dp_3"
+                    android:maxLines="9"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="其他备注"/>
+
+                <EditText
+                    android:id="@+id/chuchai_beizhu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入需要备注的信息（选填）"
+                    android:lineSpacingExtra="@dimen/dp_3"
+                    android:maxLines="9"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <!--<LinearLayout-->
+                <!--android:id="@+id/ll_fenguanleader"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginBottom="1dp"-->
+                <!--android:background="@color/white"-->
+                <!--android:gravity="center_vertical"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:padding="@dimen/dp_13">-->
+
+                <!--<TextView-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:text="选择分管领导审核"-->
+                    <!--android:textColor="@color/black"-->
+                    <!--android:textSize="@dimen/dp_15"/>-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/tv_fenguanleader"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:textSize="15dp"/>-->
+
+                <!--<ImageView-->
+                    <!--android:layout_width="16dp"-->
+                    <!--android:layout_height="16dp"-->
+                    <!--android:layout_marginLeft="10dp"-->
+                    <!--android:src="@drawable/icon_reimbursement_mail"/>-->
+            <!--</LinearLayout>-->
+
+            <!--<LinearLayout-->
+                <!--android:id="@+id/ll_buzhang"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginBottom="10dp"-->
+                <!--android:background="@color/white"-->
+                <!--android:gravity="center_vertical"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:padding="@dimen/dp_13">-->
+
+                <!--<TextView-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:text="是否通过部长审核"-->
+                    <!--android:textColor="@color/black"-->
+                    <!--android:textSize="@dimen/dp_15"/>-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/tv_buzhang"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:hint="(是/否)"-->
+                    <!--android:textSize="15dp"/>-->
+
+                <!--<ImageView-->
+                    <!--android:layout_width="16dp"-->
+                    <!--android:layout_height="16dp"-->
+                    <!--android:layout_marginLeft="10dp"-->
+                    <!--android:src="@drawable/arrow_right_gray2"/>-->
+            <!--</LinearLayout>-->
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_caogao"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/text_blue_blank"
+            android:text="保存草稿"
+            android:textColor="@color/blue3"/>
+
+        <Button
+            android:id="@+id/btn_commit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/text_blue_shape"
+            android:text="提交数据"
+            android:textColor="@color/white"
+            android:textSize="@dimen/dp_15"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

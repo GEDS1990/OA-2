@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/gzdbd_bianhao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="编号"/>
+
+                <TextView
+                    android:id="@+id/bianhao"
+                    style="@style/WorkInfoRightTextView"
+                    android:hint="请点击获取（必填）"/>
+
+                <ImageView
+                    style="@style/WorkInfoRightArrow"
+                    android:src="@drawable/icon_official_number"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="工作来源"/>
+
+                <EditText
+                    android:id="@+id/workfrom"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入工作来源（必填）"
+                    android:lineSpacingExtra="@dimen/dp_3"
+                    android:maxLines="6"
+                    android:textSize="@dimen/dp_15"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="主办部门"/>
+
+                <EditText
+                    android:id="@+id/firstBumen"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入主办部门（必填）"
+                    android:maxLines="3"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="责任人"/>
+
+                <EditText
+                    android:id="@+id/fuzeren1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入主办部门责任人（必填）"
+                    android:lineSpacingExtra="@dimen/dp_3"
+                    android:maxLines="6"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="协办部门"/>
+
+                <EditText
+                    android:id="@+id/secondBumen"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入协办部门（必填）"
+                    android:maxLines="3"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="责任人"/>
+
+                <EditText
+                    android:id="@+id/fuzeren2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入协办部门责任人（必填）"
+                    android:lineSpacingExtra="@dimen/dp_3"
+                    android:maxLines="6"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="交办时间"/>
+
+                <TextView
+                    android:id="@+id/date"
+                    style="@style/WorkInfoRightTextView"/>
+
+                <ImageView
+                    style="@style/WorkInfoRightArrow"
+                    android:src="@drawable/arrow_right_gray2"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="办结期限"/>
+
+                <EditText
+                    android:id="@+id/qixian"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入办结期限（必填）"
+                    android:maxLines="3"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="督办内容"/>
+
+                <EditText
+                    android:id="@+id/content"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_weight="1"
+                    android:background="@color/white"
+                    android:hint="请输入督办内容（必填）"
+                    android:lineSpacingExtra="@dimen/dp_3"
+                    android:maxLines="6"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_caogao"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/text_blue_blank"
+            android:text="保存草稿"
+            android:textColor="@color/blue3"/>
+
+        <Button
+            android:id="@+id/btn_commit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/text_blue_shape"
+            android:text="提交数据"
+            android:textColor="@color/white"
+            android:textSize="@dimen/dp_15"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

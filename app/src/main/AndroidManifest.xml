@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.example.administrator.oa">
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.INTERACT_ACROSS_USERS_FULL"/>
+    <uses-permission android:name="android.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+
+    <application
+        android:name=".view.common.MyApp"
+        android:allowBackup="true"
+        android:icon="@drawable/logo_launch"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".view.activity.SplashActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashTheme"
+            android:windowSoftInputMode="stateHidden|stateUnchanged">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.activity.MainActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <activity
+            android:name=".view.activity.MsgDetailActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <activity
+            android:name=".view.activity.DaibanTaskActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <activity
+            android:name=".view.activity.LiuchongDingyiActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <activity
+            android:name=".view.activity.MyLiuChongActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <activity
+            android:name=".view.activity.GonggapDetailActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <activity
+            android:name=".view.activity.MessageKeduActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+
+        <activity
+            android:name=".view.activity.LoginActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <activity
+            android:name=".view.activity.GuideActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+
+
+
+        <!--一下为流程界面-->
+        <!--请假申请-->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.QingJiaActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--借款申请-->
+        <activity
+            android:name=".view.activity.JieKuanActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--出差申请-->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.ChuChaiActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--工作联系-->  <!-- 有编号 -->  <!-- 有负责人 -->
+        <activity
+            android:name=".view.activity.workConectionActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--办文流程-->  <!-- 有编号 -->  <!-- 有附件 -->
+        <activity
+            android:name=".view.activity.BanwenActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--用车申请-->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.YongcheActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--新闻发布-->  <!-- 有附件 -->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.NewsfabuActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--低值易耗品领用-->  <!-- 有负责人 -->  <!-- 有明细 -->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.DizhiyihaoActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--固定资产领用-->  <!-- 有负责人 -->  <!-- 有明细 -->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.GudingZichanActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--用印申请-->  <!-- 有编号 -->
+        <activity
+            android:name=".view.activity.YongyinActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--报销流程-->  <!-- 有附件 -->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.BaoxiaoActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--资金调发-->  <!-- 有编号 -->  <!-- 有明细 -->
+        <activity
+            android:name=".view.activity.ZijinActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--资金申请（非合同付款）-->  <!-- 有编号 -->
+        <activity
+            android:name=".view.activity.ZijinShenqingFeiHetongActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--企业考核-->  <!-- 有编号 -->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.QiyeKaoheActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--企业退租-->  <!-- 有编号 -->
+        <activity
+            android:name=".view.activity.QiyeTuizuActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--租房流程-->  <!-- 有编号 -->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.ZufangActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--收文流程-->  <!-- 有编号 -->  <!-- 有附件 -->  <!-- 有负责人 -->
+        <activity
+            android:name=".view.activity.ShouWenActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--督办流程-->  <!-- 有编号 -->  <!-- 有时间 -->
+        <activity
+            android:name=".view.activity.DubanActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--投资协议流程-->  <!-- 有编号 -->  <!-- 有附件 -->
+        <activity
+            android:name=".view.activity.TouziXieyiActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+
+        <!--合同流程-->
+        <activity
+            android:name=".view.activity.HetongActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--道路开挖占用流程-->
+        <activity
+            android:name=".view.activity.DaoluZhanyongActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--涉密合同流程-->
+        <activity
+            android:name=".view.activity.ShemiHetongActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+
+        <!--资金申请（合同付款）-->
+        <activity
+            android:name=".view.activity.ZijinShenqingActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--预算合约部合同流程-->
+        <activity
+            android:name=".view.activity.YusuanheyueActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+
+        <!--聊天界面-->
+        <activity
+            android:name=".view.activity.ChatActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <activity android:name=".view.activity.ChatMsgListActivity"/>
+
+        <!--文件选择界面-->
+
+        <!--请假流程-审核-->
+        <activity
+            android:name=".view.activity.QingJiaActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--工作联系单-->
+        <activity
+            android:name=".view.activity.WorkConnection_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--办文审核-->
+        <activity
+            android:name=".view.activity.BanwenActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--出差申请审核-->
+        <activity
+            android:name=".view.activity.ChuchaiActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--用车申请审核-->
+        <activity
+            android:name=".view.activity.YongcheActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--物品申请审核-->
+        <activity
+            android:name=".view.activity.GoodsApplyActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--固定资产申请审核-->
+        <activity
+            android:name=".view.activity.GudingzichanApplyActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--用印申请审核-->
+        <activity
+            android:name=".view.activity.YongyinApplyActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--借款申请审核-->
+        <activity
+            android:name=".view.activity.JiekuanApplyActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--报销申请审核-->
+        <activity
+            android:name=".view.activity.BaoXiaoApplyActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--合同申请审核-->
+        <activity
+            android:name=".view.activity.HeTongActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--资金调拨申请审核-->
+        <activity
+            android:name=".view.activity.ZijingDiaofaActivity_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--资金申请审核(合同付款)-->
+        <activity
+            android:name=".view.activity.FundApplyHetong_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--资金申请审核(非合同付款)-->
+        <activity
+            android:name=".view.activity.FundApplyFeiHetong_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+
+
+        <!--督办流程审核-->
+        <activity
+            android:name=".view.activity.Duban_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--收文流程审核-->
+        <activity
+            android:name=".view.activity.ShouwenProcess_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <activity
+            android:name=".view.activity.QiyeTuizu_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <activity
+            android:name=".view.activity.HouseRent_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+
+        <activity
+            android:name=".view.activity.Qiyekaohe_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <activity android:name=".view.activity.QingJiaActivity2"/>
+
+        <activity android:name=".view.activity.NewsFabuActivity_shenhe"/>
+
+        <activity
+            android:name=".view.activity.GonggaoActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+    </application>
+
+</manifest>

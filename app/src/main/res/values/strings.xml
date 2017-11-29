@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">南京研创园OA</string>
+    <string name="setting">设置</string>
+    <string name="fankui">意见反馈</string>
+    <string name="fankuisuggest">请在此输入你的建议吧！谢谢~</string>
+    <string name="fankuicontactway">请输入您的联系方式</string>
+    <string name="person">个人资料</string>
+    <string name="nichen">昵称</string>
+
+    <!--常用流程name-->
+    <string name="qingjia">请假流程</string>
+    <string name="chuchai">出差申请</string>
+    <string name="baoxiao">报销流程</string>
+    <string name="zijin">资金调拨</string>
+    <string name="xinwen">新闻发布</string>
+    <string name="yongche">用车申请</string>
+
+    <!--常用流程longname-->
+    <string name="commonqingjia">通用请假流程</string>
+    <string name="commonbaoxiao">通用报销流程</string>
+
+    <!--公共流程-->
+    <string name="banwen">办文流程</string>
+    <string name="gongzuo">工作联系</string>
+    <string name="daying">用印申请</string>
+    <string name="jiekuan">借款申请</string>
+    <string name="hetong">合同流程</string>
+    <string name="dizhi">低值易耗品领用</string>
+    <string name="guding">固定资产领用</string>
+    <string name="zijin_hetong">资金申请（合同付款）</string>
+    <string name="zijin_feihetong">资金申请（非合同）</string>
+
+
+    <!--企业服务部流程-->
+    <string name="qiye_kaohe">企业考核</string>
+    <string name="qiye_tuizu">企业退租</string>
+    <string name="zufang_pro">租房流程</string>
+
+    <!--综合管理部流程-->
+    <string name="fawen_pro">发文流程</string>
+    <string name="shouwen_pro">收文流程</string>
+    <string name="duban_pro">督办流程</string>
+
+    <!--财务金融部流程-->
+    <string name="shemihetong_pro">涉密合同流程</string>
+
+    <!--预算合约部流程-->
+    <string name="zhaobiao_pro">招投标流程</string>
+    <string name="yusuanheyu_pro">预算合约部合同流程</string>
+
+    <!--工程建设部流程-->
+    <string name="daoluzhanyong_pro">道路开挖占用流程</string>
+
+    <!--投资促进与人才工作部-->
+    <string name="qiyeruzhu_pro">企业入驻</string>
+    <string name="touzixieyi_pro">投资协议流程</string>
+
+
+    <!--流程类型-->
+    <string name="common_pro">常用流程</string>
+    <string name="public_pro">公共流程</string>
+    <string name="enterprise_service_pro">企业服务部流程</string>
+    <string name="zonghe_manage_pro">综合管理部流程</string>
+    <string name="finance_pro">财务金融部流程</string>
+    <string name="yusuan_pro">预算合约部流程</string>
+    <string name="gongchong_pro">工程建设部流程</string>
+    <string name="touzi_pro">投资促进与人才工作部</string>
+
+    <!--密码-->
+    <string name="register_name_digits">._!?,/@*#;%0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLIMNOPQRSTUVWXYZ</string>
+
+</resources>

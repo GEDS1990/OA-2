@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.example.administrator.oa"
+        minSdkVersion 16
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testCompile 'junit:junit:4.12'
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    compile 'com.github.luoshihai:XXRecyclerView:v1.2.7'
+    compile 'com.github.luoshihai:XXDialog:v1.0.3'
+    compile 'com.github.luoshihai:DropDownMenu:v1.0.5'
+    //引入可多选图片并返回的库
+    compile 'com.github.luoshihai:XXAlbum:V1.0.0'
+    compile 'com.github.ganfra:material-spinner:1.1.1'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.xhb:xbanner:1.2.7'
+    compile 'com.github.promeg:tinypinyin:2.0.3'
+    //权限处理
+    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.9.3@aar'
+    compile 'io.reactivex:rxjava:1.2.2'
+    compile 'io.reactivex:rxandroid:1.2.1'
+    //网络框架引入
+    compile 'com.yanzhenjie.nohttp:okhttp:1.1.3'
+
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'com.flyco.roundview:FlycoRoundView_Lib:1.1.2@aar'
+    compile 'com.flyco.tablayout:FlycoTabLayout_Lib:1.5.0@aar'
+
+    compile 'com.contrarywind:Android-PickerView:3.2.5'
+    compile 'com.leon:lfilepickerlibrary:1.2.0'
+}

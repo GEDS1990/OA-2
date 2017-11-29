@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <RelativeLayout
+        android:id="@+id/rl_msg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="@dimen/dp_10"
+        >
+
+        <!--<ImageView-->
+            <!--android:id="@+id/iv"-->
+            <!--android:layout_width="50dp"-->
+            <!--android:layout_height="50dp"-->
+            <!--android:background="@drawable/me_headicon"-->
+            <!--/>-->
+        <TextView
+            android:id="@+id/iv"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/icon_backgrouand"
+            android:textSize="23dp"
+            android:text="马"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:gravity="center"
+            />
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_18"
+            android:layout_marginRight="@dimen/dp_60"
+            android:layout_marginTop="3dp"
+            android:layout_toRightOf="@id/iv"
+            android:singleLine="true"
+            android:text="马化腾"
+            android:textColor="@color/blue2"
+            android:textSize="@dimen/dp_14"
+            android:textStyle="bold"
+            />
+
+        <TextView
+            android:id="@+id/taskname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_20"
+            android:layout_marginRight="@dimen/dp_60"
+            android:layout_marginTop="5dp"
+            android:layout_toRightOf="@id/iv"
+            android:singleLine="true"
+            android:text="任务名称 : "
+            android:textColor="@color/gray1"
+            android:textSize="@dimen/dp_12"
+            android:textStyle="bold"
+            android:layout_below="@id/name"
+            />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="15:32"
+            android:textColor="@color/gray2"
+            android:textSize="@dimen/dp_12"/>
+
+        <TextView
+            android:id="@+id/msg_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/taskname"
+            android:layout_marginLeft="@dimen/dp_20"
+            android:layout_marginRight="@dimen/dp_30"
+            android:layout_marginTop="3dp"
+            android:layout_toRightOf="@id/iv"
+            android:singleLine="true"
+            android:text="您有意向合同即将到期，请注意查收"
+            android:textSize="12dp"
+            />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_0.5"
+        android:layout_marginLeft="83dp"
+        android:background="@color/gray5"/>
+
+</LinearLayout>
+
