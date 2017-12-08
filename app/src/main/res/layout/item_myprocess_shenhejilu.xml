@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal">
+
+    <RelativeLayout
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        >
+
+        <ImageView
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:background="@color/gray4"/>
+
+        <TextView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/circle_point_shape"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="@dimen/dp_20"
+        android:layout_weight="1"
+        android:background="@drawable/shape_white"
+        android:padding="8dp"
+        android:layout_marginTop="@dimen/dp_5"
+        android:layout_marginBottom="@dimen/dp_5"
+        >
+
+        <TextView
+            android:id="@+id/processName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="流程节点："
+            android:textSize="@dimen/dp_13"/>
+
+        <TextView
+            android:id="@+id/processNameContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_5"
+            android:layout_toRightOf="@id/processName"
+            android:singleLine="true"
+            android:textSize="@dimen/dp_13"
+            android:text="xingm "/>
+
+        <TextView
+            android:id="@+id/tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/processName"
+            android:layout_marginTop="@dimen/dp_5"
+            android:singleLine="true"
+            android:text="负责人："
+            android:textSize="@dimen/dp_13"/>
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_marginLeft="@dimen/dp_5"
+            android:layout_below="@+id/processName"
+            android:layout_toRightOf="@id/tv"
+            android:singleLine="true"
+            android:textSize="@dimen/dp_13"
+            android:text="xingm "/>
+
+
+        <TextView
+            android:id="@+id/startTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv"
+            android:layout_marginTop="@dimen/dp_5"
+            android:maxLines="2"
+            android:text="开始时间："
+            android:textSize="@dimen/dp_13"/>
+
+        <TextView
+            android:id="@+id/startTimeContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv"
+            android:layout_marginLeft="@dimen/dp_5"
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_toRightOf="@+id/startTime"
+            android:maxLines="2"
+            android:textSize="@dimen/dp_13"/>
+
+        <TextView
+            android:id="@+id/completeTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/startTime"
+            android:layout_marginTop="@dimen/dp_5"
+            android:maxLines="2"
+            android:text="完成时间："
+            android:textSize="@dimen/dp_13"/>
+
+        <TextView
+            android:id="@+id/completeTimeContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/startTime"
+            android:layout_marginLeft="@dimen/dp_5"
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_toRightOf="@+id/completeTime"
+            android:textSize="@dimen/dp_13"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

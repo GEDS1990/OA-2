@@ -100,7 +100,8 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_marginLeft="10dp"
-                    android:src="@drawable/icon_official_number"/>
+                    android:src="@drawable/icon_official_number"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <LinearLayout
@@ -140,7 +141,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="申请金额 (元) :"
+                    android:text="申请金额 (元)"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -168,7 +169,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="申请事由 :"
+                    android:text="申请事由"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -197,7 +198,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="申请内容 :"
+                    android:text="申请内容"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -212,19 +213,6 @@
                     android:maxLines="7"
                     android:textSize="@dimen/dp_15"/>
             </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/blue5"
-                android:padding="@dimen/dp_10"
-                android:text="流程审核记录"
-                android:textColor="@color/white"/>
-
-            <com.lsh.XXRecyclerview.XXRecycleView
-                android:id="@+id/xxre"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
 
             <LinearLayout
                 android:id="@+id/ll_huiqianren"
@@ -263,7 +251,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="办理意见"
+                    android:text="办理意见："
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -272,12 +260,58 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/dp_10"
+                    android:hint="请输入办理意见"
                     android:layout_weight="1"
                     android:background="@color/white"
                     android:lineSpacingExtra="@dimen/dp_3"
                     android:maxLines="5"
                     android:textSize="@dimen/dp_15"/>
             </LinearLayout>
+
+            <!--审核意见-->
+            <LinearLayout
+                android:id="@+id/ll_shenheyijian"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/dp_13"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="审核意见"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/dp_15"/>
+
+                <TextView
+                    android:id="@+id/shenheyijian"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:background="@color/white"
+                    android:textSize="@dimen/dp_15"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/blue5"
+                android:padding="@dimen/dp_10"
+                android:text="流程审核记录"
+                android:textColor="@color/white"/>
+
+            <com.lsh.XXRecyclerview.XXRecycleView
+                android:id="@+id/xxre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+
 
         </LinearLayout>
     </ScrollView>

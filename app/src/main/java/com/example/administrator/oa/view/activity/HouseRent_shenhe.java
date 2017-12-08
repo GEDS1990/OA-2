@@ -4,6 +4,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -85,6 +86,10 @@ public class HouseRent_shenhe extends HeadBaseActivity {
     EditText mHuiqianyijian;
     @BindView(R.id.ll_huiqianyijian)
     LinearLayout mLlHuiqianyijian;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -125,21 +130,22 @@ public class HouseRent_shenhe extends HeadBaseActivity {
         //获取服务器数据，填充表单数据
         RequestServer();
         //判断是否是发起会签节点
-        if ("vote".equals(mProcessTaskType)) {
-            mBtnCaogao.setText("退回发起人");
-            mLlHuiqianyijian.setVisibility(View.VISIBLE);
-        } else {
-            mBtnCaogao.setText("不同意");
-            mLlHuiqianyijian.setVisibility(View.GONE);
-        }
+//        if ("vote".equals(mProcessTaskType)) {
+//            mBtnCaogao.setText("退回发起人");
+//            mLlHuiqianyijian.setVisibility(View.VISIBLE);
+//        } else {
+//            mBtnCaogao.setText("不同意");
+//            mLlHuiqianyijian.setVisibility(View.GONE);
+//        }
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
@@ -176,7 +182,7 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "退回发起人":
+                    case "回退发起人":
                         RequestServerTuihui();
                         break;
                 }
@@ -247,48 +253,92 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "rentalDepartments":
-                                mBumen.setText(value);
-                                break;
-                            case "title":
-                                mHetongName.setText(value);
-                                break;
-                            case "name1":
-                                mNameJia.setText(value);
-                                break;
-                            case "name2":
-                                mNameYi.setText(value);
-                                break;
-                            case "rentalDate":
-                                mDate.setText(value);
-                                break;
-                            case "rentalAsset":
-                                mZichanyyYijian.setText(value);
-                                break;
-                            case "rentalAddress":
-                                mAddress.setText(value);
-                                break;
-                            case "rentalContent":
-                                mMainContent.setText(value);
-                                break;
-                            case "rentalId":
-                                mBianhao.setText(value);
-                                break;
-                            case "initiatorRental":
-                                mZhubanren.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 房屋租赁流程资产运营
+                                case "rental-asset":
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 房屋租赁流程会签审核
+                                case "rental-leader":
+                                    mZichanyyYijian.setFocusable(false);
+                                    mZichanyyYijian.setGravity(Gravity.RIGHT);
+                                    mLlHuiqianren.setVisibility(View.VISIBLE);
+                                    mXxreHuiqianren.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 房屋租赁流程会签
+                                case "rental-return":
+                                    mZichanyyYijian.setFocusable(false);
+                                    mZichanyyYijian.setGravity(Gravity.RIGHT);
+                                    mLlHuiqianyijian.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 房屋租赁流程通知
+                                case "rental-notice":
+                                    mZichanyyYijian.setFocusable(false);
+                                    mZichanyyYijian.setGravity(Gravity.RIGHT);
+                                    mLlShenheyijian.setVisibility(View.VISIBLE);
+                                    mShenheyijian.setFocusable(false);
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                            }
                         }
-                        if ("userpicker".equals(bean.getType())) {
-                            mLlHuiqianren.setVisibility(View.VISIBLE);
-                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "rentalDepartments":
+                                    mBumen.setText(value);
+                                    break;
+                                case "title":
+                                    mHetongName.setText(value);
+                                    break;
+                                case "name1":
+                                    mNameJia.setText(value);
+                                    break;
+                                case "name2":
+                                    mNameYi.setText(value);
+                                    break;
+                                case "rentalDate":
+                                    mDate.setText(value);
+                                    break;
+                                case "rentalAddress":
+                                    mAddress.setText(value);
+                                    break;
+                                case "rentalContent":
+                                    mMainContent.setText(value);
+                                    break;
+                                case "rentalId":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                                // 主办人
+                                case "initiatorRental":
+                                    mZhubanren.setText(value);
+                                    break;
+                                // 资产运营部意见
+                                case "rentalAsset":
+                                    mZichanyyYijian.setText(value);
+                                    break;
+                            }
                         }
-                        if ("rentalAsset".equals(bean.getLabel())&&"Y".equals(bean.getReadOnly())) {
-                            mZichanyyYijian.setFocusable(false);
-                        }
+//                        if ("userpicker".equals(bean.getType())) {
+//                            mLlHuiqianren.setVisibility(View.VISIBLE);
+//                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+//                        }
+//                        if ("rentalAsset".equals(bean.getLabel())&&"Y".equals(bean.getReadOnly())) {
+//                            mZichanyyYijian.setFocusable(false);
+//                        }
                     }
                 }
             }
@@ -327,7 +377,7 @@ public class HouseRent_shenhe extends HeadBaseActivity {
         String zhubanren = mZhubanren.getText().toString();
 
         if (TextUtils.isEmpty(zichanyy)) {
-            Toast.makeText(this, "请填写意见", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "请填写资产运营部意见", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -412,7 +462,7 @@ public class HouseRent_shenhe extends HeadBaseActivity {
      */
     private void RequestServerTuihui() {
         String yijian = mHuiqianyijian.getText().toString().trim();
-        if (!TextUtils.isEmpty(yijian)) {
+//        if (!TextUtils.isEmpty(yijian)) {
             //创建请求队列
             RequestQueue Queue = NoHttp.newRequestQueue();
             //创建请求
@@ -451,191 +501,9 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                     }
                 }
             });
-        } else {
-            Toast.makeText(this, "请填写会签处理意见", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * 请求网络接口，获取组织结构数据
-     * @param title
-     */
-    private void RequestServerGetZuzhi(final String title) {
-        //创建请求队列
-        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
-        //创建请求
-        Request<OrganizationResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_ZUZHI, RequestMethod.POST, OrganizationResponse.class);
-        request.add("partyStructTypeId", "1");
-        ProcessQueue.add(0, request, new OnResponseListener<OrganizationResponse>() {
-
-            @Override
-            public void onStart(int what) {
-
-            }
-
-            @Override
-            public void onSucceed(int what, Response<OrganizationResponse> response) {
-                Log.w("3333", response.toString());
-                if (null != response && null != response.get() && null != response.get().getData()) {
-                    if (response.get().getData().get(0).isOpen()) {
-                        chooseDate2(response.get().getData().get(0).getChildren(), title);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailed(int what, Response<OrganizationResponse> response) {
-                Toast.makeText(HouseRent_shenhe.this, "请求数据失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFinish(int what) {
-
-            }
-        });
-    }
-
-    /**
-     * 选择相关机构
-     *
-     * @param data
-     * @param title
-     */
-    public void chooseDate2(final List<ChildrenBean> data, final String title) {
-        mxxDialog2 = new XXDialog(this, R.layout.dialog_chooselist) {
-            @Override
-            public void convert(DialogViewHolder holder) {
-                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
-                holder.setText(R.id.dialog_title, title);
-                xxre.setLayoutManager(new LinearLayoutManager(HouseRent_shenhe.this));
-                List<ChildrenBean> datas = new ArrayList();
-                final CommonRecyclerAdapter<ChildrenBean> adapter = new CommonRecyclerAdapter<ChildrenBean>(HouseRent_shenhe.this,
-                        datas, R.layout.simple_list_item) {
-                    @Override
-                    public void convert(CommonViewHolder holder1, final ChildrenBean item, final int i, boolean b) {
-                        holder1.setText(R.id.tv, item.getName());
-                        if (item.isOpen()) {
-                            holder1.getView(R.id.more).setVisibility(View.VISIBLE);
-                        } else {
-                            holder1.getView(R.id.more).setVisibility(View.GONE);
-                        }
-
-                        holder1.getView(R.id.more).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                mxxDialog2.dismiss();
-                                if (item.isOpen()) {
-                                    chooseDate2(item.getChildren(), title);
-                                }
-                            }
-                        });
-                    }
-                };
-                xxre.setAdapter(adapter);
-                adapter.replaceAll(data);
-                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
-                        RequestServerGetUsers(adapter.getDatas().get(i).getId(), adapter.getDatas().get(i).getName());
-                        mxxDialog2.dismiss();
-                    }
-                });
-            }
-        }.showDialog();
-    }
-
-
-    /**
-     * 请求网络接口，获取组织结构下的具体人员列表
-     *
-     * @param partyEntityId
-     */
-    private void RequestServerGetUsers(long partyEntityId, final String departmentName) {
-        //创建请求队列
-        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
-        //创建请求
-        Request<ZuzhiUserListResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_ZUZHI_USERS,
-                RequestMethod.POST, ZuzhiUserListResponse.class);
-        request.add("partyStructTypeId", "1");
-        request.add("partyEntityId", partyEntityId + "");
-        ProcessQueue.add(0, request, new OnResponseListener<ZuzhiUserListResponse>() {
-
-            @Override
-            public void onStart(int what) {
-
-            }
-
-            @Override
-            public void onSucceed(int what, Response<ZuzhiUserListResponse> response) {
-                Log.w("3333", response.toString());
-                if (null != response && null != response.get() && null != response.get().getData()) {
-                    chooseUsersDate(response.get().getData(), mTvHuiqian, departmentName);
-                }
-            }
-
-            @Override
-            public void onFailed(int what, Response<ZuzhiUserListResponse> response) {
-                Toast.makeText(HouseRent_shenhe.this, "请求数据失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFinish(int what) {
-
-            }
-        });
-    }
-
-    /**
-     * 选择某部门下的具体人员
-     *
-     * @param data
-     * @param tv
-     * @param title
-     */
-    public void chooseUsersDate(final List<ZuzhiUserBean> data, final TextView tv, final String title) {
-        mxxUsersDialog = new XXDialog(this, R.layout.dialog_chooselist) {
-            @Override
-            public void convert(DialogViewHolder holder) {
-                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
-                holder.setText(R.id.dialog_title, title);
-                xxre.setLayoutManager(new LinearLayoutManager(HouseRent_shenhe.this));
-                List<ZuzhiUserBean> datas = new ArrayList();
-                final CommonRecyclerAdapter<ZuzhiUserBean> adapter = new CommonRecyclerAdapter<ZuzhiUserBean>(HouseRent_shenhe.this,
-                        datas, R.layout.simple_list_item) {
-                    @Override
-                    public void convert(CommonViewHolder holder1, ZuzhiUserBean item, int i, boolean b) {
-                        holder1.setText(R.id.tv, item.getName());
-                        holder1.getView(R.id.more).setVisibility(View.GONE);
-                        holder1.getView(R.id.users).setVisibility(View.GONE);
-                        ((ImageView) holder1.getView(R.id.icon)).setImageResource(R.drawable.personal);
-
-                    }
-                };
-                xxre.setAdapter(adapter);
-                adapter.replaceAll(data);
-                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
-//                        mZuzhiUserBean = adapter.getDatas().get(i);
-//                        if (mHuiqianAdapter != null) {
-//                            boolean flag = false;
-//                            for (int t = 0; t < mHuiqianAdapter.getDatas().size(); t++) {
-//                                if (mHuiqianAdapter.getDatas().get(t).getId().equals(mZuzhiUserBean.getId())) {
-//                                    Toast.makeText(HouseRent_shenhe.this, "不要重复添加", Toast.LENGTH_SHORT).show();
-//                                    flag = true;
-//                                }
-//                            }
-//                            if (!flag) {
-//                                mHuiqianAdapter.add(mZuzhiUserBean);
-//                            }
-//                        }
-//                        if (mZuzhiUserBean != null) {
-//                            mxxUsersDialog.dismiss();
-//                        }
-                    }
-                });
-            }
-        }.showDialog();
+//        } else {
+//            Toast.makeText(this, "请填写会签处理意见", Toast.LENGTH_SHORT).show();
+//        }
     }
 
 }

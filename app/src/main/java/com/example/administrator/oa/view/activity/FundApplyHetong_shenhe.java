@@ -75,6 +75,10 @@ public class FundApplyHetong_shenhe extends HeadBaseActivity {
     EditText mHuiqianyijian;
     @BindView(R.id.ll_huiqianyijian)
     LinearLayout mLlHuiqianyijian;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -127,12 +131,13 @@ public class FundApplyHetong_shenhe extends HeadBaseActivity {
         RequestServer();
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);

@@ -19,6 +19,9 @@ public class GoodsRegistrationBean {
         this.remarks = remarks;
     }
 
+    public GoodsRegistrationBean() {
+    }
+
     public int getIndex() {
         return index;
     }

@@ -1,10 +1,14 @@
 package com.example.administrator.oa.view.activity;
 
+import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,17 +21,23 @@ import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
+import com.example.administrator.oa.view.utils.CommonUtil;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
 import com.lsh.XXRecyclerview.CommonViewHolder;
 import com.lsh.XXRecyclerview.XXRecycleView;
+import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.RequestMethod;
+import com.yanzhenjie.nohttp.download.DownloadListener;
+import com.yanzhenjie.nohttp.download.DownloadQueue;
+import com.yanzhenjie.nohttp.download.DownloadRequest;
 import com.yanzhenjie.nohttp.rest.OnResponseListener;
 import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,8 +63,26 @@ public class BaoXiaoApplyActivity_shenhe extends HeadBaseActivity {
     TextView mMoneyNum;
     @BindView(R.id.baoxiao_yuanyin)
     TextView mBaoxiaoYuanyin;
+    @BindView(R.id.add_fujian)
+    RelativeLayout mAddFujian;
+    @BindView(R.id.rl_fujian)
+    RelativeLayout mRlFujian;
+    @BindView(R.id.pb)
+    ProgressBar mPb;
+    @BindView(R.id.icon)
+    ImageView mIcon;
+    @BindView(R.id.file_name)
+    TextView mFileName;
+    @BindView(R.id.filesize)
+    TextView mFilesize;
+    @BindView(R.id.btn_uplaod)
+    ImageView mBtnUplaod;
     @BindView(R.id.xxre)
     XXRecycleView mXxre;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -67,6 +95,13 @@ public class BaoXiaoApplyActivity_shenhe extends HeadBaseActivity {
     private String mSessionId;
     private List<ProcessShenheHistoryBean> datas = new ArrayList<>();
     private CommonRecyclerAdapter<ProcessShenheHistoryBean> mAdapter;
+    // 附件
+    private String mFilePathReturn = "";
+    private String mFileNameReturn = "";
+    // 文件总大小
+    private long fileSize;
+    // 已下载的大小
+    private long downLoadFileSize;
 
     @Override
     protected int getChildLayoutRes() {
@@ -93,20 +128,26 @@ public class BaoXiaoApplyActivity_shenhe extends HeadBaseActivity {
         RequestServer();
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
     }
 
-    @OnClick({ R.id.btn_caogao, R.id.btn_commit})
+    @OnClick({ R.id.btn_uplaod, R.id.btn_caogao, R.id.btn_commit})
     public void onViewClicked(View view) {
         switch (view.getId()) {
+            case R.id.btn_uplaod:
+                mBtnUplaod.setVisibility(View.GONE);
+                mBtnUplaod.setEnabled(false);
+                RequestServerDownLoad();
+                break;
             case R.id.btn_caogao:
                 RequestServerCommit("不同意");
                 break;
@@ -179,13 +220,69 @@ public class BaoXiaoApplyActivity_shenhe extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    //按顺序填写数据
-                    mName.setText(shenheBeen.get(0).getValue());
-                    mBumen.setText(shenheBeen.get(1).getValue());
-                    mStart.setText(shenheBeen.get(3).getValue());
-                    mMoneyRmb.setText(shenheBeen.get(4).getValue());
-                    mMoneyNum.setText(shenheBeen.get(5).getValue());
-                    mBaoxiaoYuanyin.setText(shenheBeen.get(2).getValue());
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 报销流程审核单
+                                case "money-comment":
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 报销流程通知
+                                case "money-notice":
+                                    mLlShenheyijian.setVisibility(View.VISIBLE);
+                                    mShenheyijian.setFocusable(false);
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                            }
+                        }
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "name":
+                                    mName.setText(value);
+                                    break;
+                                case "departments":
+                                    mBumen.setText(value);
+                                    break;
+                                case "reason":
+                                    mBaoxiaoYuanyin.setText(value);
+                                    break;
+                                case "date":
+                                    mStart.setText(value);
+                                    break;
+                                case "RMB":
+                                    mMoneyRmb.setText(value);
+                                    break;
+                                case "money":
+                                    mMoneyNum.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                                case "enclosure":
+                                    if (!TextUtils.isEmpty(bean.getLabel())) {
+                                        // 实时请求权限
+                                        CommonUtil.verifyStoragePermissions(BaoXiaoApplyActivity_shenhe.this);
+                                        mFilePathReturn = value;
+                                        mFileNameReturn = bean.getLabel();
+                                        if (!TextUtils.isEmpty(bean.getSize())) {
+                                            fileSize = Integer.parseInt(bean.getSize());
+                                        }
+                                        // 如果文件没有下载过，则开始下载
+                                        checkFileExisted();
+                                    }
+                                    break;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -203,6 +300,136 @@ public class BaoXiaoApplyActivity_shenhe extends HeadBaseActivity {
         });
     }
 
+    /**
+     * 判断文件是否已下载过
+     * @return
+     */
+    private boolean checkFileExisted(){
+        // 实时请求权限
+        CommonUtil.verifyStoragePermissions(this);
+        // 判断sd卡是否可读写
+        String sdStatus = Environment.getExternalStorageState();
+        if (!Environment.MEDIA_MOUNTED.equals(sdStatus)) {
+            // 检测sd是否可用
+            Log.d("TestFile", "SD card is not avaiable/writeable right now.");
+            return false;
+        }
+        // 创建根目录文件夹
+        String rootPath = CommonUtil.createRootFile(this);
+        // 拼接成本地路径
+        String filePath = rootPath + mFileNameReturn;
+        // 如果文件存在，则直接显示
+        File file = new File(rootPath, mFileNameReturn);
+        if(file.exists()) {
+            // 将文件显示在界面
+            getFileInfo(filePath);
+            mPb.setProgress(100);
+            mBtnUplaod.setVisibility(View.GONE);
+            mBtnUplaod.setEnabled(false);
+            return true;
+        } else {
+            // 将文件显示在界面
+            getFileInfo(filePath);
+            mFilesize.setText(ShowLongFileSzie(fileSize));
+            mPb.setProgress(0);
+            mBtnUplaod.setVisibility(View.VISIBLE);
+            mBtnUplaod.setEnabled(true);
+            mBtnUplaod.setTag("down");
+            return false;
+        }
+    }
+
+    /**
+     * 界面显示附件信息
+     * @param filePath
+     */
+    private void getFileInfo(String filePath){
+        mRlFujian.setVisibility(View.VISIBLE);
+        String[] strings = filePath.split("/");
+        int count = strings.length;
+        String mFilename = strings[count - 1];
+        mFileName.setText(mFilename);
+        File file = new File(filePath);
+        mFilesize.setText(ShowLongFileSzie(file.length()));
+        if (mFilename.contains(".")) {
+            switch (mFilename.split("\\.")[1]) {
+                case "TXT":
+                case "txt":
+                    mIcon.setImageResource(R.drawable.file_txt);
+                    break;
+                case "xlsx":
+                case "XLSX":
+                    mIcon.setImageResource(R.drawable.icon_official_excel);
+                    break;
+                case "docx":
+                case "DOCX":
+                    mIcon.setImageResource(R.drawable.file_word);
+                    break;
+                case "png":
+                case "PNG":
+                case "jpg":
+                case "JPG":
+                case "jpeg":
+                case "JPEG":
+                    mIcon.setImageResource(R.drawable.picture);
+                    break;
+                default:
+                    mIcon.setImageResource(R.drawable.unknow_type);
+            }
+        }
+
+    }
+
+    /**
+     * 下载附件
+     */
+    private void RequestServerDownLoad(){
+        // 实时请求权限
+        CommonUtil.verifyStoragePermissions(this);
+        String rootPath = CommonUtil.createRootFile(this);
+        DownloadQueue downloadQueue = NoHttp.newDownloadQueue();
+        //下载文件
+        DownloadRequest downloadRequest = NoHttp.createDownloadRequest(UrlConstance.URL_DOWNLOAD,
+                RequestMethod.POST, rootPath, mFileNameReturn, true, false);
+        downloadRequest.add("filePath", mFilePathReturn);
+        downloadQueue.add(0, downloadRequest, new DownloadListener() {
+            @Override
+            public void onDownloadError(int what, Exception exception) {
+                Log.w("2333", "onDownloadError" + exception.toString());
+                Toast.makeText(BaoXiaoApplyActivity_shenhe.this, "附件下载失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onStart(int what, boolean isResume, long rangeSize, Headers responseHeaders, long allCount) {
+//                fileSize = allCount;
+//                Toast.makeText(BaoXiaoApplyActivity_shenhe.this, "开始下载附件", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProgress(int what, int progress, long fileCount, long speed) {
+                downLoadFileSize = fileCount;
+                if(0 < fileSize) {
+                    long mProgress = downLoadFileSize * 100 / fileSize;
+//                Log.w("2333", "mProgress=" + mProgress);
+                    mPb.setProgress((int)mProgress);
+                }
+                mFilesize.setText(ShowProcessFileSzie(downLoadFileSize));
+            }
+
+            @Override
+            public void onFinish(int what, String filePath) {
+                Log.w("2333", "onFinish" + filePath);
+                Toast.makeText(BaoXiaoApplyActivity_shenhe.this, "附件下载完成", Toast.LENGTH_SHORT).show();
+                mFilesize.setText(ShowLongFileSzie(downLoadFileSize));
+                mPb.setProgress(100);
+            }
+
+            @Override
+            public void onCancel(int what) {
+                Log.w("2333", "onCancel");
+            }
+        });
+    }
 
     /**
      * 提交页面数据，完成当前审核

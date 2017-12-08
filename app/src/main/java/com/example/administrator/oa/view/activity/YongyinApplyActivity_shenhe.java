@@ -55,8 +55,8 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
     TextView mBianhao;
     @BindView(R.id.danwei)
     TextView mDanwei;
-    @BindView(R.id.fenguanleader)
-    TextView mFenguanleader;
+//    @BindView(R.id.fenguanleader)
+//    TextView mFenguanleader;
     @BindView(R.id.yinjianname)
     TextView mYinjianname;
     @BindView(R.id.fenshu)
@@ -75,6 +75,10 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
     EditText mHuiqianyijian;
     @BindView(R.id.ll_huiqianyijian)
     LinearLayout mLlHuiqianyijian;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -100,7 +104,7 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
     @Override
     protected void initView(RelativeLayout headView, RelativeLayout backBtn, RelativeLayout headerCenter,
                             RelativeLayout headerRight, View childView, LinearLayout statubar) {
-        ((TextView) headerCenter.getChildAt(0)).setText("物品领用审核单");
+        ((TextView) headerCenter.getChildAt(0)).setText("用印审核单");
         initThisView();
     }
 
@@ -125,12 +129,13 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
         RequestServer();
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
@@ -167,7 +172,7 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "退回发起人":
+                    case "回退发起人":
                         RequestServerTuihui();
                         break;
                 }
@@ -239,21 +244,72 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    //按顺序填写数据
-                    mJingbanren.setText(shenheBeen.get(0).getValue());
-                    mShiyou.setText(shenheBeen.get(1).getValue());
-                    mYinjianname.setText(shenheBeen.get(2).getValue());
-                    mDanwei.setText(shenheBeen.get(3).getValue());
-                    mBianhao.setText(shenheBeen.get(4).getValue());
-                    mFenshu.setText(shenheBeen.get(5).getValue());
-                    mFenguanleader.setText(shenheBeen.get(6).getValue());
-
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        if ("userpicker".equals(bean.getType())) {
-                            mLlHuiqianren.setVisibility(View.VISIBLE);
-                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 用印审核单
+                                case "seal-comment":
+                                    mLlHuiqianren.setVisibility(View.VISIBLE);
+                                    mXxreHuiqianren.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 用印会签
+                                case "seal-join-comment":
+                                    mLlHuiqianyijian.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 用印通知
+                                case "seal-return":
+                                    mLlShenheyijian.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 用印申请单 回退之后
+                                case "seal-request":
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("提交");
+                                    break;
+                            }
                         }
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "jbr":
+                                    mJingbanren.setText(value);
+                                    break;
+                                case "bh":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "yydw":
+                                    mDanwei.setText(value);
+                                    break;
+                                case "yjmc_name":
+                                    mYinjianname.setText(value);
+                                    break;
+                                case "fs":
+                                    mFenshu.setText(value);
+                                    break;
+                                case "sy":
+                                    mShiyou.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                            }
+                        }
+                        //当有type为userpicker的时候说明是可以发起会签的节点
+//                        if ("userpicker".equals(bean.getType())) {
+//                            mLlHuiqianren.setVisibility(View.VISIBLE);
+//                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+//                        }
                     }
                 }
             }
@@ -282,7 +338,7 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
         String bianhao = mBianhao.getText().toString();
         String jinbanren = mJingbanren.getText().toString();
         String danwei = mDanwei.getText().toString();
-        String fenguanleader = mFenguanleader.getText().toString();
+//        String fenguanleader = mFenguanleader.getText().toString();
         String yinjianname = mYinjianname.getText().toString();
         String fenshu = mFenshu.getText().toString();
         String reason = mShiyou.getText().toString();
@@ -307,7 +363,7 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
                 .append("\"bh\":" + "\"" + bianhao + "\",")
                 .append("\"jbr\":" + "\"" + jinbanren + "\",")
                 .append("\"yydw\":" + "\"" + danwei + "\",")
-                .append("\"fgld_name\":" + "\"" + fenguanleader + "\",")
+//                .append("\"fgld_name\":" + "\"" + fenguanleader + "\",")
                 .append("\"yjmc_name\":" + "\"" + yinjianname + "\",")
                 .append("\"fs\":" + "\"" + fenshu + "\",")
                 .append("\"sy\":" + "\"" + reason + "\",")
@@ -366,7 +422,7 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
      */
     private void RequestServerTuihui() {
         String yijian = mHuiqianyijian.getText().toString().trim();
-        if (!TextUtils.isEmpty(yijian)) {
+//        if (!TextUtils.isEmpty(yijian)) {
             //创建请求队列
             RequestQueue Queue = NoHttp.newRequestQueue();
             //创建请求
@@ -405,191 +461,8 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
                     }
                 }
             });
-        } else {
-            Toast.makeText(this, "请填写会签处理意见", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * 请求网络接口，获取组织结构数据
-     *
-     * @param title
-     */
-    private void RequestServerGetZuzhi(final String title) {
-        //创建请求队列
-        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
-        //创建请求
-        Request<OrganizationResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_ZUZHI, RequestMethod.POST, OrganizationResponse.class);
-        request.add("partyStructTypeId", "1");
-        ProcessQueue.add(0, request, new OnResponseListener<OrganizationResponse>() {
-
-            @Override
-            public void onStart(int what) {
-
-            }
-
-            @Override
-            public void onSucceed(int what, Response<OrganizationResponse> response) {
-                Log.w("3333", response.toString());
-                if (null != response && null != response.get() && null != response.get().getData()) {
-                    if (response.get().getData().get(0).isOpen()) {
-                        chooseDate2(response.get().getData().get(0).getChildren(), title);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailed(int what, Response<OrganizationResponse> response) {
-                Toast.makeText(YongyinApplyActivity_shenhe.this, "请求数据失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFinish(int what) {
-
-            }
-        });
-    }
-
-    /**
-     * 选择相关机构
-     *
-     * @param data
-     * @param title
-     */
-    public void chooseDate2(final List<ChildrenBean> data, final String title) {
-        mxxDialog2 = new XXDialog(this, R.layout.dialog_chooselist) {
-            @Override
-            public void convert(DialogViewHolder holder) {
-                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
-                holder.setText(R.id.dialog_title, title);
-                xxre.setLayoutManager(new LinearLayoutManager(YongyinApplyActivity_shenhe.this));
-                List<ChildrenBean> datas = new ArrayList();
-                final CommonRecyclerAdapter<ChildrenBean> adapter = new CommonRecyclerAdapter<ChildrenBean>(YongyinApplyActivity_shenhe.this,
-                        datas, R.layout.simple_list_item) {
-                    @Override
-                    public void convert(CommonViewHolder holder1, final ChildrenBean item, final int i, boolean b) {
-                        holder1.setText(R.id.tv, item.getName());
-                        if (item.isOpen()) {
-                            holder1.getView(R.id.more).setVisibility(View.VISIBLE);
-                        } else {
-                            holder1.getView(R.id.more).setVisibility(View.GONE);
-                        }
-
-                        holder1.getView(R.id.more).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                mxxDialog2.dismiss();
-                                if (item.isOpen()) {
-                                    chooseDate2(item.getChildren(), title);
-                                }
-                            }
-                        });
-                    }
-                };
-                xxre.setAdapter(adapter);
-                adapter.replaceAll(data);
-                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
-                        RequestServerGetUsers(adapter.getDatas().get(i).getId(), adapter.getDatas().get(i).getName());
-                        mxxDialog2.dismiss();
-                    }
-                });
-            }
-        }.showDialog();
-    }
-
-
-    /**
-     * 请求网络接口，获取组织结构下的具体人员列表
-     *
-     * @param partyEntityId
-     */
-    private void RequestServerGetUsers(long partyEntityId, final String departmentName) {
-        //创建请求队列
-        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
-        //创建请求
-        Request<ZuzhiUserListResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_ZUZHI_USERS,
-                RequestMethod.POST, ZuzhiUserListResponse.class);
-        request.add("partyStructTypeId", "1");
-        request.add("partyEntityId", partyEntityId + "");
-        ProcessQueue.add(0, request, new OnResponseListener<ZuzhiUserListResponse>() {
-
-            @Override
-            public void onStart(int what) {
-
-            }
-
-            @Override
-            public void onSucceed(int what, Response<ZuzhiUserListResponse> response) {
-                Log.w("3333", response.toString());
-                if (null != response && null != response.get() && null != response.get().getData()) {
-                    chooseUsersDate(response.get().getData(), mTvHuiqian, departmentName);
-                }
-            }
-
-            @Override
-            public void onFailed(int what, Response<ZuzhiUserListResponse> response) {
-                Toast.makeText(YongyinApplyActivity_shenhe.this, "请求数据失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFinish(int what) {
-
-            }
-        });
-    }
-
-    /**
-     * 选择某部门下的具体人员
-     *
-     * @param data
-     * @param tv
-     * @param title
-     */
-    public void chooseUsersDate(final List<ZuzhiUserBean> data, final TextView tv, final String title) {
-        mxxUsersDialog = new XXDialog(this, R.layout.dialog_chooselist) {
-            @Override
-            public void convert(DialogViewHolder holder) {
-                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
-                holder.setText(R.id.dialog_title, title);
-                xxre.setLayoutManager(new LinearLayoutManager(YongyinApplyActivity_shenhe.this));
-                List<ZuzhiUserBean> datas = new ArrayList();
-                final CommonRecyclerAdapter<ZuzhiUserBean> adapter = new CommonRecyclerAdapter<ZuzhiUserBean>(YongyinApplyActivity_shenhe.this,
-                        datas, R.layout.simple_list_item) {
-                    @Override
-                    public void convert(CommonViewHolder holder1, ZuzhiUserBean item, int i, boolean b) {
-                        holder1.setText(R.id.tv, item.getName());
-                        holder1.getView(R.id.more).setVisibility(View.GONE);
-                        holder1.getView(R.id.users).setVisibility(View.GONE);
-                        ((ImageView) holder1.getView(R.id.icon)).setImageResource(R.drawable.personal);
-
-                    }
-                };
-                xxre.setAdapter(adapter);
-                adapter.replaceAll(data);
-                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
-//                        mZuzhiUserBean = adapter.getDatas().get(i);
-//                        if (mHuiqianAdapter != null) {
-//                            boolean flag = false;
-//                            for (int t = 0; t < mHuiqianAdapter.getDatas().size(); t++) {
-//                                if (mHuiqianAdapter.getDatas().get(t).getId().equals(mZuzhiUserBean.getId())) {
-//                                    Toast.makeText(YongyinApplyActivity_shenhe.this, "不要重复添加", Toast.LENGTH_SHORT).show();
-//                                    flag = true;
-//                                }
-//                            }
-//                            if (!flag) {
-//                                mHuiqianAdapter.add(mZuzhiUserBean);
-//                            }
-//                        }
-//                        if (mZuzhiUserBean != null) {
-//                            mxxUsersDialog.dismiss();
-//                        }
-                    }
-                });
-            }
-        }.showDialog();
+//        } else {
+//            Toast.makeText(this, "请填写会签处理意见", Toast.LENGTH_SHORT).show();
+//        }
     }
 }

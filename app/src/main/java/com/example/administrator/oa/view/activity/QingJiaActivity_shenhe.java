@@ -1,6 +1,7 @@
 package com.example.administrator.oa.view.activity;
 
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -52,6 +53,10 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
     TextView mQingjiaShiyou;
     @BindView(R.id.xxre)
     XXRecycleView mXxre;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -66,7 +71,6 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
     private String mSessionId;
     private List<ProcessShenheHistoryBean> datas = new ArrayList();
     private CommonRecyclerAdapter<ProcessShenheHistoryBean> mAdapter;
-    private XXDialog xxDialog;
 
     @Override
     protected int getChildLayoutRes() {
@@ -86,12 +90,13 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
         //获取服务器数据，填充表单数据
         RequestServer();
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
@@ -104,13 +109,7 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
                 RequestServerCommit("不同意");
                 break;
             case R.id.btn_commit:
-//                xxDialog = new XXDialog(this, R.layout.dialog_shenhe_yijian) {
-//                    @Override
-//                    public void convert(DialogViewHolder holder) {
-//
-//                    }
-//                };
-                RequestServerCommit("同意");
+                RequestServerCommit(mBtnCommit.getText().toString());
                 break;
         }
     }
@@ -177,15 +176,60 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
                 Log.w("3333", response.toString());
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    //按顺序填写数据
-                    mQingjiaBumen.setText(shenheBeen.get(0).getValue());
-                    mQingjiaName.setText(shenheBeen.get(1).getValue());
-                    mStartTime.setText(shenheBeen.get(2).getValue());
-                    mStopTime.setText(shenheBeen.get(3).getValue());
-                    mQingjiaFangshi.setText(shenheBeen.get(4).getValue());
-                    mQingjiaTianshu.setText(shenheBeen.get(5).getValue());
-                    mQingjiaType.setText(shenheBeen.get(6).getValue());
-                    mQingjiaShiyou.setText(shenheBeen.get(7).getValue());
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 请假流程审核单
+                                case "leave-comment":
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 请假流程退回单
+                                case "leave-return":
+                                    mLlShenheyijian.setVisibility(View.VISIBLE);
+                                    mShenheyijian.setFocusable(false);
+                                    mBtnCaogao.setVisibility(View.INVISIBLE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                            }
+                        }
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "departments":
+                                    mQingjiaBumen.setText(value);
+                                    break;
+                                case "name":
+                                    mQingjiaName.setText(value);
+                                    break;
+                                case "type":
+                                    mQingjiaType.setText(value);
+                                    break;
+                                case "day":
+                                    mQingjiaFangshi.setText(value);
+                                    break;
+                                case "startTime":
+                                    mStartTime.setText(value);
+                                    break;
+                                case "endTime":
+                                    mStopTime.setText(value);
+                                    break;
+                                case "number":
+                                    mQingjiaTianshu.setText(value);
+                                    break;
+                                case "reason":
+                                    mQingjiaShiyou.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                            }
+                        }
+                    }
                 }
             }
 

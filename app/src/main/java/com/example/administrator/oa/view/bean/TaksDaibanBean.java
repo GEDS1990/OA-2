@@ -19,6 +19,8 @@ public class TaksDaibanBean {
     private String id;
     private String name;
     private String presentationSubject;
+    // 流程定义实例ID
+    private String processId;
 
     public String getAssignee() {
         return assignee;
@@ -66,5 +68,12 @@ public class TaksDaibanBean {
 
     public void setPresentationSubject(String presentationSubject) {
         this.presentationSubject = presentationSubject;
+    }
+    public String getProcessId() {
+        return processId;
+    }
+
+    public void setProcessId(String processId) {
+        this.processId = processId;
     }
 }

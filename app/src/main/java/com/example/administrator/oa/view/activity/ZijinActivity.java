@@ -75,7 +75,8 @@ public class ZijinActivity extends HeadBaseActivity {
     private String mUserId;
     private String mDepartmentId;
     private String mDepartmentName;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -97,6 +98,7 @@ public class ZijinActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mName.setText(mUserName);
         mBumen.setText(mDepartmentName);
 
@@ -128,7 +130,6 @@ public class ZijinActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -162,47 +163,38 @@ public class ZijinActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-
-                    //按顺序填写数据
-//                    mName.setText(shenheBeen.get(0).getValue());
-//                    mBumen.setText(shenheBeen.get(1).getValue());
+                    ArrayList<String> pay = new ArrayList<>(10);
+                    ArrayList<String> income = new ArrayList<>(10);
+                    ArrayList<String> money = new ArrayList<>(10);
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
-                        Log.d("Caogao", bean.getValue());
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "id":
-                                mBianhao.setText(value);
-                                break;
-//                            case "address":
-//                                mAddress.setText(value);
-//                                break;
-//                            case "startTime":
-//                                mDateStart.setText(value);
-//                                break;
-//                            case "endTime":
-//                                mDateStop.setText(value);
-//                                break;
+                        if (!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                            }
+                            // 处理物品明细
+                            if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
+                                if (bean.getLabel().startsWith("pay")) {
+                                    pay.add(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("income")) {
+                                    income.add(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("money")) {
+                                    money.add( bean.getValue());
+                                }
+                            }
                         }
                     }
-
-                    //pay，income，money
-                    ArrayList<QingjiaShenheBean> pay = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> income = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> money = new ArrayList<>();
-
-                    for (QingjiaShenheBean bean : shenheBeen) {
-                        if (bean.getLabel().startsWith("pay")) {
-                            pay.add(bean);
-                        }
-                        if (bean.getLabel().startsWith("income")) {
-                            income.add(bean);
-                        }
-                        if (bean.getLabel().startsWith("money")) {
-                            money.add(bean);
-                        }
+                    // 把放入list里的物品明细添加进adapter里，展示出来
+                    for (int i = 0;i< pay.size();i++) {
+                        mAdapter.add(new ZijinDiaoboBean(pay.get(i), income.get(i), money.get(i)));
                     }
                 }
             }
@@ -294,8 +286,9 @@ public class ZijinActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"transactor\":" + "\"" + mUserName + "\",")
                 .append("\"id\":" + "\"" + bianhao + "\",");
 //                .append("\"manager_name\":" + "\"" + mZuzhiUserBean.getName() + "\",")
@@ -320,6 +313,7 @@ public class ZijinActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Log.w("99999", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
@@ -408,8 +402,9 @@ public class ZijinActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"transactor\":" + "\"" + mUserName + "\",")
                 .append("\"id\":" + "\"" + bianhao + "\",");
 //                .append("\"manager_name\":" + "\"" + mZuzhiUserBean.getName() + "\",")
@@ -434,6 +429,7 @@ public class ZijinActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Log.w("99999", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {

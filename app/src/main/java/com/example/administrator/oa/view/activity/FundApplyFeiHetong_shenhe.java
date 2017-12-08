@@ -49,8 +49,6 @@ import butterknife.OnClick;
  */
 
 public class FundApplyFeiHetong_shenhe extends HeadBaseActivity {
-
-
     @BindView(R.id.name)
     TextView mName;
     @BindView(R.id.bumen)
@@ -75,6 +73,10 @@ public class FundApplyFeiHetong_shenhe extends HeadBaseActivity {
     EditText mHuiqianyijian;
     @BindView(R.id.ll_huiqianyijian)
     LinearLayout mLlHuiqianyijian;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -101,7 +103,7 @@ public class FundApplyFeiHetong_shenhe extends HeadBaseActivity {
     @Override
     protected void initView(RelativeLayout headView, RelativeLayout backBtn, RelativeLayout headerCenter, RelativeLayout headerRight,
                             View childView, LinearLayout statubar) {
-        ((TextView) headerCenter.getChildAt(0)).setText("合同审核单");
+        ((TextView) headerCenter.getChildAt(0)).setText("资金申请非合同审核单");
         initThisView();
     }
 
@@ -126,12 +128,13 @@ public class FundApplyFeiHetong_shenhe extends HeadBaseActivity {
         RequestServer();
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
@@ -169,7 +172,7 @@ public class FundApplyFeiHetong_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "退回发起人":
+                    case "回退发起人":
                         RequestServerTuihui();
                         break;
                 }
@@ -240,41 +243,80 @@ public class FundApplyFeiHetong_shenhe extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    //按顺序填写数据
-                    mBianhao.setText(shenheBeen.get(1).getValue());
-                    mBumen.setText(shenheBeen.get(2).getValue());
-                    mName.setText(shenheBeen.get(3).getValue());
-                    for (QingjiaShenheBean bean : shenheBeen) {
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "id":
-                                mBianhao.setText(value);
-                                break;
-                            case "departments":
-                                mBumen.setText(value);
-                                break;
-                            case "transactor":
-                                mName.setText(value);
-                                break;
-                            case "money":
-                                mMoney.setText(value);
-                                break;
-                            case "content":
-                                mContent.setText(value);
-                                break;
-                            case "reason":
-                                mReason.setText(value);
-                                break;
-                        }
 
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 资金申请部长审核（非合同）
+                                case "pay-leader":
+                                    mLlHuiqianren.setVisibility(View.VISIBLE);
+                                    mXxreHuiqianren.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 资金申请会签（非合同）
+                                case "pay-return":
+                                    mLlHuiqianyijian.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 资金申请审核（非合同）
+                                case "pay-comment":
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 资金申请通知（非合同）
+                                case "pay-notice":
+                                    mLlShenheyijian.setVisibility(View.VISIBLE);
+                                    mShenheyijian.setFocusable(false);
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 资金调拨，回退之后
+                                case "pay-request":
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("提交");
+                                    break;
+                            }
+                        }
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "departments":
+                                    mBumen.setText(value);
+                                    break;
+                                case "transactor":
+                                    mName.setText(value);
+                                    break;
+                                case "money":
+                                    mMoney.setText(value);
+                                    break;
+                                case "content":
+                                    mContent.setText(value);
+                                    break;
+                                case "reason":
+                                    mReason.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                            }
+                        }
                         //当有type为userpicker的时候说明是可以发起会签的节点
-                        if ("userpicker".equals(bean.getType())) {
+                        if (null != bean.getType() && "userpicker".equals(bean.getType())) {
                             mLlHuiqianren.setVisibility(View.VISIBLE);
                             mXxreHuiqianren.setVisibility(View.VISIBLE);
                         }
                     }
-
                 }
             }
 

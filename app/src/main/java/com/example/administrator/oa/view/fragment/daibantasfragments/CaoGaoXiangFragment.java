@@ -90,9 +90,7 @@ public class CaoGaoXiangFragment extends Fragment {
 
         mActivity = getActivity();
 
-        mXxre.setLayoutManager(new LinearLayoutManager(getContext()));
-        mXxre.setEmptyView(R.layout.emptyview);
-        mXxre.setPullRefreshEnabled(true);
+        mXxre.setLayoutManager(new LinearLayoutManager(mActivity));
         mAdapter = new CommonRecyclerAdapter<CaoGaoXiangInfoBean>(getContext(), datas, R.layout.item_simple_text) {
             @Override
             public void convert(CommonViewHolder holder, CaoGaoXiangInfoBean item, int i, boolean b) {
@@ -112,6 +110,7 @@ public class CaoGaoXiangFragment extends Fragment {
         });
         mLoadingDialog = ViewUtils.createLoadingDialog(getContext(), "数据处理中...");
         RequestServer(false);
+        mXxre.setPullRefreshEnabled(true);
         mXxre.setOnRefreshListener(new PullRefreshRecycleView.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -153,9 +152,12 @@ public class CaoGaoXiangFragment extends Fragment {
                 Log.w("2222", response.toString());
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<CaoGaoXiangInfoBean> beanList = response.get().getData();
-                    if (mAdapter != null) {
+                    // 如果没有数据，就显示“暂无数据”
+                    if (null == beanList || 0 >= beanList.size()){
+                        mXxre.setEmptyView(R.layout.emptyview);
+                    }
+                    if (null != mAdapter) {
                         mAdapter.replaceAll(beanList);
-                        mAdapter.notifyDataSetChanged();
                     }
                 }
             }
@@ -205,20 +207,35 @@ public class CaoGaoXiangFragment extends Fragment {
             case "3":
                 readyGo(JieKuanActivity.class, bundle);//ok-
                 break;
+            case "4":
+                readyGo(QiyeKaoheActivity.class, bundle);//ok-
+                break;
             case "5":
                 readyGo(ChuChaiActivity.class, bundle);//ok-
                 break;
             case "6":
                 readyGo(workConectionActivity.class, bundle);//ok-
                 break;
+            case "7":
+                readyGo(QiyeTuizuActivity.class, bundle);//ok-
+                break;
             case "9":
                 readyGo(BanwenActivity.class, bundle);//ok-
+                break;
+            case "10":
+                readyGo(ShouWenActivity.class, bundle);//ok-
                 break;
             case "11":
                 readyGo(YongcheActivity.class, bundle);//ok-
                 break;
             case "12":
                 readyGo(NewsfabuActivity.class, bundle);//ok-
+                break;
+            case "13":
+                readyGo(TouziXieyiActivity.class, bundle);//ok-
+                break;
+            case "14":
+                readyGo(ZufangActivity.class, bundle);//ok-
                 break;
             case "15":
                 readyGo(DizhiyihaoActivity.class, bundle);//ok-
@@ -238,29 +255,15 @@ public class CaoGaoXiangFragment extends Fragment {
             case "25":
                 readyGo(ZijinActivity.class, bundle);//ok-
                 break;
-            case "4":
-                readyGo(QiyeKaoheActivity.class, bundle);//ok-
-                break;
-            case "7":
-                readyGo(QiyeTuizuActivity.class, bundle);//ok-
-                break;
-            case "14":
-                readyGo(ZufangActivity.class, bundle);//ok-
-                break;
-            case "资金申请（合同付款）":
-                readyGo(ZijinShenqingActivity.class, bundle);//ok-
-                break;
             case "27":
                 readyGo(ZijinShenqingFeiHetongActivity.class, bundle);//ok-
                 break;
             case "28":
                 readyGo(DubanActivity.class, bundle);//ok-
                 break;
-            case "10":
-                readyGo(ShouWenActivity.class, bundle);//ok-
-                break;
-            case "13":
-                readyGo(TouziXieyiActivity.class, bundle);//ok-
+
+            case "资金申请（合同付款）":
+                readyGo(ZijinShenqingActivity.class, bundle);//ok-
                 break;
             case "招投标文件":
                 readyGo(ZhaobiaoFileActivity.class, bundle);//ok

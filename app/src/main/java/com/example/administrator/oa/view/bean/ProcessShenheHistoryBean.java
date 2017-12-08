@@ -10,9 +10,14 @@ public class ProcessShenheHistoryBean {
      * comment : 同意
      */
 
+    // 流程节点名称
+    private String name;
+    // 负责人
     private String assignee;
+    // 任务完成时间
     private String completeTime;
-    private String comment;
+    // 任务开始时间
+    private String createTime;
 
     public String getAssignee() {
         return assignee;
@@ -30,11 +35,19 @@ public class ProcessShenheHistoryBean {
         this.completeTime = completeTime;
     }
 
-    public String getComment() {
-        return comment;
+    public String getCreateTime() {
+        return createTime;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

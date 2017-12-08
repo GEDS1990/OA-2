@@ -90,13 +90,11 @@ public class GudingZichanActivity extends HeadBaseActivity {
     private String mSessionId;
     private String mUserName;
     private String mDepartmentName;
-    private String processDefinitionId;
     private String mUserId;
     private String mDepartmentId;
-    private XXDialog mxxDialog2;
-    private XXDialog mxxUsersDialog;
-    private String mBumenLeaderId = "";
-    private String mFenguanLeaderId = "";
+
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -118,6 +116,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mName.setText(mUserName);
         mBumen.setText(mDepartmentName);
 
@@ -151,7 +150,6 @@ public class GudingZichanActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -185,67 +183,64 @@ public class GudingZichanActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-
-                    //按顺序填写数据
-//                    mBumen.setText(shenheBeen.get(0).getValue());
-////                    mFuzeren.setText(shenheBeen.get(1).getValue());
-//                    mName.setText(shenheBeen.get(2).getValue());
-//                    mDate.setText(shenheBeen.get(3).getValue());
-
+                    ArrayList<String> goods = new ArrayList<>();
+                    ArrayList<String> format = new ArrayList<>();
+                    ArrayList<String> num = new ArrayList<>();
+                    ArrayList<String> remarks = new ArrayList<>();
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
-                        Log.d("Caogao", bean.getValue());
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            // TODO 负责人
-                            case "minister":
-//                                mBianhao.setText(value);
-                                break;
-                            case "date":
-                                mDate.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                // TODO 负责人
+                                case "minister":
+                                    mTvBumenleader.setTag(value);
+                                    mTvBumenleader.setText(bean.getLabel());
+                                    break;
+                                case "date":
+                                    mDate.setText(value);
+                                    break;
+                            }
+                        }
+                        // 处理物品明细
+//                        if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
+//                            if (bean.getLabel().startsWith("goods") ) {
+//                                goods.add((Integer.parseInt(bean.getLabel().replace("goods",""))-1), bean.getValue());
+//                            }
+//                            if (bean.getLabel().startsWith("format")) {
+//                                format.add((Integer.parseInt(bean.getLabel().replace("format",""))-1), bean.getValue());
+//                            }
+//                            if (bean.getLabel().startsWith("num")) {
+//                                num.add((Integer.parseInt(bean.getLabel().replace("num",""))-1), bean.getValue());
+//                            }
+//                            if (bean.getLabel().startsWith("remarks")) {
+//                                remarks.add((Integer.parseInt(bean.getLabel().replace("remarks",""))-1), bean.getValue());
+//                            }
+//                        }
+                        if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
+                            if (bean.getLabel().startsWith("goods") ) {
+                                goods.add(bean.getValue());
+                            }
+                            if (bean.getLabel().startsWith("format")) {
+                                format.add(bean.getValue());
+                            }
+                            if (bean.getLabel().startsWith("num")) {
+                                num.add(bean.getValue());
+                            }
+                            if (bean.getLabel().startsWith("remarks")) {
+                                remarks.add(bean.getValue());
+                            }
                         }
                     }
-
-                    //把good，format，num，remarks
-                    ArrayList<QingjiaShenheBean> goods = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> format = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> num = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> remarks = new ArrayList<>();
-
-                    for (QingjiaShenheBean bean : shenheBeen) {
-                        if (bean.getLabel().startsWith("goods")) {
-                            goods.add(bean);
+                    // 把放入list里的物品明细添加进adapter里，展示出来
+                    for (int i = 0;i< goods.size();i++) {
+                        if(remarks.size() < goods.size()){
+                            remarks.add(i, "");
                         }
-                        if (bean.getLabel().startsWith("format")) {
-                            format.add(bean);
-                        }
-                        if (bean.getLabel().startsWith("num")) {
-                            num.add(bean);
-                        }
-                        if (bean.getLabel().startsWith("remarks")) {
-                            remarks.add(bean);
-                        }
-
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        if ("userpicker".equals(bean.getType())) {
-
-                        }
-
-                    }
-
-                    //然后把四个集合的数据一一对应取出组成一个新的含有good，format，num，remarks四个字段实体类的集合
-                    ArrayList<GoodsRegistrationBean> tempList = new ArrayList<>();
-                    for (int i = 0; i < goods.size(); i++) {
-                        if (!TextUtils.isEmpty(goods.get(i).getValue())) {
-                            tempList.add(new GoodsRegistrationBean(goods.get(i).getValue(), format.get(i).getValue(),
-                                    num.get(i).getValue(), remarks.get(i).getValue()));
-                        }
-                    }
-                    if (mAdapter != null) {
-                        mAdapter.replaceAll(tempList);
+                        mAdapter.add(new GoodsRegistrationBean(goods.get(i), format.get(i), num.get(i), remarks.get(i)));
                     }
                 }
             }
@@ -368,8 +363,9 @@ public class GudingZichanActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"date\":" + "\"" + time + "\",")
                 .append("\"minister_name\":" + "\"" + mTvBumenleader.getText().toString().trim() + "\",")
@@ -397,6 +393,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Log.w("99999", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
@@ -445,8 +442,9 @@ public class GudingZichanActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"date\":" + "\"" + time + "\",")
                 .append("\"minister_name\":" + "\"" + mTvBumenleader.getText().toString().trim() + "\",")
@@ -474,6 +472,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Log.w("99999", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {

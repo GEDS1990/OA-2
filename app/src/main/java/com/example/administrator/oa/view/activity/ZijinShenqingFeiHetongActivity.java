@@ -60,7 +60,8 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
     private String mUserId;
     private String mDepartmentId;
     private String mDepartmentName;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -81,6 +82,7 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mBumen.setText(mDepartmentName);
         mName.setText(mUserName);
         checkFormCaoGao();
@@ -90,7 +92,6 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -126,10 +127,11 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
 
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                        Log.d("Caogao", bean.getName());
                         Log.d("Caogao", bean.getValue());
                         //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
+                        String label = bean.getName();
                         String value = bean.getValue();
                         switch (label) {
                             case "id":
@@ -144,6 +146,7 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
                             case "content":
                                 mContent.setText(value);
                                 break;
+                        }
                         }
                     }
 
@@ -233,10 +236,11 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"id\":" + "\"" + bianhao + "\",")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
-                .append("\"transactor_name\":" + "\"" + mUserName + "\",")
-                .append("\"transactor\":" + "\"" + mUserId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
+                .append("\"transactor\":" + "\"" + mUserName + "\",")
+                .append("\"transactor_id\":" + "\"" + mUserId + "\",")
                 .append("\"money\":" + "\"" + money + "\",")
                 .append("\"content\":" + "\"" + content + "\",")
                 .append("\"reason\":" + "\"" + reason + "\"")
@@ -246,6 +250,7 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
@@ -335,10 +340,11 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"id\":" + "\"" + bianhao + "\",")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
-                .append("\"transactor_name\":" + "\"" + mUserName + "\",")
-                .append("\"transactor\":" + "\"" + mUserId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
+                .append("\"transactor\":" + "\"" + mUserName + "\",")
+                .append("\"transactor_id\":" + "\"" + mUserId + "\",")
                 .append("\"money\":" + "\"" + money + "\",")
                 .append("\"content\":" + "\"" + content + "\",")
                 .append("\"reason\":" + "\"" + reason + "\"")
@@ -348,6 +354,7 @@ public class ZijinShenqingFeiHetongActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 

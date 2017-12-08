@@ -117,12 +117,13 @@
                 android:layout_marginBottom="@dimen/dp_1"
                 android:background="@color/white"
                 android:orientation="horizontal"
-                android:padding="10dp">
+                android:padding="@dimen/dp_13">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="甲"/>
+                    android:text="甲"
+                    android:textColor="@color/black"/>
 
                 <EditText
                     android:id="@+id/name_jia"
@@ -137,7 +138,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="乙"/>
+                    android:text="乙"
+                    android:textColor="@color/black"/>
 
                 <EditText
                     android:id="@+id/name_yi"

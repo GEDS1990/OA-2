@@ -15,7 +15,7 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/ll_bumen"
+                android:id="@+id/ll_companyName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="1dp"
@@ -28,15 +28,13 @@
                     style="@style/WorkInfoLeftTextView"
                     android:text="企业名称"/>
 
-                <EditText
+                <TextView
                     android:id="@+id/companyName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="@dimen/dp_10"
-                    android:background="@color/white"
-                    android:hint="请填写企业名称（必填）"
-                    android:textSize="15dp"/>
+                    style="@style/WorkInfoRightTextView"/>
+
+                <ImageView
+                    style="@style/WorkInfoRightArrow"
+                    android:src="@drawable/arrow_right_gray2"/>
 
             </LinearLayout>
 

@@ -20,17 +20,12 @@ import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.bean.ZuzhiUserBean;
-import com.example.administrator.oa.view.bean.ZuzhiUserListResponse;
-import com.example.administrator.oa.view.bean.organization_structure.ChildrenBean;
-import com.example.administrator.oa.view.bean.organization_structure.OrganizationResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
 import com.lsh.XXRecyclerview.CommonViewHolder;
 import com.lsh.XXRecyclerview.XXRecycleView;
-import com.luoshihai.xxdialog.DialogViewHolder;
-import com.luoshihai.xxdialog.XXDialog;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.rest.OnResponseListener;
@@ -62,14 +57,68 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
     TextView mStartDate;
     @BindView(R.id.stop_date)
     TextView mStopDate;
-    @BindView(R.id.ll1)
-    LinearLayout mLl1;
-    @BindView(R.id.ll2)
-    LinearLayout mLl2;
-    @BindView(R.id.ll3)
-    LinearLayout mLl3;
-    @BindView(R.id.ll4)
-    LinearLayout mLl4;
+    @BindView(R.id.wuyeshuidian)
+    TextView wuyeshuidian;
+    @BindView(R.id.image_wuyeshuidian)
+    ImageView image_wuyeshuidian;
+    @BindView(R.id.qianfei)
+    EditText qianfei;
+    @BindView(R.id.fangwujiaju)
+    TextView fangwujiaju;
+    @BindView(R.id.image_fangwujiaju)
+    ImageView image_fangwujiaju;
+    @BindView(R.id.ll_serviceInput)
+    LinearLayout mLlServiceInput;
+    @BindView(R.id.ll_investInput)
+    LinearLayout mLlInvestInput;
+
+    @BindView(R.id.qyzhfzkhyj)
+    TextView qyzhfzkhyj;
+    @BindView(R.id.image_qyzhfzkhyj)
+    ImageView image_qyzhfzkhyj;
+    @BindView(R.id.zlqjqnss)
+    EditText zlqjqnss;
+    @BindView(R.id.kaohebeizhu)
+    EditText beizhu;
+    @BindView(R.id.qyfzqk)
+    TextView qyfzqk;
+    @BindView(R.id.image_qyfzqk)
+    ImageView image_qyfzqk;
+    @BindView(R.id.trzqk)
+    EditText trzqk;
+    @BindView(R.id.sftgcwbb)
+    TextView sftgcwbb;
+    @BindView(R.id.image_sftgcwbb)
+    ImageView image_sftgcwbb;
+    @BindView(R.id.qyssqk)
+    TextView qyssqk;
+    @BindView(R.id.image_qyssqk)
+    ImageView image_qyssqk;
+    @BindView(R.id.rcxm)
+    EditText rcxm;
+    @BindView(R.id.zcsbrs)
+    EditText zcsbrs;
+    @BindView(R.id.wzqydzqk)
+    EditText wzqydzqk;
+    @BindView(R.id.tzcjrckpyj)
+    TextView tzcjrckpyj;
+    @BindView(R.id.image_tzcjrckpyj)
+    ImageView image_tzcjrckpyj;
+    @BindView(R.id.zlhtlx)
+    TextView zlhtlx;
+    @BindView(R.id.image_zlhtlx)
+    ImageView image_zlhtlx;
+    @BindView(R.id.fwzlsfjq)
+    TextView fwzlsfjq;
+    @BindView(R.id.image_fwzlsfjq)
+    ImageView image_fwzlsfjq;
+    @BindView(R.id.fwzlqf)
+    EditText fwzlqf;
+    @BindView(R.id.tzxylxqk)
+    TextView tzxylxqk;
+    @BindView(R.id.image_tzxylxqk)
+    ImageView image_tzxylxqk;
+
     @BindView(R.id.xxre)
     XXRecycleView mXxre;
     @BindView(R.id.tv_huiqian)
@@ -82,18 +131,14 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
     EditText mHuiqianyijian;
     @BindView(R.id.ll_huiqianyijian)
     LinearLayout mLlHuiqianyijian;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
     Button mBtnCommit;
-    @BindView(R.id.text1)
-    TextView mText1;
-    @BindView(R.id.text2)
-    TextView mText2;
-    @BindView(R.id.text3)
-    TextView mText3;
-    @BindView(R.id.text4)
-    TextView mText4;
     private String mTaskId;
     private String mProcessTaskType;
     private String mUserType;
@@ -102,8 +147,6 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
     private List<ProcessShenheHistoryBean> datas = new ArrayList<>();
     private CommonRecyclerAdapter<ZuzhiUserBean> mHuiqianAdapter;
     private List<ZuzhiUserBean> datas2 = new ArrayList<>();
-    private XXDialog mxxUsersDialog;
-    private XXDialog mxxDialog2;
 
     @Override
     protected int getChildLayoutRes() {
@@ -126,22 +169,23 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
 
         //获取服务器数据，填充表单数据
         RequestServer();
-        //判断是否是发起会签节点
-        if ("vote".equals(mProcessTaskType)) {
-            mBtnCaogao.setText("退回发起人");
-            mLlHuiqianyijian.setVisibility(View.VISIBLE);
-        } else {
-            mBtnCaogao.setText("不同意");
-            mLlHuiqianyijian.setVisibility(View.GONE);
-        }
+//        //判断是否是发起会签节点
+//        if ("vote".equals(mProcessTaskType)) {
+//            mBtnCaogao.setText("退回发起人");
+//            mLlHuiqianyijian.setVisibility(View.VISIBLE);
+//        } else {
+//            mBtnCaogao.setText("不同意");
+//            mLlHuiqianyijian.setVisibility(View.GONE);
+//        }
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
@@ -163,32 +207,99 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
         mXxreHuiqianren.setAdapter(mHuiqianAdapter);
     }
 
-    @OnClick({R.id.ll1, R.id.ll2, R.id.ll3, R.id.ll4, R.id.ll_huiqianren, R.id.btn_caogao, R.id.btn_commit})
+    @OnClick({R.id.ll_wuyeshuidian, R.id.ll_fangwujiaju,
+            R.id.ll_qyzhfzkhyj, R.id.ll_qyfzqk,
+            R.id.ll_sftgcwbb, R.id.ll_qyssqk,
+            R.id.ll_tzcjrckpyj, R.id.ll_zlhtlx,
+            R.id.ll_fwzlsfjq, R.id.ll_tzxylxqk,
+            R.id.ll_huiqianren, R.id.btn_caogao, R.id.btn_commit})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.ll1:
-                List<String> datas_1 = new ArrayList();
-                datas_1.add("合格");
-                datas_1.add("不合格");
-                chooseDate(datas_1, mText1, "给出意见");
+            case R.id.ll_wuyeshuidian:
+                if("0".equals(wuyeshuidian.getTag().toString())) {
+                    List<String> datas_1 = new ArrayList();
+                    datas_1.add("是");
+                    datas_1.add("否");
+                    chooseDate(datas_1, wuyeshuidian, "物业费、水电费是否缴清");
+                }
                 break;
-            case R.id.ll2:
-                List<String> datas_2 = new ArrayList();
-                datas_2.add("合格");
-                datas_2.add("不合格");
-                chooseDate(datas_2, mText2, "给出意见");
+            case R.id.ll_fangwujiaju:
+                if("0".equals(fangwujiaju.getTag().toString())) {
+                    List<String> datas_2 = new ArrayList();
+                    datas_2.add("是");
+                    datas_2.add("否");
+                    chooseDate(datas_2, fangwujiaju, "房屋和家具使用情况是否良好");
+                }
                 break;
-            case R.id.ll4:
-                List<String> datas_4 = new ArrayList();
-                datas_4.add("合格");
-                datas_4.add("不合格");
-                chooseDate(datas_4, mText4, "给出意见");
+            case R.id.ll_qyzhfzkhyj:
+                if("0".equals(qyzhfzkhyj.getTag().toString())) {
+                    List<String> datas_3 = new ArrayList();
+                    datas_3.add("合格");
+                    datas_3.add("不合格");
+                    chooseDate(datas_3, qyzhfzkhyj, "企业综合发展考评建议");
+                }
                 break;
-            case R.id.ll3:
-                List<String> datas_3 = new ArrayList();
-                datas_3.add("是");
-                datas_3.add("否");
-                chooseDate(datas_3, mText3, "房屋租赁费钱是否缴清");
+            case R.id.ll_qyfzqk:
+                if("0".equals(qyfzqk.getTag().toString())) {
+                    List<String> datas_4 = new ArrayList();
+                    datas_4.add("高新技术企业");
+                    datas_4.add("双软认证企业");
+                    datas_4.add("知识产权");
+                    datas_4.add("新三板挂牌");
+                    datas_4.add("享受其他政府支持资金、条件");
+                    chooseDate(datas_4, qyfzqk, "企业发展情况");
+                }
+                break;
+            case R.id.ll_sftgcwbb:
+                if("0".equals(sftgcwbb.getTag().toString())) {
+                    List<String> datas_5 = new ArrayList();
+                    datas_5.add("是");
+                    datas_5.add("否");
+                    chooseDate(datas_5, sftgcwbb, "是否提供财务报表");
+                }
+                break;
+            case R.id.ll_qyssqk:
+                if("0".equals(qyssqk.getTag().toString())) {
+                    List<String> datas_6 = new ArrayList();
+                    datas_6.add("主板上市");
+                    datas_6.add("中小板上市");
+                    datas_6.add("创业板上市");
+                    datas_6.add("无");
+                    chooseDate(datas_6, qyssqk, "企业上市情况");
+                }
+                break;
+
+            case R.id.ll_tzcjrckpyj:
+                if("0".equals(tzcjrckpyj.getTag().toString())) {
+                    List<String> datas_7 = new ArrayList();
+                    datas_7.add("合格");
+                    datas_7.add("不合格");
+                    chooseDate(datas_7, tzcjrckpyj, "投资促进与人才工作部考评建议");
+                }
+                break;
+            case R.id.ll_zlhtlx:
+                if("0".equals(zlhtlx.getTag().toString())) {
+                    List<String> datas_8 = new ArrayList();
+                    datas_8.add("合格");
+                    datas_8.add("不合格");
+                    chooseDate(datas_8, zlhtlx, "租赁合同考评建议");
+                }
+                break;
+            case R.id.ll_fwzlsfjq:
+                if("0".equals(fwzlsfjq.getTag().toString())) {
+                    List<String> datas_9 = new ArrayList();
+                    datas_9.add("是");
+                    datas_9.add("否");
+                    chooseDate(datas_9, fwzlsfjq, "房屋租赁是否缴清");
+                }
+                break;
+            case R.id.ll_tzxylxqk:
+                if("0".equals(tzxylxqk.getTag().toString())) {
+                    List<String> datas_10 = new ArrayList();
+                    datas_10.add("合格");
+                    datas_10.add("不合格");
+                    chooseDate(datas_10, tzxylxqk, "投资协议履行情况");
+                }
                 break;
             case R.id.ll_huiqianren:
                 if("0".equals(mLlHuiqianren.getTag())) {
@@ -197,8 +308,17 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
                 }
                 break;
             case R.id.btn_caogao:
+                switch (mBtnCaogao.getText().toString()) {
+                    case "不同意":
+                        RequestServerCommit("不同意");
+                        break;
+                    case "回退发起人":
+                        RequestServerTuihui();
+                        break;
+                }
                 break;
             case R.id.btn_commit:
+                RequestServerCommit("同意");
                 break;
         }
     }
@@ -263,24 +383,127 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "company_name":
-                                mCompanyName.setText(value);
-                                break;
-                            case "id":
-                                mBianhao.setText(value);
-                                break;
-                            case "address":
-                                mOldaddress.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 企业考核资产运营部完备信息
+                                case "assessment-asset":
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 企业考核企业服务部给意见
+                                case "assessment-service":
+                                    mLlServiceInput.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 企业考核投资促进与人才工作部
+                                case "assessment-invest":
+
+                                    break;
+                                // 企业考核会签
+                                case "assessment-return":
+                                    mLlHuiqianyijian.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("回退发起人");
+                                    break;
+                                // 企业考核领导审核表
+                                case "assessment-leader":
+                                    mLlServiceInput.setVisibility(View.VISIBLE);
+                                    mLlInvestInput.setVisibility(View.VISIBLE);
+                                    mLlHuiqianren.setVisibility(View.VISIBLE);
+                                    mXxreHuiqianren.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 企业考核通知
+                                case "assessment-notice":
+                                    break;
+                            }
                         }
-                        if ("userpicker".equals(bean.getType())) {
-                            mLlHuiqianren.setVisibility(View.VISIBLE);
-                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "company_name":
+                                    mCompanyName.setText(value);
+                                    break;
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "address":
+                                    mOldaddress.setText(value);
+                                    break;
+                                case "startTime":
+                                    mStartDate.setText(value);
+                                    break;
+                                case "endTime":
+                                    mStopDate.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                                case "cost":
+                                    wuyeshuidian.setText(value);
+                                    wuyeshuidian.setFocusable(false);
+                                    image_wuyeshuidian.setVisibility(View.GONE);
+                                    break;
+                                case "arrears":
+                                    qianfei.setText(value);
+                                    qianfei.setFocusable(false);
+                                    break;
+                                case "use":
+                                    fangwujiaju.setText(value);
+                                    fangwujiaju.setFocusable(false);
+                                    image_fangwujiaju.setVisibility(View.GONE);
+                                    break;
+                                case "serviceComment":
+                                    qyzhfzkhyj.setText(value);
+                                    image_qyzhfzkhyj.setVisibility(View.GONE);
+                                    break;
+                                case "revenue":
+                                    zlqjqnss.setText(value);
+                                    zlqjqnss.setFocusable(false);
+                                    break;
+                                case "remarks":
+                                    beizhu.setText(value);
+                                    beizhu.setFocusable(false);
+                                    break;
+                                case "develop":
+                                    qyfzqk.setText(value);
+                                    image_qyfzqk.setVisibility(View.GONE);
+                                    break;
+                                case "investment":
+                                    trzqk.setText(value);
+                                    trzqk.setFocusable(false);
+                                    break;
+                                case "finance":
+                                    sftgcwbb.setText(value);
+                                    image_sftgcwbb.setVisibility(View.GONE);
+                                    break;
+                                case "quote":
+                                    qyssqk.setText(value);
+                                    image_qyssqk.setVisibility(View.GONE);
+                                    break;
+                                case "personnel":
+                                    rcxm.setText(value);
+                                    rcxm.setFocusable(false);
+                                    break;
+                                case "security":
+                                    zcsbrs.setText(value);
+                                    zcsbrs.setFocusable(false);
+                                    break;
+                                case "capital":
+                                    wzqydzqk.setText(value);
+                                    wzqydzqk.setFocusable(false);
+                                    break;
+                            }
                         }
+//                        if ("userpicker".equals(bean.getType())) {
+//                            mLlHuiqianren.setVisibility(View.VISIBLE);
+//                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+//                        }
                     }
                 }
             }
@@ -332,6 +555,21 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
                 .append("\"address\":" + "\"" + address + "\",")
                 .append("\"leader\":" + "\"" + leadersID.toString() + "\",")
                 .append("\"leader_name\":" + "\"" + leadersName.toString() + "\",")
+
+                .append("\"cost\":" + "\"" + wuyeshuidian.getText().toString() + "\",")
+                .append("\"arrears\":" + "\"" + qianfei.getText().toString() + "\",")
+                .append("\"use\":" + "\"" + fangwujiaju.getText().toString() + "\",")
+                .append("\"serviceComment\":" + "\"" + qyzhfzkhyj.getText().toString() + "\",")
+                .append("\"revenue\":" + "\"" + zlqjqnss.getText().toString() + "\",")
+                .append("\"remarks\":" + "\"" + beizhu.getText().toString() + "\",")
+                .append("\"develop\":" + "\"" + qyfzqk.getText().toString() + "\",")
+                .append("\"investment\":" + "\"" + trzqk.getText().toString() + "\",")
+                .append("\"finance\":" + "\"" + sftgcwbb.getText().toString() + "\",")
+                .append("\"quote\":" + "\"" + qyssqk.getText().toString() + "\",")
+                .append("\"personnel\":" + "\"" + rcxm.getText().toString() + "\",")
+                .append("\"security\":" + "\"" + zcsbrs.getText().toString() + "\",")
+                .append("\"capital\":" + "\"" + wzqydzqk.getText().toString() + "\",")
+
                 .append("\"comment\":" + "\"" + comment + "\"")
                 .append("}");
 
@@ -384,7 +622,7 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
      */
     private void RequestServerTuihui() {
         String yijian = mHuiqianyijian.getText().toString().trim();
-        if (!TextUtils.isEmpty(yijian)) {
+//        if (!TextUtils.isEmpty(yijian)) {
             //创建请求队列
             RequestQueue Queue = NoHttp.newRequestQueue();
             //创建请求
@@ -405,7 +643,7 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
                 public void onSucceed(int what, Response<ProcessJieguoResponse> response) {
                     if (null != response && null != response.get()) {
                         if (response.get().getCode() == 200) {
-                            Toast.makeText(Qiyekaohe_shenhe.this, "退回成功", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Qiyekaohe_shenhe.this, "回退成功", Toast.LENGTH_SHORT).show();
                             finish();
                         }
                     }
@@ -423,192 +661,8 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
                     }
                 }
             });
-        } else {
-            Toast.makeText(this, "请填写会签处理意见", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
-    /**
-     * 请求网络接口，获取组织结构数据
-     *
-     * @param title
-     */
-    private void RequestServerGetZuzhi(final String title) {
-        //创建请求队列
-        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
-        //创建请求
-        Request<OrganizationResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_ZUZHI, RequestMethod.POST, OrganizationResponse.class);
-        request.add("partyStructTypeId", "1");
-        ProcessQueue.add(0, request, new OnResponseListener<OrganizationResponse>() {
-
-            @Override
-            public void onStart(int what) {
-
-            }
-
-            @Override
-            public void onSucceed(int what, Response<OrganizationResponse> response) {
-                Log.w("3333", response.toString());
-                if (null != response && null != response.get() && null != response.get().getData()) {
-                    if (response.get().getData().get(0).isOpen()) {
-                        chooseDate2(response.get().getData().get(0).getChildren(), title);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailed(int what, Response<OrganizationResponse> response) {
-                Toast.makeText(Qiyekaohe_shenhe.this, "请求数据失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFinish(int what) {
-
-            }
-        });
-    }
-
-    /**
-     * 选择相关机构
-     *
-     * @param data
-     * @param title
-     */
-    public void chooseDate2(final List<ChildrenBean> data, final String title) {
-        mxxDialog2 = new XXDialog(this, R.layout.dialog_chooselist) {
-            @Override
-            public void convert(DialogViewHolder holder) {
-                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
-                holder.setText(R.id.dialog_title, title);
-                xxre.setLayoutManager(new LinearLayoutManager(Qiyekaohe_shenhe.this));
-                List<ChildrenBean> datas = new ArrayList();
-                final CommonRecyclerAdapter<ChildrenBean> adapter = new CommonRecyclerAdapter<ChildrenBean>(Qiyekaohe_shenhe.this,
-                        datas, R.layout.simple_list_item) {
-                    @Override
-                    public void convert(CommonViewHolder holder1, final ChildrenBean item, final int i, boolean b) {
-                        holder1.setText(R.id.tv, item.getName());
-                        if (item.isOpen()) {
-                            holder1.getView(R.id.more).setVisibility(View.VISIBLE);
-                        } else {
-                            holder1.getView(R.id.more).setVisibility(View.GONE);
-                        }
-
-                        holder1.getView(R.id.more).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                mxxDialog2.dismiss();
-                                if (item.isOpen()) {
-                                    chooseDate2(item.getChildren(), title);
-                                }
-                            }
-                        });
-                    }
-                };
-                xxre.setAdapter(adapter);
-                adapter.replaceAll(data);
-                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
-                        RequestServerGetUsers(adapter.getDatas().get(i).getId(), adapter.getDatas().get(i).getName());
-                        mxxDialog2.dismiss();
-                    }
-                });
-            }
-        }.showDialog();
-    }
-
-
-    /**
-     * 请求网络接口，获取组织结构下的具体人员列表
-     *
-     * @param partyEntityId
-     */
-    private void RequestServerGetUsers(long partyEntityId, final String departmentName) {
-        //创建请求队列
-        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
-        //创建请求
-        Request<ZuzhiUserListResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_ZUZHI_USERS,
-                RequestMethod.POST, ZuzhiUserListResponse.class);
-        request.add("partyStructTypeId", "1");
-        request.add("partyEntityId", partyEntityId + "");
-        ProcessQueue.add(0, request, new OnResponseListener<ZuzhiUserListResponse>() {
-
-            @Override
-            public void onStart(int what) {
-
-            }
-
-            @Override
-            public void onSucceed(int what, Response<ZuzhiUserListResponse> response) {
-                Log.w("3333", response.toString());
-                if (null != response && null != response.get() && null != response.get().getData()) {
-                    chooseUsersDate(response.get().getData(), mTvHuiqian, departmentName);
-                }
-            }
-
-            @Override
-            public void onFailed(int what, Response<ZuzhiUserListResponse> response) {
-                Toast.makeText(Qiyekaohe_shenhe.this, "请求数据失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFinish(int what) {
-
-            }
-        });
-    }
-
-    /**
-     * 选择某部门下的具体人员
-     *
-     * @param data
-     * @param tv
-     * @param title
-     */
-    public void chooseUsersDate(final List<ZuzhiUserBean> data, final TextView tv, final String title) {
-        mxxUsersDialog = new XXDialog(this, R.layout.dialog_chooselist) {
-            @Override
-            public void convert(DialogViewHolder holder) {
-                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
-                holder.setText(R.id.dialog_title, title);
-                xxre.setLayoutManager(new LinearLayoutManager(Qiyekaohe_shenhe.this));
-                List<ZuzhiUserBean> datas = new ArrayList();
-                final CommonRecyclerAdapter<ZuzhiUserBean> adapter = new CommonRecyclerAdapter<ZuzhiUserBean>(Qiyekaohe_shenhe.this,
-                        datas, R.layout.simple_list_item) {
-                    @Override
-                    public void convert(CommonViewHolder holder1, ZuzhiUserBean item, int i, boolean b) {
-                        holder1.setText(R.id.tv, item.getName());
-                        holder1.getView(R.id.more).setVisibility(View.GONE);
-                        holder1.getView(R.id.users).setVisibility(View.GONE);
-                        ((ImageView) holder1.getView(R.id.icon)).setImageResource(R.drawable.personal);
-
-                    }
-                };
-                xxre.setAdapter(adapter);
-                adapter.replaceAll(data);
-                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
-//                        mZuzhiUserBean = adapter.getDatas().get(i);
-//                        if (mHuiqianAdapter != null) {
-//                            boolean flag = false;
-//                            for (int t = 0; t < mHuiqianAdapter.getDatas().size(); t++) {
-//                                if (mHuiqianAdapter.getDatas().get(t).getId().equals(mZuzhiUserBean.getId())) {
-//                                    Toast.makeText(Qiyekaohe_shenhe.this, "不要重复添加", Toast.LENGTH_SHORT).show();
-//                                    flag = true;
-//                                }
-//                            }
-//                            if (!flag) {
-//                                mHuiqianAdapter.add(mZuzhiUserBean);
-//                            }
-//                        }
-//                        if (mZuzhiUserBean != null) {
-//                            mxxUsersDialog.dismiss();
-//                        }
-                    }
-                });
-            }
-        }.showDialog();
+//        } else {
+//            Toast.makeText(this, "请填写会签处理意见", Toast.LENGTH_SHORT).show();
+//        }
     }
 }

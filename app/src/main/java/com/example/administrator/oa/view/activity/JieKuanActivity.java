@@ -57,7 +57,8 @@ public class JieKuanActivity extends HeadBaseActivity {
     private String mDepartmentId;
     private String mSessionId;
     private String mUserId;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -79,6 +80,7 @@ public class JieKuanActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mJiekuanren.setText(mUserName);
         mBumen.setText(mDepartmentName);
         checkFormCaoGao();
@@ -123,18 +125,20 @@ public class JieKuanActivity extends HeadBaseActivity {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
-                        Log.d("Caogao", bean.getValue());
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "jksy":
-                                mShiyou.setText(value);
-                                break;
-                            case "jkje":
-                                mMoney.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.w("Caogao", bean.getName());
+                            Log.w("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "jksy":
+                                    mShiyou.setText(value);
+                                    break;
+                                case "jkje":
+                                    mMoney.setText(value);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -212,8 +216,9 @@ public class JieKuanActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"ssbm_name\":" + "\"" + bumen + "\",")
-                .append("\"ssbm\":" + "\"" + mDepartmentId + "\",")
+                .append("\"ssbm\":" + "\"" + bumen + "\",")
+                .append("\"ssbm_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"jkr\":" + "\"" + mUserName + "\",")
                 .append("\"jksy\":" + "\"" + reason + "\",")
                 .append("\"jkje\":" + "\"" + money + "\"")
@@ -222,6 +227,7 @@ public class JieKuanActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
@@ -271,9 +277,10 @@ public class JieKuanActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"ssbm_name\":" + "\"" + bumen + "\",")
-                .append("\"ssbm\":" + "\"" + mDepartmentId + "\",")
+                .append("\"ssbm\":" + "\"" + bumen + "\",")
+                .append("\"ssbm_id\":" + "\"" + mDepartmentId + "\",")
                 .append("\"jkr\":" + "\"" + mUserName + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"jksy\":" + "\"" + reason + "\",")
                 .append("\"jkje\":" + "\"" + money + "\"")
 //                .append("\"comment\":" + "\"" + comment + "\"")
@@ -281,6 +288,7 @@ public class JieKuanActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 

@@ -66,7 +66,8 @@ public class ZufangActivity extends HeadBaseActivity {
     private String mUserId;
     private String mDepartmentId;
     private String mDepartmentName;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -87,6 +88,7 @@ public class ZufangActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mBumen.setText(mDepartmentName);
         mZhubanren.setText(mUserName);
 
@@ -97,7 +99,6 @@ public class ZufangActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -133,38 +134,40 @@ public class ZufangActivity extends HeadBaseActivity {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
 
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "rentalDepartments":
-                                mBumen.setText(value);
-                                break;
-                            case "title":
-                                mHetongName.setText(value);
-                                break;
-                            case "name1":
-                                mNameJia.setText(value);
-                                break;
-                            case "name2":
-                                mNameYi.setText(value);
-                                break;
-                            case "rentalDate":
-                                mDate.setText(value);
-                                break;
-                            case "rentalAddress":
-                                mAddress.setText(value);
-                                break;
-                            case "rentalContent":
-                                mMainContent.setText(value);
-                                break;
-                            case "rentalId":
-                                mBianhao.setText(value);
-                                break;
-                            // 主办人id
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "rentalDepartments":
+                                    mBumen.setText(value);
+                                    break;
+                                case "title":
+                                    mHetongName.setText(value);
+                                    break;
+                                case "name1":
+                                    mNameJia.setText(value);
+                                    break;
+                                case "name2":
+                                    mNameYi.setText(value);
+                                    break;
+                                case "rentalDate":
+                                    mDate.setText(value);
+                                    break;
+                                case "rentalAddress":
+                                    mAddress.setText(value);
+                                    break;
+                                case "rentalContent":
+                                    mMainContent.setText(value);
+                                    break;
+                                case "rentalId":
+                                    mBianhao.setText(value);
+                                    break;
+                                // 主办人id
 //                            case "initiatorRental":
 //                                mZhubanren.setText(value);
 //                                break;
+                            }
                         }
                     }
                 }
@@ -266,8 +269,9 @@ public class ZufangActivity extends HeadBaseActivity {
         json.append("{")
                 .append("\"title\":" + "\"" + hetongName + "\",")
                 .append("\"rentalDepartments\":" + "\"" + bumen + "\",")
-                .append("\"initiatorRental\":" + "\"" + mUserId + "\",")
-                .append("\"initiatorRental_name\":" + "\"" + mUserName + "\",")
+                .append("\"initiatorRental\":" + "\"" + mUserName + "\",")
+                .append("\"initiatorRental_id\":" + "\"" + mUserId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"rentalId\":" + "\"" + bianhao + "\",")
                 .append("\"name1\":" + "\"" + nameJia + "\",")
                 .append("\"name2\":" + "\"" + nameYi + "\",")
@@ -278,6 +282,7 @@ public class ZufangActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
@@ -368,8 +373,9 @@ public class ZufangActivity extends HeadBaseActivity {
         json.append("{")
                 .append("\"title\":" + "\"" + hetongName + "\",")
                 .append("\"rentalDepartments\":" + "\"" + bumen + "\",")
-                .append("\"initiatorRental\":" + "\"" + mUserId + "\",")
-                .append("\"initiatorRental_name\":" + "\"" + mUserName + "\",")
+                .append("\"initiatorRental\":" + "\"" + mUserName + "\",")
+                .append("\"initiatorRental_id\":" + "\"" + mUserId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"rentalId\":" + "\"" + bianhao + "\",")
                 .append("\"name1\":" + "\"" + nameJia + "\",")
                 .append("\"name2\":" + "\"" + nameYi + "\",")
@@ -380,6 +386,7 @@ public class ZufangActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 

@@ -71,7 +71,8 @@ public class YongyinActivity extends HeadBaseActivity {
     private String mDepartmentName;
     private String mDepartmentId;
     private String mUserId;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -92,6 +93,7 @@ public class YongyinActivity extends HeadBaseActivity {
         mDepartmentName = SPUtils.getString(this, "departmentName");
         mDepartmentId = SPUtils.getString(this, "departmentId");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mJingbanren.setText(mUserName);
         mDanwei.setText(mDepartmentName);
 
@@ -102,7 +104,6 @@ public class YongyinActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -136,34 +137,30 @@ public class YongyinActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-
-                    //按顺序填写数据
-//                    mBianhao.setText(shenheBeen.get(0).getValue());
-//                    mShiyou.setText(shenheBeen.get(1).getValue());
-//                    mYinjianname.setText(shenheBeen.get(2).getValue());
-//                    mDanwei.setText(shenheBeen.get(3).getValue());
-//                    mBianhao.setText(shenheBeen.get(4).getValue());
-//                    mFenshu.setText(shenheBeen.get(5).getValue());
-
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
-                        Log.d("Caogao", bean.getValue());
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "bh":
-                                mBianhao.setText(value);
-                                break;
-                            case "yjmc":
-                                mYinjianname.setText(value);
-                                break;
-                            case "fs":
-                                mFenshu.setText(value);
-                                break;
-                            case "sy":
-                                mShiyou.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "bh":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "yjmc":
+                                    if(!TextUtils.isEmpty(bean.getLabel())) {
+                                        mYinjianname.setText(bean.getLabel());
+                                        mYinjianname.setTag(value);
+                                    }
+                                    break;
+                                case "fs":
+                                    mFenshu.setText(value);
+                                    break;
+                                case "sy":
+                                    mShiyou.setText(value);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -203,10 +200,10 @@ public class YongyinActivity extends HeadBaseActivity {
 //                chooseDate(datas_buzhang, mTvBuzhang, "是否需要部长审核");
 //                break;
             case R.id.ll_yinjianname:
-                if("0".equals(mYinjianname.getTag())) {
-                    mYinjianname.setTag("1");
+//                if("0".equals(mYinjianname.getTag())) {
+//                    mYinjianname.setTag("1");
                     HuoquyingzhangCode();
-                }
+//                }
 
                 break;
             case R.id.btn_caogao:
@@ -309,13 +306,17 @@ public class YongyinActivity extends HeadBaseActivity {
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"bh\":" + "\"" + bianhao + "\",")
-                .append("\"jbr\":" + "\"" + mUserId + "\",")
-                .append("\"jbr_name\":" + "\"" + mUserName + "\",")
+                .append("\"jbr_id\":" + "\"" + mUserId + "\",")
+                .append("\"jbr\":" + "\"" + mUserName + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
 //                .append("\"fgld_name\":" + "\"" + leaderName + "\",")
 //                .append("\"fgld\":" + "\"" + mZuzhiUserBean.getId() + "\",")
-                .append("\"yydw_name\":" + "\"" + danwei + "\",")
-                .append("\"yydw\":" + "\"" + mDepartmentId + "\",")
-                .append("\"yjmc\":" + "\"" + yinjianname + "\",")
+//                .append("\"yydw_name\":" + "\"" + danwei + "\",")
+//                .append("\"yydw\":" + "\"" + mDepartmentId + "\",")
+                .append("\"yydw\":" + "\"" + mDepartmentName + "\",")
+                .append("\"yydw_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"yjmc_name\":" + "\"" + yinjianname + "\",")
+                .append("\"yjmc\":" + "\"" + mYinjianname.getTag().toString() + "\",")
                 .append("\"fs\":" + "\"" + fenshu + "\",")
 //                .append("\"comment\":" + "\"" + comment + "\",")
                 .append("\"sy\":" + "\"" + shiyou + "\"")
@@ -329,6 +330,7 @@ public class YongyinActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", sessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
@@ -385,12 +387,8 @@ public class YongyinActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<YingzhangTypeResponse> response) {
                 Log.w("2222", response.toString());
                 if (null != response && null != response.get() && null != response.get().getData()) {
-                    List<String> datas_buzhang = new ArrayList<>();
                     List<YingzhangTypeBean> data = response.get().getData();
-                    for (YingzhangTypeBean bean : data) {
-                        datas_buzhang.add(bean.getName());
-                    }
-                    chooseDate(datas_buzhang, mYinjianname, "选择印鉴名称");
+                    chooseNameAndId(data, mYinjianname, "选择印鉴名称");
                 }
             }
 
@@ -418,13 +416,17 @@ public class YongyinActivity extends HeadBaseActivity {
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"bh\":" + "\"" + bianhao + "\",")
-                .append("\"jbr\":" + "\"" + mUserId + "\",")
-                .append("\"jbr_name\":" + "\"" + mUserName + "\",")
+                .append("\"jbr_id\":" + "\"" + mUserId + "\",")
+                .append("\"jbr\":" + "\"" + mUserName + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
 //                .append("\"fgld_name\":" + "\"" + leaderName + "\",")
 //                .append("\"fgld\":" + "\"" + mZuzhiUserBean.getId() + "\",")
-                .append("\"yydw_name\":" + "\"" + danwei + "\",")
-                .append("\"yydw\":" + "\"" + mDepartmentId + "\",")
-                .append("\"yjmc\":" + "\"" + yinjianname + "\",")
+//                .append("\"yydw_name\":" + "\"" + danwei + "\",")
+//                .append("\"yydw\":" + "\"" + mDepartmentId + "\",")
+                .append("\"yydw\":" + "\"" + mDepartmentName + "\",")
+                .append("\"yydw_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"yjmc_name\":" + "\"" + yinjianname + "\",")
+                .append("\"yjmc\":" + "\"" + mYinjianname.getTag().toString() + "\",")
                 .append("\"fs\":" + "\"" + fenshu + "\",")
 //                .append("\"comment\":" + "\"" + comment + "\",")
                 .append("\"sy\":" + "\"" + shiyou + "\"")
@@ -438,6 +440,7 @@ public class YongyinActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", sessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 

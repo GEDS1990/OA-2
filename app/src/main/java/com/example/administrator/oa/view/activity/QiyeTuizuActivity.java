@@ -1,5 +1,6 @@
 package com.example.administrator.oa.view.activity;
 
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -11,13 +12,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.oa.R;
+import com.example.administrator.oa.view.bean.CompanyTypeBean;
+import com.example.administrator.oa.view.bean.CompanyTypeResponse;
 import com.example.administrator.oa.view.bean.FormBianmaBean;
+import com.example.administrator.oa.view.bean.HetongBianhaoBean;
+import com.example.administrator.oa.view.bean.HetongBianhaoResponse;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.SPUtils;
+import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
+import com.lsh.XXRecyclerview.CommonViewHolder;
+import com.lsh.XXRecyclerview.XXRecycleView;
+import com.luoshihai.xxdialog.DialogViewHolder;
+import com.luoshihai.xxdialog.XXDialog;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.rest.OnResponseListener;
@@ -37,8 +47,6 @@ import butterknife.OnClick;
 public class QiyeTuizuActivity extends HeadBaseActivity {
     @BindView(R.id.companyName)
     TextView mCompanyName;
-    @BindView(R.id.ll_bumen)
-    LinearLayout mLlBumen;
     @BindView(R.id.bianhao)
     TextView mBianhao;
     @BindView(R.id.Oldaddress)
@@ -59,7 +67,8 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
     private String mUserId;
     private String mDepartmentId;
     private String mDepartmentName;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -80,6 +89,7 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
 
         checkFormCaoGao();
     }
@@ -88,7 +98,6 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -124,25 +133,37 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
 
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "company":
-                                mCompanyName.setText(value);
-                                break;
-                            case "id":
-                                mBianhao.setText(value);
-                                break;
-                            case "address":
-                                mOldaddress.setText(value);
-                                break;
-                            case "content":
-                                mContent.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "company":
+                                    Log.d("bean.name", value);
+                                    Log.d("bean.label", bean.getLabel());
+                                    if(!TextUtils.isEmpty(bean.getLabel())) {
+                                        mCompanyName.setText(bean.getLabel());
+                                        mCompanyName.setTag(value);
+                                    }
+                                    break;
+                                case "id":
+                                    Log.d("bean.name", value);
+                                    Log.d("bean.label", bean.getLabel());
+                                    if(!TextUtils.isEmpty(bean.getLabel())) {
+                                        mBianhao.setText(bean.getLabel());
+                                        mBianhao.setTag(value);
+                                    }
+                                    break;
+                                case "address":
+                                    mOldaddress.setText(value);
+                                    break;
+                                case "content":
+                                    mContent.setText(value);
+                                    break;
 //                            case "investComment":
 //                                mRencaibuyijian.setText(value);
 //                                break;
+                            }
                         }
                     }
                 }
@@ -164,18 +185,22 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
 
 
     // R.id.ll_fenguanleader,
-    @OnClick({R.id.qytz_bianhao, R.id.btn_caogao, R.id.btn_commit})
+    @OnClick({R.id.qytz_bianhao, R.id.ll_companyName, R.id.btn_caogao, R.id.btn_commit})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.qytz_bianhao:
-                if("0".equals(mBianhao.getTag())) {
-                    mBianhao.setTag("1");
-                    houQuFormCode();
-                }
+//                if("0".equals(mBianhao.getTag())) {
+//                    mBianhao.setTag("1");
+//                    houQuFormCode();
+//                }
+                HuoquHetongNameAndID();
                 break;
 //            case R.id.ll_fenguanleader:
 //                RequestServerGetZuzhi("请选择分管领导审核",mTvFenguanleader);
 //                break;
+            case R.id.ll_companyName:
+                HuoquCompanyNameAndID();
+                break;
             case R.id.btn_caogao:
                 RequestServerGoodsLingqu_Save(mCompanyName.getText().toString().trim(),
                         mContent.getText().toString().trim(),
@@ -187,6 +212,154 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
                 jianYanshuju();
                 break;
         }
+    }
+
+    /**
+     * 请求网络接口 获取公司名称列表
+     */
+    private void HuoquCompanyNameAndID() {
+
+        //创建请求队列
+        RequestQueue requestQueue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<CompanyTypeResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_COMPANY_TYPE,
+                RequestMethod.POST, CompanyTypeResponse.class);
+        request.add("companyname", "");
+        //添加url?key=value形式的参数
+        requestQueue.add(0, request, new OnResponseListener<CompanyTypeResponse>() {
+
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<CompanyTypeResponse> response) {
+                Log.w("2222", response.toString());
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<CompanyTypeBean> data = response.get().getData();
+                    chooseCompanyNameAndId(data, mCompanyName, "选择企业名称");
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<CompanyTypeResponse> response) {
+                Toast.makeText(QiyeTuizuActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
+            }
+        });
+
+    }
+
+    public void chooseCompanyNameAndId(final List<CompanyTypeBean> data, final TextView tv, final String title) {
+        if(null != mxxDialog){
+            mxxDialog.dismiss();
+        }
+        mxxDialog = new XXDialog(this, R.layout.dialog_chooselist) {
+            @Override
+            public void convert(DialogViewHolder holder) {
+                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
+                holder.setText(R.id.dialog_title, title);
+                xxre.setLayoutManager(new LinearLayoutManager(QiyeTuizuActivity.this));
+                final CommonRecyclerAdapter<CompanyTypeBean> adapter = new CommonRecyclerAdapter<CompanyTypeBean>
+                        (QiyeTuizuActivity.this, data, R.layout.simple_list_item) {
+                    @Override
+                    public void convert(CommonViewHolder holder1, CompanyTypeBean item, int i, boolean b) {
+                        holder1.setText(R.id.tv, item.getCompanyname());
+                        holder1.getView(R.id.more).setVisibility(View.GONE);
+                        holder1.getView(R.id.users).setVisibility(View.GONE);
+                    }
+                };
+                xxre.setAdapter(adapter);
+                adapter.replaceAll(data);
+                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
+                        tv.setText(adapter.getDatas().get(i).getCompanyname());
+                        tv.setTag(adapter.getDatas().get(i).getCompanypId());
+                        mxxDialog.dismiss();
+                    }
+                });
+
+            }
+        }.showDialog();
+    }
+
+    /**
+     * 请求网络接口 获取合同编号
+     */
+    private void HuoquHetongNameAndID() {
+
+        //创建请求队列
+        RequestQueue requestQueue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<HetongBianhaoResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_HETONG_TYPE,
+                RequestMethod.POST, HetongBianhaoResponse.class);
+        request.add("contractName", "");
+        //添加url?key=value形式的参数
+        requestQueue.add(0, request, new OnResponseListener<HetongBianhaoResponse>() {
+
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<HetongBianhaoResponse> response) {
+                Log.w("2222", response.toString());
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<HetongBianhaoBean> data = response.get().getData();
+                    chooseHetongNameAndId(data, mBianhao, "选择合同编号");
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<HetongBianhaoResponse> response) {
+                Toast.makeText(QiyeTuizuActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
+            }
+        });
+
+    }
+
+    public void chooseHetongNameAndId(final List<HetongBianhaoBean> data, final TextView tv, final String title) {
+        if(null != mxxDialog){
+            mxxDialog.dismiss();
+        }
+        mxxDialog = new XXDialog(this, R.layout.dialog_chooselist) {
+            @Override
+            public void convert(DialogViewHolder holder) {
+                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
+                holder.setText(R.id.dialog_title, title);
+                xxre.setLayoutManager(new LinearLayoutManager(QiyeTuizuActivity.this));
+                final CommonRecyclerAdapter<HetongBianhaoBean> adapter = new CommonRecyclerAdapter<HetongBianhaoBean>
+                        (QiyeTuizuActivity.this, data, R.layout.simple_list_item) {
+                    @Override
+                    public void convert(CommonViewHolder holder1, HetongBianhaoBean item, int i, boolean b) {
+                        holder1.setText(R.id.tv, item.getName());
+                        holder1.getView(R.id.more).setVisibility(View.GONE);
+                        holder1.getView(R.id.users).setVisibility(View.GONE);
+                    }
+                };
+                xxre.setAdapter(adapter);
+                adapter.replaceAll(data);
+                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
+                        tv.setText(adapter.getDatas().get(i).getName());
+                        tv.setTag(adapter.getDatas().get(i).getContracId());
+                        mxxDialog.dismiss();
+                    }
+                });
+
+            }
+        }.showDialog();
     }
 
     /**
@@ -223,9 +396,12 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"company\":" + "\"" + companyName + "\",")
+                .append("\"company_name\":" + "\"" + companyName + "\",")
+                .append("\"company\":" + "\"" + mCompanyName.getTag().toString() + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"content\":" + "\"" + content + "\",")
-                .append("\"id\":" + "\"" + bianhao + "\",")
+                .append("\"id\":" + "\"" + mBianhao.getTag().toString() + "\",")
+                .append("\"id_name\":" + "\"" + bianhao + "\",")
                 .append("\"address\":" + "\"" + oldaddress + "\"")
 //                .append("\"address_name\":" + "\"" + mZuzhiUserBean.getName() + "\",")
 //                .append("\"address\":" + "\"" + mZuzhiUserBean.getId() + "\"")
@@ -233,6 +409,7 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
@@ -320,9 +497,13 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"company\":" + "\"" + companyName + "\",")
-                .append("\"content\":" + "\"" + content + "\",")
-                .append("\"id\":" + "\"" + bianhao + "\",")
+                .append("\"company_name\":" + "\"" + companyName + "\",")
+                .append("\"company\":" + "\"" + mCompanyName.getTag().toString() + "\",")
+                .append("\"content_name\":" + "\"" + content + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
+                .append("\"content\":" + "\"" + mBianhao.getTag().toString() + "\",")
+                .append("\"id\":" + "\"" + mBianhao.getTag().toString() + "\",")
+                .append("\"id_name\":" + "\"" + bianhao + "\",")
                 .append("\"address\":" + "\"" + oldaddress + "\"")
 //                .append("\"address_name\":" + "\"" + mZuzhiUserBean.getName() + "\",")
 //                .append("\"address\":" + "\"" + mZuzhiUserBean.getId() + "\"")
@@ -330,6 +511,7 @@ public class QiyeTuizuActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 

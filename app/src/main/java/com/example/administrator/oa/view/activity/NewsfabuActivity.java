@@ -1,6 +1,7 @@
 package com.example.administrator.oa.view.activity;
 
 import android.content.Intent;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -20,12 +21,17 @@ import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
+import com.example.administrator.oa.view.utils.CommonUtil;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.leon.lfilepickerlibrary.LFilePicker;
 import com.yanzhenjie.nohttp.FileBinary;
+import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.OnUploadListener;
 import com.yanzhenjie.nohttp.RequestMethod;
+import com.yanzhenjie.nohttp.download.DownloadListener;
+import com.yanzhenjie.nohttp.download.DownloadQueue;
+import com.yanzhenjie.nohttp.download.DownloadRequest;
 import com.yanzhenjie.nohttp.rest.OnResponseListener;
 import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.RequestQueue;
@@ -33,6 +39,9 @@ import com.yanzhenjie.nohttp.rest.Response;
 import com.yanzhenjie.nohttp.rest.StringRequest;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import butterknife.BindView;
@@ -73,18 +82,25 @@ public class NewsfabuActivity extends HeadBaseActivity {
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
     Button mBtnCommit;
-//    @BindView(R.id.tv_fenguanleader)
-//    TextView mTvFenguanleader;
-//    @BindView(R.id.ll_fenguanleader)
-//    LinearLayout mLlFenguanleader;
-    private String mFilename = "";
-    private String mFilePath = "";
+
     private String mSessionId;
     private String mUserName;
     private String mDepartmentName;
-    private String processDefinitionId;
     private String mUserId;
     private String mDepartmentId;
+    // 草稿信息
+    private String processDefinitionId = "";
+    private String businessKey = "";
+    // 附件信息
+    private int REQUESTCODE_FROM_ACTIVITY = 1002;
+    private String mFilename = "";
+    private String mFilePath = "";
+    private String mFilePathReturn = "";
+    private String mFileNameReturn = "";
+    // 文件总大小
+    long fileSize;
+    // 已下载的大小
+    long downLoadFileSize;
 
     @Override
     protected int getChildLayoutRes() {
@@ -107,6 +123,7 @@ public class NewsfabuActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mName.setText(mUserName);
         mFagaoBumen.setText(mDepartmentName);
         checkFormCaoGao();
@@ -116,7 +133,6 @@ public class NewsfabuActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -152,21 +168,34 @@ public class NewsfabuActivity extends HeadBaseActivity {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
 
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
-                        Log.d("Caogao", bean.getValue());
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "date":
-                                mDate.setText(value);
-                                break;
-                            case "title":
-                                mTitle.setText(value);
-                                break;
-                            // 附件
-                            case "enclosure1":
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "date":
+                                    mDate.setText(value);
+                                    break;
+                                case "title":
+                                    mTitle.setText(value);
+                                    break;
+                                // 附件
+                                case "enclosure1":
+                                    if(!TextUtils.isEmpty(bean.getLabel())) {
+                                        // 实时请求权限
+                                        CommonUtil.verifyStoragePermissions(NewsfabuActivity.this);
+                                        mFilePathReturn = value;
+                                        mFileNameReturn = bean.getLabel();
+                                        if(!TextUtils.isEmpty(bean.getSize())) {
+                                            fileSize = Integer.parseInt(bean.getSize());
+                                        }
+                                        // 如果文件没有下载过，则开始下载
+                                        checkFileExisted();
+                                    }
+                                    break;
+                            }
                         }
                     }
                 }
@@ -186,8 +215,6 @@ public class NewsfabuActivity extends HeadBaseActivity {
         });
     }
 
-    int REQUESTCODE_FROM_ACTIVITY = 1001;
-
     // , R.id.ll_fenguanleader
     @OnClick({R.id.ll_start, R.id.add_fujian, R.id.btn_uplaod, R.id.btn_cancel, R.id.rl_fujian, R.id.btn_caogao,
             R.id.btn_commit})
@@ -205,8 +232,14 @@ public class NewsfabuActivity extends HeadBaseActivity {
                 }
                 break;
             case R.id.btn_uplaod:
-                if (!TextUtils.isEmpty(mFilePath) && !TextUtils.isEmpty(mFilename)) {
-                    RequestServer(mFilePath, mFilename);
+                if("down".equals(mBtnUplaod.getTag().toString())) {
+                    mBtnUplaod.setVisibility(View.GONE);
+                    mBtnUplaod.setEnabled(false);
+                    RequestServerDownLoad();
+                } else {
+                    if (!TextUtils.isEmpty(mFilePath) && !TextUtils.isEmpty(mFilename)) {
+                        RequestServer(mFilePath, mFilename);
+                    }
                 }
                 break;
             case R.id.btn_cancel:
@@ -243,51 +276,7 @@ public class NewsfabuActivity extends HeadBaseActivity {
                 //List<String> list = data.getStringArrayListExtra(Constant.RESULT_INFO);//Constant.RESULT_INFO == "paths"
                 List<String> list = data.getStringArrayListExtra("paths");
                 if (list.size() == 1) {
-                    mRlFujian.setVisibility(View.VISIBLE);
-                    mFilePath = list.get(0);
-                    String[] strings = mFilePath.split("/");
-                    int count = strings.length;
-                    mFilename = strings[count - 1];
-                    mFileName.setText(mFilename);
-                    File file = new File(mFilePath);
-                    mFilesize.setText(ShowLongFileSzie(file.length()));
-                    if (mFilename.contains(".")) {
-                        // 如果有两个后缀，则是非法文档
-                        if(mFilename.split("\\.").length > 2){
-                            Toast.makeText(this, "文档名格式不对", Toast.LENGTH_SHORT).show();
-                            mFilePath = "";
-                            mFilename = "";
-                            mRlFujian.setVisibility(View.GONE);
-                            return;
-                        }
-                        switch (mFilename.split("\\.")[1]) {
-                            case "TXT":
-                            case "txt":
-                                mIcon.setImageResource(R.drawable.file_txt);
-                                break;
-                            case "xlsx":
-                            case "XLSX":
-                                mIcon.setImageResource(R.drawable.icon_official_excel);
-                                break;
-                            case "docx":
-                            case "DOCX":
-                                mIcon.setImageResource(R.drawable.file_word);
-                                break;
-                            case "png":
-                            case "PNG":
-                            case "jpg":
-                            case "JPG":
-                            case "jpeg":
-                            case "JPEG":
-                                mIcon.setImageResource(R.drawable.picture);
-                                break;
-                            default:
-                                mIcon.setImageResource(R.drawable.unknow_type);
-                        }
-                    } else {
-//                        Toast.makeText(this, "不支持的类型", Toast.LENGTH_SHORT).show();
-                    }
-
+                    getFileInfo(list.get(0));
                 } else if (list.size() == 0) {
                     Toast.makeText(this, "请重新选择附件", Toast.LENGTH_SHORT).show();
                 } else {
@@ -296,10 +285,59 @@ public class NewsfabuActivity extends HeadBaseActivity {
             }
         }
     }
-    String mFilePathReturn = "";
 
     /**
-     * 请求网络接口
+     * 界面显示附件信息
+     * @param filePath
+     */
+    private void getFileInfo(String filePath){
+        mRlFujian.setVisibility(View.VISIBLE);
+        mFilePath = filePath;
+        String[] strings = mFilePath.split("/");
+        int count = strings.length;
+        mFilename = strings[count - 1];
+        mFileName.setText(mFilename);
+        File file = new File(mFilePath);
+        mFilesize.setText(ShowLongFileSzie(file.length()));
+        if (mFilename.contains(".")) {
+            // 如果有两个后缀，则是非法文档
+            if(mFilename.split("\\.").length > 2){
+                Toast.makeText(this, "文档名格式不对", Toast.LENGTH_SHORT).show();
+                mFilePath = "";
+                mFilename = "";
+                mRlFujian.setVisibility(View.GONE);
+                return;
+            }
+            switch (mFilename.split("\\.")[1]) {
+                case "TXT":
+                case "txt":
+                    mIcon.setImageResource(R.drawable.file_txt);
+                    break;
+                case "xlsx":
+                case "XLSX":
+                    mIcon.setImageResource(R.drawable.icon_official_excel);
+                    break;
+                case "docx":
+                case "DOCX":
+                    mIcon.setImageResource(R.drawable.file_word);
+                    break;
+                case "png":
+                case "PNG":
+                case "jpg":
+                case "JPG":
+                case "jpeg":
+                case "JPEG":
+                    mIcon.setImageResource(R.drawable.picture);
+                    break;
+                default:
+                    mIcon.setImageResource(R.drawable.unknow_type);
+            }
+        }
+
+    }
+
+    /**
+     * 上传附件
      */
     private void RequestServer(String picpath, String filename) {
         //创建请求队列
@@ -343,6 +381,98 @@ public class NewsfabuActivity extends HeadBaseActivity {
 
     }
 
+    /**
+     * 判断文件是否已下载过
+     * @return
+     */
+    private boolean checkFileExisted(){
+        // 实时请求权限
+        CommonUtil.verifyStoragePermissions(this);
+        // 判断sd卡是否可读写
+        String sdStatus = Environment.getExternalStorageState();
+        if (!Environment.MEDIA_MOUNTED.equals(sdStatus)) {
+            // 检测sd是否可用
+            Log.d("TestFile", "SD card is not avaiable/writeable right now.");
+            return false;
+        }
+        // 创建根目录文件夹
+        String rootPath = CommonUtil.createRootFile(this);
+        // 拼接成本地路径
+        String filePath = rootPath + mFileNameReturn;
+        // 如果文件存在，则直接显示
+        File file = new File(rootPath, mFileNameReturn);
+        if(file.exists()) {
+            // 将文件显示在界面
+            getFileInfo(filePath);
+            mPb.setProgress(100);
+            mBtnUplaod.setVisibility(View.GONE);
+            mBtnUplaod.setEnabled(false);
+            mAddFujian.setTag("1");
+            return true;
+        } else {
+            // 将文件显示在界面
+            getFileInfo(filePath);
+            mFilesize.setText(ShowLongFileSzie(fileSize));
+            mPb.setProgress(0);
+            mBtnUplaod.setVisibility(View.VISIBLE);
+            mBtnUplaod.setImageDrawable(getResources().getDrawable(R.drawable.download));
+            mBtnUplaod.setEnabled(true);
+            mBtnUplaod.setTag("down");
+            mAddFujian.setTag("1");
+            return false;
+        }
+    }
+
+    /**
+     * 下载附件
+     */
+    private void RequestServerDownLoad(){
+        // 实时请求权限
+        CommonUtil.verifyStoragePermissions(this);
+        String rootPath = CommonUtil.createRootFile(this);
+        DownloadQueue downloadQueue = NoHttp.newDownloadQueue();
+        //下载文件
+        DownloadRequest downloadRequest = NoHttp.createDownloadRequest(UrlConstance.URL_DOWNLOAD,
+                RequestMethod.POST, rootPath, mFileNameReturn, true, false);
+        downloadRequest.add("filePath", mFilePathReturn);
+        downloadQueue.add(0, downloadRequest, new DownloadListener() {
+            @Override
+            public void onDownloadError(int what, Exception exception) {
+                Log.w("2333", "onDownloadError" + exception.toString());
+                Toast.makeText(NewsfabuActivity.this, "附件下载失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onStart(int what, boolean isResume, long rangeSize, Headers responseHeaders, long allCount) {
+//                fileSize = allCount;
+//                Toast.makeText(NewsfabuActivity.this, "开始下载附件", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProgress(int what, int progress, long fileCount, long speed) {
+                downLoadFileSize = fileCount;
+                if(0 < fileSize) {
+                    long mProgress = downLoadFileSize * 100 / fileSize;
+//                Log.w("2333", "mProgress=" + mProgress);
+                    mPb.setProgress((int)mProgress);
+                }
+                mFilesize.setText(ShowProcessFileSzie(downLoadFileSize));
+            }
+
+            @Override
+            public void onFinish(int what, String filePath) {
+                Log.w("2333", "onFinish" + filePath);
+                Toast.makeText(NewsfabuActivity.this, "附件下载完成", Toast.LENGTH_SHORT).show();
+                mFilesize.setText(ShowLongFileSzie(downLoadFileSize));
+                mPb.setProgress(100);
+            }
+
+            @Override
+            public void onCancel(int what) {
+                Log.w("2333", "onCancel");
+            }
+        });
+    }
     /**
      * 上传文件进度的监听器
      */
@@ -411,19 +541,21 @@ public class NewsfabuActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"date\":" + "\"" + time + "\",")
                 .append("\"title\":" + "\"" + title + "\",")
 //                .append("\"manager\":" + "\"" + mZuzhiUserBean.getId() + "\",")
 //                .append("\"manager_name\":" + "\"" + managerName + "\"")
-                .append("\"enclosure\":" + "\"" + mFilePathReturn + "\"")
+                .append("\"enclosure1\":" + "\"" + mFilePathReturn + "\"")
                 .append("}");
 
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
 
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
@@ -472,19 +604,21 @@ public class NewsfabuActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"date\":" + "\"" + time + "\",")
                 .append("\"title\":" + "\"" + title + "\",")
 //                .append("\"manager\":" + "\"" + mZuzhiUserBean.getId() + "\",")
 //                .append("\"manager_name\":" + "\"" + managerName + "\"")
-                .append("\"enclosure\":" + "\"" + mFilePathReturn + "\"")
+                .append("\"enclosure1\":" + "\"" + mFilePathReturn + "\"")
                 .append("}");
 
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
 
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {

@@ -157,8 +157,8 @@ public class LiuChongFragment extends BaseFragment {
     }
 
     private void initThisView() {
+        // 获取工作台数据
         RequestServerLogin();
-
         // 加载数据
         setDatas();
     }
@@ -176,13 +176,14 @@ public class LiuChongFragment extends BaseFragment {
         //创建请求
         Request<ProcessListResponse> request = new JavaBeanRequest(UrlConstance.URL_PROCESS_DEFIN,
                 RequestMethod.POST, ProcessListResponse.class);
+        request.addHeader("sessionId", SPUtils.getString(mActivity, "sessionId"));
         request.add("departmentName", departmentName);
         request.add("departments", departments);
         ProcessQueue.add(0, request, new OnResponseListener<ProcessListResponse>() {
 
             @Override
             public void onStart(int what) {
-                if (mLoadingDialog != null) {
+                if (null != mLoadingDialog) {
                     mLoadingDialog.show();
                 }
             }
@@ -206,7 +207,7 @@ public class LiuChongFragment extends BaseFragment {
 
             @Override
             public void onFinish(int what) {
-                if (mLoadingDialog != null) {
+                if (null != mLoadingDialog) {
                     mLoadingDialog.dismiss();
                 }
             }
@@ -215,7 +216,6 @@ public class LiuChongFragment extends BaseFragment {
 
     private void setDatas(){
         //常用流程
-//        mXxreCommonLiuchong.setNestedScrollingEnabled(false);
         mXxreCommonLiuchong.setLayoutManager(new LinearLayoutManager(mActivity));
         mCommonAdapter = new CommonRecyclerAdapter<ProcessTypeListBean>(mActivity, datas, R.layout.item_liuchong_list) {
             @Override
@@ -234,7 +234,6 @@ public class LiuChongFragment extends BaseFragment {
                     @Override
                     public void convert(CommonViewHolder holder, ProcessDetailBean item, int position, boolean b) {
                         holder.setText(R.id.name, item.getName());
-//                        holder.setText(R.id.longname, item.getName());
                         for (int i = 0; i < commonConstance.liuchong.length; i++) {
                             if (getString(commonConstance.liuchong[i][0]).equals(item.getName())) {
                                 holder.getView(R.id.icon).setBackgroundResource(commonConstance.liuchong[i][2]);
@@ -259,28 +258,10 @@ public class LiuChongFragment extends BaseFragment {
     }
 
     /**
-     * scrollview嵌套listview显示不全解决
-     *
+     * 跳入对应的界面
+     * @param processType
+     * @param processDefinitionId
      */
-//    public void setListViewHeightBasedOnChildren() {
-////        ListAdapter listAdapter = listView.getAdapter();
-//        if (mCommonAdapter != null) {
-//            return;
-//        }
-//
-//        int totalHeight = 0;
-//        for (int i = 0; i < mCommonAdapter.getItemCount(); i++) {
-//            View listItem = mCommonAdapter.getItemViewType(i, null, mXxreCommonLiuchong);
-//            listItem.measure(0, 0);
-//            totalHeight += listItem.getMeasuredHeight();
-//        }
-//
-//        ViewGroup.LayoutParams params = mXxreCommonLiuchong.getLayoutParams();
-//        params.height = totalHeight
-//                + (mXxreCommonLiuchong.getHeight() * ( mCommonAdapter.getItemCount() - 1));
-//        mXxreCommonLiuchong.setLayoutParams(params);
-//    }
-
     private void GoFaqiliuchong(String processType, String processDefinitionId) {
         Bundle bundle = new Bundle();
         bundle.putString("processDefinitionId", processDefinitionId);

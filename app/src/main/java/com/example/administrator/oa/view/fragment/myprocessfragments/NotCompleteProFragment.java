@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.administrator.oa.R;
+import com.example.administrator.oa.view.activity.MyProcessInfo;
 import com.example.administrator.oa.view.bean.MyProcessBean;
 import com.example.administrator.oa.view.bean.MyProcessInfoBean;
 import com.example.administrator.oa.view.bean.ProcessTaskTypeResponse;
@@ -66,8 +67,6 @@ public class NotCompleteProFragment extends Fragment {
         mActivity = getActivity();
 
         mXxre.setLayoutManager(new LinearLayoutManager(getContext()));
-        mXxre.setEmptyView(R.layout.emptyview);
-        mXxre.setPullRefreshEnabled(true);
         mAdapter = new CommonRecyclerAdapter<MyProcessInfoBean>(getContext(), datas, R.layout.item_simple_text) {
             @Override
             public void convert(CommonViewHolder holder, MyProcessInfoBean item, int i, boolean b) {
@@ -79,10 +78,15 @@ public class NotCompleteProFragment extends Fragment {
         mAdapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
+                Bundle bundle = new Bundle();
+                String taskId = mAdapter.getDatas().get(i - mXxre.getHeaderCount()).getTaskId();
+                bundle.putString("taskId", taskId);
+                readyGo(MyProcessInfo.class, bundle);
             }
         });
         mLoadingDialog = ViewUtils.createLoadingDialog(getContext(), "数据处理中...");
         RequestServer(false);
+        mXxre.setPullRefreshEnabled(true);
         mXxre.setOnRefreshListener(new PullRefreshRecycleView.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -96,39 +100,6 @@ public class NotCompleteProFragment extends Fragment {
             }
         });
         return view;
-    }
-
-    /**
-     * 判断当前节点类型
-     *
-     * @param taskId
-     */
-    private void NeedHuiQian(final String taskId, final String processType) {
-        //创建请求队列
-        RequestQueue Queue = NoHttp.newRequestQueue();
-        final Request<ProcessTaskTypeResponse> request = new JavaBeanRequest<>(UrlConstance.URL_PROCESS_TASKTYPE,
-                RequestMethod.POST, ProcessTaskTypeResponse.class);
-        //添加url?key=value形式的参数
-        request.add("taskId", taskId);
-        Queue.add(0, request, new OnResponseListener<ProcessTaskTypeResponse>() {
-            @Override
-            public void onStart(int what) {
-            }
-
-            @Override
-            public void onSucceed(int what, Response<ProcessTaskTypeResponse> response) {
-
-            }
-
-            @Override
-            public void onFailed(int what, Response<ProcessTaskTypeResponse> response) {
-                Toast.makeText(mActivity, "获取流程节点类型失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFinish(int what) {
-            }
-        });
     }
 
     /**
@@ -157,9 +128,12 @@ public class NotCompleteProFragment extends Fragment {
                 Log.w("2222", response.toString());
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<MyProcessInfoBean> beanList = response.get().getData();
+                    // 如果没有数据，就显示“暂无数据”
+                    if (null == beanList || 0 >= beanList.size()){
+                        mXxre.setEmptyView(R.layout.emptyview);
+                    }
                     if (mAdapter != null) {
                         mAdapter.replaceAll(beanList);
-                        mAdapter.notifyDataSetChanged();
                     }
                 }
             }
@@ -171,7 +145,7 @@ public class NotCompleteProFragment extends Fragment {
 
             @Override
             public void onFinish(int what) {
-                if (mLoadingDialog != null) {
+                if (null != mLoadingDialog) {
                     mLoadingDialog.dismiss();
                 }
                 if (isRefresh) {

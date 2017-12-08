@@ -76,6 +76,10 @@ public class Duban_shenhe extends HeadBaseActivity {
     LinearLayout mLlBanliren;
     @BindView(R.id.xxre)
     XXRecycleView mXxre;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -121,21 +125,22 @@ public class Duban_shenhe extends HeadBaseActivity {
         //获取服务器数据，填充表单数据
         RequestServer();
         //判断是否是发起会签节点
-        if ("vote".equals(mProcessTaskType)) {
-            mBtnCaogao.setText("退回发起人");
-            mLlHuiqianyijian.setVisibility(View.VISIBLE);
-        } else {
-            mBtnCaogao.setText("不同意");
-            mLlHuiqianyijian.setVisibility(View.GONE);
-        }
+//        if ("vote".equals(mProcessTaskType)) {
+//            mBtnCaogao.setText("退回发起人");
+//            mLlHuiqianyijian.setVisibility(View.VISIBLE);
+//        } else {
+//            mBtnCaogao.setText("不同意");
+//            mLlHuiqianyijian.setVisibility(View.GONE);
+//        }
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
@@ -156,7 +161,7 @@ public class Duban_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "退回发起人":
+                    case "回退发起人":
                         RequestServerTuihui();
                         break;
                 }
@@ -241,39 +246,66 @@ public class Duban_shenhe extends HeadBaseActivity {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
                     //按顺序填写数据
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "id":
-                                mBianhao.setText(value);
-                                break;
-                            case "work_name":
-                                mWorkfrom.setText(value);
-                                break;
-                            case "department1":
-                                mFirstBumen.setText(value);
-                                break;
-                            case "name1":
-                                mFuzeren1.setText(value);
-                                break;
-                            case "department2":
-                                mSecondBumen.setText(value);
-                                break;
-                            case "name2":
-                                mFuzeren2.setText(value);
-                                break;
-                            case "date":
-                                mDate.setText(value);
-                                break;
-                            case "term":
-                                mQixian.setText(value);
-                                break;
-                            case "content":
-                                mContent.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 督办流程审核
+                                case "urge-comment":
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 督办流程通知
+                                case "urge-notice":
+                                    mLlShenheyijian.setVisibility(View.VISIBLE);
+                                    mShenheyijian.setFocusable(false);
+                                    mLlHuiqianyijian.setVisibility(View.VISIBLE);
+                                    mTvBanliren.setTag("1");
+                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                            }
+                        }
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "work_name":
+                                    mWorkfrom.setText(value);
+                                    break;
+                                case "department1":
+                                    mFirstBumen.setText(value);
+                                    break;
+                                case "name1":
+                                    mFuzeren1.setText(value);
+                                    break;
+                                case "department2":
+                                    mSecondBumen.setText(value);
+                                    break;
+                                case "name2":
+                                    mFuzeren2.setText(value);
+                                    break;
+                                case "date":
+                                    mDate.setText(value);
+                                    break;
+                                case "term":
+                                    mQixian.setText(value);
+                                    break;
+                                case "content":
+                                    mContent.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                                case "user_name":
+                                    mTvBanliren.setText(value);
+                                    break;
+                            }
                         }
                     }
-
                 }
             }
 
@@ -311,7 +343,7 @@ public class Duban_shenhe extends HeadBaseActivity {
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"id\":" + "\"" + bianhao + "\",")
-                .append("\"work\":" + "\"" + workfrom + "\",")
+                .append("\"work_name\":" + "\"" + workfrom + "\",")
                 .append("\"department1\":" + "\"" + firstbumen + "\",")
                 .append("\"name1\":" + "\"" + fuzeren1 + "\",")
                 .append("\"department2\":" + "\"" + secondbumen + "\",")
@@ -350,6 +382,8 @@ public class Duban_shenhe extends HeadBaseActivity {
                         Toast.makeText(Duban_shenhe.this, "流程审核成功", Toast.LENGTH_SHORT).show();
                         finish();
                     }
+                } else {
+                    Toast.makeText(Duban_shenhe.this, "流程审核失败", Toast.LENGTH_SHORT).show();
                 }
             }
 

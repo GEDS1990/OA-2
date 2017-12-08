@@ -12,6 +12,8 @@ public class QingjiaShenheBean {
      * value : test
      * items : 按小时请假,按天请假
      */
+    private String formName;
+    private String formCode;
 
     private String label;
     private String name;
@@ -19,6 +21,7 @@ public class QingjiaShenheBean {
     private String type;
     private String value;
     private String items;
+    private String size;
 
     public String getLabel() {
         return label;
@@ -66,5 +69,29 @@ public class QingjiaShenheBean {
 
     public void setItems(String items) {
         this.items = items;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getFormName() {
+        return formName;
+    }
+
+    public void setFormName(String formName) {
+        this.formName = formName;
+    }
+
+    public String getFormCode() {
+        return formCode;
+    }
+
+    public void setFormCode(String formCode) {
+        this.formCode = formCode;
     }
 }

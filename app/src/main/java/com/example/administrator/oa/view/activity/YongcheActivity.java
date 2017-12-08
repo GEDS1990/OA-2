@@ -72,7 +72,8 @@ public class YongcheActivity extends HeadBaseActivity {
     private String mDepartmentName;
     private String mDepartmentId;
     private String mUserId;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
     @Override
     protected int getChildLayoutRes() {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
@@ -93,6 +94,7 @@ public class YongcheActivity extends HeadBaseActivity {
         mDepartmentName = SPUtils.getString(this, "departmentName");
         mDepartmentId = SPUtils.getString(this, "departmentId");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mName.setText(mUserName);
         mBumen.setText(mDepartmentName);
 
@@ -121,7 +123,6 @@ public class YongcheActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -155,42 +156,33 @@ public class YongcheActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-
-                    //按顺序填写数据
-//                    mBumen.setText(shenheBeen.get(0).getValue());
-//                    mName.setText(shenheBeen.get(1).getValue());
-//                    mDateStart.setText(shenheBeen.get(2).getValue());
-//                    mDateStop.setText(shenheBeen.get(3).getValue());
-//                    mTotalTime.setText(shenheBeen.get(4).getValue());
-//                    mCarType.setText(shenheBeen.get(5).getValue());
-//                    mBeizhu.setText(shenheBeen.get(6).getValue());
-//                    mBenbucar.setText(shenheBeen.get(7).getValue());
-
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
-                        Log.d("Caogao", bean.getValue());
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "number":
-                                mTotalTime.setText(value);
-                                break;
-                            case "type":
-                                mCarType.setText(value);
-                                break;
-                            case "startTime":
-                                mDateStart.setText(value);
-                                break;
-                            case "endTime":
-                                mDateStop.setText(value);
-                                break;
-                            case "reason":
-                                mShenqingYuanyin.setText(value);
-                                break;
-                            case "department":
-                                mShifouyongche.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "number":
+                                    mTotalTime.setText(value);
+                                    break;
+                                case "type":
+                                    mCarType.setText(value);
+                                    break;
+                                case "startTime":
+                                    mDateStart.setText(value);
+                                    break;
+                                case "endTime":
+                                    mDateStop.setText(value);
+                                    break;
+                                case "reason":
+                                    mShenqingYuanyin.setText(value);
+                                    break;
+                                case "department":
+                                    mShifouyongche.setText(value);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -285,8 +277,9 @@ public class YongcheActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"startTime\":" + "\"" + start + "\",")
                 .append("\"endTime\":" + "\"" + stop + "\",")
@@ -299,6 +292,7 @@ public class YongcheActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
             @Override
@@ -344,8 +338,9 @@ public class YongcheActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"startTime\":" + "\"" + start + "\",")
                 .append("\"endTime\":" + "\"" + stop + "\",")
@@ -358,6 +353,7 @@ public class YongcheActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
             @Override

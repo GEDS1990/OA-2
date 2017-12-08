@@ -1,5 +1,15 @@
 package com.example.administrator.oa.view.utils;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+
+import com.yanzhenjie.nohttp.OnUploadListener;
+
+import java.io.File;
 import java.security.MessageDigest;
 
 /**
@@ -51,4 +61,78 @@ public class CommonUtil {
             return null;
         }
     }
+
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE };
+
+    /**
+     * 实时请求存储读写权限
+     * Checks if the app has permission to write to device storage
+     * If the app does not has permission then the user will be prompted to
+     * grant permissions
+     * @param activity
+     */
+    public static void verifyStoragePermissions(Activity activity) {
+        // 在API23+以上也就是安卓6.0以上的，进行了权限管理， 不止要在AndroidManifest.xml里面添加权限
+        // <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+        // <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+        // 还要在JAVA代码中运行时实时请求权限：
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE);
+        }
+    }
+
+    /**
+     * 创建OA的文件夹
+     */
+    public static String createRootFile(Context context){
+        String rootPath = getSDPath(context) + File.separator + "NJSPOA"
+                + File.separator;
+        File fileRoot = new File(rootPath);
+        try {
+            if (!fileRoot.exists()) {
+                if (fileRoot.mkdirs()) {
+                    return rootPath;
+                } else {
+                    return null;
+                }
+            } else {
+                return rootPath;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取SD卡的根目录
+     * @param context
+     * @return
+     */
+    public static String getSDPath(Context context) {
+        File sdDir = null;
+        // 判断sd卡是否存在
+        boolean sdCardExist = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+        // 如果SD卡存在，则获取跟目录
+        if (sdCardExist){
+            // 获取根目录
+            sdDir = Environment.getExternalStorageDirectory();
+            System.out.println("ExternalStorageDirectory " + sdDir);
+        }
+        else {
+            sdDir = context.getFilesDir();
+            System.out.println("FilesDir " + sdDir);
+        }
+        return sdDir.toString();
+    }
+
 }

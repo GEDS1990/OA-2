@@ -165,7 +165,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="申请金额 (元) :"
+                    android:text="申请金额 (元) "
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -193,7 +193,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="申请事由 :"
+                    android:text="申请事由"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -222,7 +222,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="申请内容 :"
+                    android:text="申请内容"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 

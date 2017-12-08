@@ -44,6 +44,7 @@ import com.example.administrator.oa.view.utils.SPUtils;
 import com.example.administrator.oa.view.utils.viewutils.ViewUtils;
 import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
 import com.lsh.XXRecyclerview.CommonViewHolder;
+import com.lsh.XXRecyclerview.PullRefreshRecycleView;
 import com.lsh.XXRecyclerview.XXRecycleView;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.RequestMethod;
@@ -62,6 +63,7 @@ import java.util.List;
 public class daiBanFragment extends Fragment {
 
     private String mTitle;
+    private XXRecycleView xxre;
     private List<TaksDaibanBean> datas = new ArrayList<>();
     private CommonRecyclerAdapter<TaksDaibanBean> mAdapter;
     private FragmentActivity mActivity;
@@ -81,7 +83,7 @@ public class daiBanFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fr_simple_card, null);
-        XXRecycleView xxre = (XXRecycleView) view.findViewById(R.id.xxre);
+        xxre = (XXRecycleView) view.findViewById(R.id.xxre);
 
         mActivity = getActivity();
 
@@ -104,13 +106,31 @@ public class daiBanFragment extends Fragment {
         mAdapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
-                String taskId = mAdapter.getDatas().get(i).getId();
-                String processType = mAdapter.getDatas().get(i).getPresentationSubject().split("\\-")[0];
-                NeedHuiQian(taskId, processType);
+                String processId = mAdapter.getDatas().get(i - xxre.getHeaderCount()).getProcessId();
+                String taskId = mAdapter.getDatas().get(i - xxre.getHeaderCount()).getId();
+                String processType = mAdapter.getDatas().get(i - xxre.getHeaderCount()).getPresentationSubject().split("\\-")[0];
+                NeedHuiQian(processId, taskId, processType);
             }
         });
         mLoadingDialog = ViewUtils.createLoadingDialog(getContext(), "数据处理中...");
-        RequestServer();
+        RequestServer(false);
+        //下拉刷新
+        xxre.setPullRefreshEnabled(true);
+        xxre.setOnRefreshListener(new PullRefreshRecycleView.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                try {
+                    RequestServer(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void refreshEnd() {
+//                Toast.makeText(mainActivity, "刷新数据成功", Toast.LENGTH_SHORT).show();
+            }
+        });
         return view;
     }
 
@@ -119,7 +139,7 @@ public class daiBanFragment extends Fragment {
      *
      * @param taskId
      */
-    private void NeedHuiQian(final String taskId, final String processType) {
+    private void NeedHuiQian(final String processId, final String taskId, final String processType) {
         //创建请求队列
         RequestQueue Queue = NoHttp.newRequestQueue();
         final Request<ProcessTaskTypeResponse> request = new JavaBeanRequest<>(UrlConstance.URL_PROCESS_TASKTYPE,
@@ -138,74 +158,8 @@ public class daiBanFragment extends Fragment {
             public void onSucceed(int what, Response<ProcessTaskTypeResponse> response) {
                 Log.w("2222", response.toString());
                 if (response != null && response.get() != null && response.get().getData() != null) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("taskId", taskId);
-                    bundle.putString("processTaskType", response.get().getData().getType());
-                    switch (processType) {
-                        case "请假流程":
-                            readyGo(QingJiaActivity_shenhe.class, bundle);//不会签节点
-                            break;
-                        case "出差申请":
-                            readyGo(ChuchaiActivity_shenhe.class, bundle);//不会签节点
-                            break;
-                        case "工作联系":
-                            readyGo(WorkConnection_shenhe.class, bundle);
-                            break;
-                        case "办文流程":
-                            readyGo(BanwenActivity_shenhe.class, bundle);//0k
-                            break;
-                        case "用车申请":
-                            readyGo(YongcheActivity_shenhe.class, bundle);//不会签节点
-                            break;
-                        case "新闻发布":
-                            readyGo(NewsFabuActivity_shenhe.class, bundle);//0k
-                            break;
-                        case "低值易耗品领用":
-                            readyGo(GoodsApplyActivity_shenhe.class, bundle);//0k
-                            break;
-                        case "固定资产领用":
-                            readyGo(GudingzichanApplyActivity_shenhe.class, bundle);//0k
-                            break;
-                        case "用印申请流程":
-                            readyGo(YongyinApplyActivity_shenhe.class, bundle);//0k
-                            break;
-                        case "借款申请":
-                            readyGo(JiekuanApplyActivity_shenhe.class, bundle);//0k
-                            break;
-                        case "报销流程":
-                            readyGo(BaoXiaoApplyActivity_shenhe.class, bundle);
-                            break;
-                        case "普通合同":
-                            readyGo(HeTongActivity_shenhe.class, bundle);//0k
-                            break;
-                        case "资金调拨":
-                            readyGo(ZijingDiaofaActivity_shenhe.class, bundle);//0k
-                            break;
-                        case "企业考核":
-                            readyGo(Qiyekaohe_shenhe.class, bundle);
-                            break;
-                        case "企业退租":
-                            readyGo(QiyeTuizu_shenhe.class, bundle);//0k
-                            break;
-                        case "租房流程":
-                            readyGo(HouseRent_shenhe.class, bundle);//0k
-                            break;
-                        case "督办流程":
-                            readyGo(Duban_shenhe.class, bundle);//ok
-                            break;
-                        case "收文流程":
-                            readyGo(ShouwenProcess_shenhe.class, bundle);//0k
-                            break;
-                        case "资金申请（合同付款）":
-                            readyGo(FundApplyHetong_shenhe.class, bundle);//0k
-                            break;
-                        case "资金申请（非合同付款）":
-                            readyGo(FundApplyFeiHetong_shenhe.class, bundle);//0k
-                            break;
-                        case "投资协议流程":
-                            readyGo(Touzixieyi_shenhe.class, bundle);//0k
-                            break;
-                    }
+                    String processTaskType = response.get().getData().getType();
+                    goFaqiliuchong(processId, taskId, processTaskType);
                 }
             }
 
@@ -224,9 +178,86 @@ public class daiBanFragment extends Fragment {
     }
 
     /**
+     * 跳入对应的审核界面
+     * @param processType
+     * @param taskId
+     */
+    private void goFaqiliuchong(String processId, String taskId, String processType) {
+        Bundle bundle = new Bundle();
+        bundle.putString("taskId", taskId);
+        bundle.putString("processTaskType", processType);
+        switch (processId) {
+            case "1":
+                readyGo(QingJiaActivity_shenhe.class, bundle);//不会签节点
+                break;
+            case "3":
+                readyGo(JiekuanApplyActivity_shenhe.class, bundle);//0k
+                break;
+            case "4":
+                readyGo(Qiyekaohe_shenhe.class, bundle);
+                break;
+            case "5":
+                readyGo(ChuchaiActivity_shenhe.class, bundle);//不会签节点
+                break;
+            case "6":
+                readyGo(WorkConnection_shenhe.class, bundle);
+                break;
+            case "7":
+                readyGo(QiyeTuizu_shenhe.class, bundle);//0k
+                break;
+            case "9":
+                readyGo(BanwenActivity_shenhe.class, bundle);//0k
+                break;
+            case "10":
+                readyGo(ShouwenProcess_shenhe.class, bundle);//0k
+                break;
+            case "11":
+                readyGo(YongcheActivity_shenhe.class, bundle);//不会签节点
+                break;
+            case "12":
+                readyGo(NewsFabuActivity_shenhe.class, bundle);//0k
+                break;
+            case "13":
+                readyGo(Touzixieyi_shenhe.class, bundle);//0k
+                break;
+            case "14":
+                readyGo(HouseRent_shenhe.class, bundle);//0k
+                break;
+            case "15":
+                readyGo(GoodsApplyActivity_shenhe.class, bundle);//0k
+                break;
+            case "16":
+                readyGo(GudingzichanApplyActivity_shenhe.class, bundle);//0k
+                break;
+            case "18":
+                readyGo(YongyinApplyActivity_shenhe.class, bundle);//0k
+                break;
+            case "20":
+                readyGo(BaoXiaoApplyActivity_shenhe.class, bundle);
+                break;
+            case "21":
+                readyGo(HeTongActivity_shenhe.class, bundle);//0k
+                break;
+            case "25":
+                readyGo(ZijingDiaofaActivity_shenhe.class, bundle);//0k
+                break;
+            case "27":
+                readyGo(FundApplyFeiHetong_shenhe.class, bundle);//0k
+                break;
+            case "28":
+                readyGo(Duban_shenhe.class, bundle);//ok
+                break;
+            case "资金申请（合同付款）":
+                readyGo(FundApplyHetong_shenhe.class, bundle);//0k
+                break;
+
+        }
+    }
+
+    /**
      * 请求网络接口
      */
-    private void RequestServer() {
+    private void RequestServer(final boolean isRefresh) {
         String sessionId = SPUtils.getString(getContext(), "sessionId");
         //创建请求队列
         RequestQueue Queue = NoHttp.newRequestQueue();
@@ -239,7 +270,7 @@ public class daiBanFragment extends Fragment {
 
             @Override
             public void onStart(int what) {
-                if (mLoadingDialog != null) {
+                if (null != mLoadingDialog) {
                     mLoadingDialog.show();
                 }
             }
@@ -248,11 +279,13 @@ public class daiBanFragment extends Fragment {
             public void onSucceed(int what, Response<TaksDaibanResponse> response) {
                 Log.w("2222", response.toString());
                 if (null != response && null != response.get() && null != response.get().getData()) {
-                    flag = true;
                     List<TaksDaibanBean> beanList = response.get().getData();
-                    if (mAdapter != null) {
+                    // 如果没有数据，就显示“暂无数据”
+                    if (null == beanList || 0 >= beanList.size()){
+                        xxre.setEmptyView(R.layout.emptyview);
+                    }
+                    if (null != mAdapter) {
                         mAdapter.replaceAll(beanList);
-                        mAdapter.notifyDataSetChanged();
                     }
                 }
             }
@@ -264,9 +297,13 @@ public class daiBanFragment extends Fragment {
 
             @Override
             public void onFinish(int what) {
-                if (mLoadingDialog != null) {
+                if (null != mLoadingDialog) {
                     mLoadingDialog.dismiss();
                 }
+                if (isRefresh) {
+                    xxre.stopRefresh();
+                }
+
             }
         });
     }
@@ -290,8 +327,6 @@ public class daiBanFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mAdapter != null && flag) {
-            RequestServer();
-        }
+        RequestServer(false);
     }
 }

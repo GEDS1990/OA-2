@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.bigkoo.pickerview.TimePickerView;
 import com.example.administrator.oa.R;
+import com.example.administrator.oa.view.bean.YingzhangTypeBean;
 import com.example.administrator.oa.view.bean.ZuzhiUserBean;
 import com.example.administrator.oa.view.bean.ZuzhiUserListResponse;
 import com.example.administrator.oa.view.bean.organization_structure.ChildrenBean;
@@ -259,6 +260,41 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
 
     XXDialog mxxDialog;
 
+    public void chooseNameAndId(final List<YingzhangTypeBean> data, final TextView tv, final String title) {
+        if(null != mxxDialog){
+            mxxDialog.dismiss();
+        }
+        mxxDialog = new XXDialog(this, R.layout.dialog_chooselist) {
+            @Override
+            public void convert(DialogViewHolder holder) {
+                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
+                holder.setText(R.id.dialog_title, title);
+                xxre.setLayoutManager(new LinearLayoutManager(HeadBaseActivity.this));
+                List<String> datas = new ArrayList();
+                final CommonRecyclerAdapter<YingzhangTypeBean> adapter = new CommonRecyclerAdapter<YingzhangTypeBean>
+                        (HeadBaseActivity.this, data, R.layout.simple_list_item) {
+                    @Override
+                    public void convert(CommonViewHolder holder1, YingzhangTypeBean item, int i, boolean b) {
+                        holder1.setText(R.id.tv, item.getName());
+                        holder1.getView(R.id.more).setVisibility(View.GONE);
+                        holder1.getView(R.id.users).setVisibility(View.GONE);
+                    }
+                };
+                xxre.setAdapter(adapter);
+                adapter.replaceAll(data);
+                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
+                        tv.setText(adapter.getDatas().get(i).getName());
+                        tv.setTag(adapter.getDatas().get(i).getId());
+                        mxxDialog.dismiss();
+                    }
+                });
+
+            }
+        }.showDialog();
+    }
+
     public void chooseDate(final List<String> data, final TextView tv, final String title) {
         if(null != mxxDialog){
             mxxDialog.dismiss();
@@ -307,6 +343,20 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
             return (length / 1024) + "KB";
         } else if (length < 1024) {
             return length + "B";
+        } else {
+            return "0KB";
+        }
+    }
+
+    /****
+     * 文件大小
+     *
+     * @param length
+     * @return
+     */
+    public String ShowProcessFileSzie(Long length) {
+        if (length >= 1048576) {
+            return (length / 1048576) + "MB";
         } else {
             return "0KB";
         }

@@ -78,9 +78,10 @@ public class ChuChaiActivity extends HeadBaseActivity {
 //    LinearLayout mLlBuzhang;
     private String mDepartmentName;
     private String mUserName;
-    private String processDefinitionId;
     private String mDepartmentId;
     private String mUserId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -101,6 +102,7 @@ public class ChuChaiActivity extends HeadBaseActivity {
         mDepartmentName = SPUtils.getString(this, "departmentName");
         mDepartmentId = SPUtils.getString(this, "departmentId");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mChuchaiName.setText(mUserName);
         mChuchaiBumen.setText(mDepartmentName);
 
@@ -130,7 +132,6 @@ public class ChuChaiActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -166,30 +167,30 @@ public class ChuChaiActivity extends HeadBaseActivity {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
 
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
-                        Log.d("Caogao", bean.getValue());
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "reason":
-                                mChuchaiShiyou.setText(value);
-                                break;
-                            case "address":
-                                mChuchaiDidian.setText(value);
-                                break;
-                            case "startTime":
-                                mChuchaiStart.setText(value);
-                                break;
-                            case "endTime":
-                                mChuchaiStop.setText(value);
-                                break;
-                            case "traffic":
-                                mChuchaiGongju.setText(value);
-                                break;
-                            case "other":
-                                mChuchaiBeizhu.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "reason":
+                                    mChuchaiShiyou.setText(value);
+                                    break;
+                                case "address":
+                                    mChuchaiDidian.setText(value);
+                                    break;
+                                case "startTime":
+                                    mChuchaiStart.setText(value);
+                                    break;
+                                case "endTime":
+                                    mChuchaiStop.setText(value);
+                                    break;
+                                case "traffic":
+                                    mChuchaiGongju.setText(value);
+                                    break;
+                                case "other":
+                                    mChuchaiBeizhu.setText(value);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -306,15 +307,16 @@ public class ChuChaiActivity extends HeadBaseActivity {
                 RequestMethod.POST, ProcessJieguoResponse.class);
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"traffic\":" + "\"" + gongju + "\",")
                 .append("\"startTime\":" + "\"" + start + "\",")
                 .append("\"endTime\":" + "\"" + stop + "\",")
                 .append("\"address\":" + "\"" + adress + "\",")
                 .append("\"reason\":" + "\"" + reason + "\",")
-                .append("\"beizhu\":" + "\"" + beizhu + "\"")
+                .append("\"other\":" + "\"" + beizhu + "\"")
 //                .append("\"manager\":" + "\"" + mZuzhiUserBean.getId() + "\",")
 //                .append("\"manager_name\":" + "\"" + mZuzhiUserBean.getName() + "\",")
 //                .append("\"comment\":" + "\"" + comment + "\"")
@@ -323,6 +325,7 @@ public class ChuChaiActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", sessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
@@ -378,15 +381,16 @@ public class ChuChaiActivity extends HeadBaseActivity {
                 RequestMethod.POST, ProcessJieguoResponse.class);
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + mDepartmentName + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + mDepartmentName + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"traffic\":" + "\"" + gongju + "\",")
                 .append("\"startTime\":" + "\"" + start + "\",")
                 .append("\"endTime\":" + "\"" + stop + "\",")
                 .append("\"address\":" + "\"" + adress + "\",")
                 .append("\"reason\":" + "\"" + reason + "\",")
-                .append("\"beizhu\":" + "\"" + beizhu + "\"")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
+                .append("\"other\":" + "\"" + beizhu + "\"")
 //                .append("\"manager\":" + "\"" + mZuzhiUserBean.getId() + "\",")
 //                .append("\"manager_name\":" + "\"" + mZuzhiUserBean.getName() + "\",")
 //                .append("\"comment\":" + "\"" + comment + "\"")
@@ -395,6 +399,7 @@ public class ChuChaiActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", sessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 

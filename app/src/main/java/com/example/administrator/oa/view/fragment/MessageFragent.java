@@ -118,7 +118,7 @@ public class MessageFragent extends BaseFragment {
         });
 
         try {
-            RequestServerMsgList();
+            RequestServerMsgList(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -127,9 +127,8 @@ public class MessageFragent extends BaseFragment {
         mXxreMsg.setOnRefreshListener(new PullRefreshRecycleView.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                flag = true;
                 try {
-                    RequestServerMsgList();
+                    RequestServerMsgList(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -137,8 +136,7 @@ public class MessageFragent extends BaseFragment {
 
             @Override
             public void refreshEnd() {
-                flag = false;
-                Toast.makeText(mainActivity, "刷新数据成功", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mainActivity, "刷新数据成功", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -150,13 +148,10 @@ public class MessageFragent extends BaseFragment {
         });
     }
 
-    boolean flag = false;
-
-
     /**
      * 请求网络接口
      */
-    private void RequestServerMsgList() throws Exception {
+    private void RequestServerMsgList(final boolean isRefresh) throws Exception {
         //获取sessionid
         String sessionId = SPUtils.getString(mainActivity, "sessionId");
         //Log.w("获取sessionid", sessionId);
@@ -192,7 +187,6 @@ public class MessageFragent extends BaseFragment {
                         // 最后一条不是消息  只是未读件数统计  不需要表示出来
                         datas.remove(datas.size() - 1);
                         mMsgAdapter.replaceAll(datas);
-                        mMsgAdapter.notifyDataSetChanged();
                     }
                 }
                 }
@@ -205,16 +199,11 @@ public class MessageFragent extends BaseFragment {
 
             @Override
             public void onFinish(int what) {
-                if (flag && mXxreMsg != null) {
-                    mXxreMsg.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mXxreMsg.stopRefresh();
-                        }
-                    }, 1500);
+                if (isRefresh) {
+                    mXxreMsg.stopRefresh();
                 }
 
-                if (mLoadingDialog != null) {
+                if (null != mLoadingDialog) {
                     mLoadingDialog.dismiss();
                 }
             }
@@ -243,7 +232,7 @@ public class MessageFragent extends BaseFragment {
         super.onActivityResult(requestCode, resultCode, data);
         if(1001 == requestCode){
             try {
-                RequestServerMsgList();
+                RequestServerMsgList(false);
             } catch (Exception e) {
                 e.printStackTrace();
             }

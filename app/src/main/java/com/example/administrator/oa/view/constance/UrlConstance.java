@@ -31,6 +31,10 @@ public class UrlConstance {
      * 上传文件
      */
     public static final String URL_UPLOAD = "http://175av53846.iask.in/njsmartoa/uploadFileController/uploadFile.do";
+    /**
+     * 下载文件
+     */
+    public static final String URL_DOWNLOAD = "http://175av53846.iask.in/njsmartoa/uploadFileController/downloadFile.do";
 
     /**
      * 登录
@@ -136,6 +140,7 @@ public class UrlConstance {
      * bpm/processInstancesRunning
      */
     public static final String URL_NOT_COMPLETE_PRO = formatUrl("bpm/processInstancesRunning");
+
     /**
      * 已结流程
      * /bpm/processInstancesComplete
@@ -156,4 +161,19 @@ public class UrlConstance {
      * 草稿箱详情
      */
     public static final String URL_CAOGAOXIANG_INFO = formatUrl("form/viewStartFormDraftJson");
+
+    /**
+     * 获取工作来源接口
+     */
+    public static final String URL_GET_WORKFORM_TYPE = formatUrl("form/getActivity");
+
+    /**
+     * 获取公司选择接口
+     */
+    public static final String URL_GET_COMPANY_TYPE = formatUrl("form/getCompany");
+
+    /**
+     * 获取合同选择接口
+     */
+    public static final String URL_GET_HETONG_TYPE = formatUrl("form/getContractInfoList");
 }

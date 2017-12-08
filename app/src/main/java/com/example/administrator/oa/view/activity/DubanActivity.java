@@ -1,5 +1,6 @@
 package com.example.administrator.oa.view.activity;
 
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -15,9 +16,18 @@ import com.example.administrator.oa.view.bean.FormBianmaBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
+import com.example.administrator.oa.view.bean.WorkFromTypeBean;
+import com.example.administrator.oa.view.bean.WorkFromTypeResponse;
+import com.example.administrator.oa.view.bean.YingzhangTypeBean;
+import com.example.administrator.oa.view.bean.YingzhangTypeResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.SPUtils;
+import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
+import com.lsh.XXRecyclerview.CommonViewHolder;
+import com.lsh.XXRecyclerview.XXRecycleView;
+import com.luoshihai.xxdialog.DialogViewHolder;
+import com.luoshihai.xxdialog.XXDialog;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.rest.OnResponseListener;
@@ -25,6 +35,7 @@ import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -38,7 +49,7 @@ public class DubanActivity extends HeadBaseActivity {
     @BindView(R.id.bianhao)
     TextView mBianhao;
     @BindView(R.id.workfrom)
-    EditText mWorkfrom;
+    TextView mWorkfrom;
     @BindView(R.id.firstBumen)
     EditText mFirstBumen;
     @BindView(R.id.fuzeren1)
@@ -65,7 +76,8 @@ public class DubanActivity extends HeadBaseActivity {
     private String mUserId;
     private String mDepartmentId;
     private String mDepartmentName;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -87,6 +99,7 @@ public class DubanActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         checkFormCaoGao();
     }
 
@@ -94,7 +107,6 @@ public class DubanActivity extends HeadBaseActivity {
      * 检测是否是从草稿箱界面跳转过来
      */
     private void checkFormCaoGao(){
-        String businessKey = getIntent().getStringExtra("businessKey");
         if(!TextUtils.isEmpty(businessKey)){
             // 获取草稿信息
             RequestServerGetInfo(businessKey);
@@ -129,36 +141,43 @@ public class DubanActivity extends HeadBaseActivity {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "id":
-                                mBianhao.setText(value);
-                                break;
-                            case "work":
-                                mWorkfrom.setText(value);
-                                break;
-                            case "department1":
-                                mFirstBumen.setText(value);
-                                break;
-                            case "name1":
-                                mFuzeren1.setText(value);
-                                break;
-                            case "department2":
-                                mSecondBumen.setText(value);
-                                break;
-                            case "name2":
-                                mFuzeren2.setText(value);
-                                break;
-                            case "date":
-                                mDate.setText(value);
-                                break;
-                            case "term":
-                                mQixian.setText(value);
-                                break;
-                            case "content":
-                                mContent.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "work":
+                                    Log.d("bean.name", value);
+                                    Log.d("bean.label", bean.getLabel());
+                                    mWorkfrom.setTag(value);
+                                    if(!TextUtils.isEmpty(bean.getLabel())){
+                                        mWorkfrom.setText(bean.getLabel());
+                                    }
+                                    break;
+                                case "department1":
+                                    mFirstBumen.setText(value);
+                                    break;
+                                case "name1":
+                                    mFuzeren1.setText(value);
+                                    break;
+                                case "department2":
+                                    mSecondBumen.setText(value);
+                                    break;
+                                case "name2":
+                                    mFuzeren2.setText(value);
+                                    break;
+                                case "date":
+                                    mDate.setText(value);
+                                    break;
+                                case "term":
+                                    mQixian.setText(value);
+                                    break;
+                                case "content":
+                                    mContent.setText(value);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -178,7 +197,7 @@ public class DubanActivity extends HeadBaseActivity {
         });
     }
 
-    @OnClick({R.id.gzdbd_bianhao, R.id.ll_date, R.id.btn_caogao, R.id.btn_commit})
+    @OnClick({R.id.gzdbd_bianhao, R.id.ll_workfrom, R.id.ll_date, R.id.btn_caogao, R.id.btn_commit})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.gzdbd_bianhao:
@@ -186,6 +205,9 @@ public class DubanActivity extends HeadBaseActivity {
                     mBianhao.setTag("1");
                     houQuFormCode();
                 }
+                break;
+            case R.id.ll_workfrom:
+                HuoquWorkNameAndID();
                 break;
             case R.id.ll_date:
                 selectDate(mDate, "");
@@ -207,6 +229,80 @@ public class DubanActivity extends HeadBaseActivity {
                 jianYanshuju();
                 break;
         }
+    }
+
+    /**
+     * 请求网络接口 获取工作来源列表
+     */
+    private void HuoquWorkNameAndID() {
+
+        //创建请求队列
+        RequestQueue requestQueue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<WorkFromTypeResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_WORKFORM_TYPE,
+                RequestMethod.POST, WorkFromTypeResponse.class);
+        request.add("activityName", "");
+        //添加url?key=value形式的参数
+        requestQueue.add(0, request, new OnResponseListener<WorkFromTypeResponse>() {
+
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<WorkFromTypeResponse> response) {
+                Log.w("2222", response.toString());
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<WorkFromTypeBean> data = response.get().getData();
+                    chooseWorkNameAndId(data, mWorkfrom, "选择工作来源");
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<WorkFromTypeResponse> response) {
+                Toast.makeText(DubanActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
+            }
+        });
+
+    }
+
+    public void chooseWorkNameAndId(final List<WorkFromTypeBean> data, final TextView tv, final String title) {
+        if(null != mxxDialog){
+            mxxDialog.dismiss();
+        }
+        mxxDialog = new XXDialog(this, R.layout.dialog_chooselist) {
+            @Override
+            public void convert(DialogViewHolder holder) {
+                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
+                holder.setText(R.id.dialog_title, title);
+                xxre.setLayoutManager(new LinearLayoutManager(DubanActivity.this));
+                final CommonRecyclerAdapter<WorkFromTypeBean> adapter = new CommonRecyclerAdapter<WorkFromTypeBean>
+                        (DubanActivity.this, data, R.layout.simple_list_item) {
+                    @Override
+                    public void convert(CommonViewHolder holder1, WorkFromTypeBean item, int i, boolean b) {
+                        holder1.setText(R.id.tv, item.getName());
+                        holder1.getView(R.id.more).setVisibility(View.GONE);
+                        holder1.getView(R.id.users).setVisibility(View.GONE);
+                    }
+                };
+                xxre.setAdapter(adapter);
+                adapter.replaceAll(data);
+                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
+                        tv.setText(adapter.getDatas().get(i).getName());
+                        tv.setTag(adapter.getDatas().get(i).getId());
+                        mxxDialog.dismiss();
+                    }
+                });
+
+            }
+        }.showDialog();
     }
 
     /**
@@ -261,18 +357,21 @@ public class DubanActivity extends HeadBaseActivity {
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"id\":" + "\"" + bianhao + "\",")
-                .append("\"work\":" + "\"" + workfrom + "\",")
+                .append("\"work_name\":" + "\"" + workfrom + "\",")
+                .append("\"work\":" + "\"" + mWorkfrom.getTag().toString() + "\",")
                 .append("\"department1\":" + "\"" + firstBumen + "\",")
                 .append("\"name1\":" + "\"" + fuzeren1 + "\",")
                 .append("\"department2\":" + "\"" + secondBumen + "\",")
                 .append("\"name2\":" + "\"" + fuzeren2 + "\",")
                 .append("\"date\":" + "\"" + date + "\",")
                 .append("\"term\":" + "\"" + qixian + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"content\":" + "\"" + content + "\"")
                 .append("}");
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
@@ -362,18 +461,21 @@ public class DubanActivity extends HeadBaseActivity {
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"id\":" + "\"" + bianhao + "\",")
-                .append("\"work\":" + "\"" + workfrom + "\",")
+                .append("\"work_name\":" + "\"" + workfrom + "\",")
+                .append("\"work\":" + "\"" + mWorkfrom.getTag().toString() + "\",")
                 .append("\"department1\":" + "\"" + firstBumen + "\",")
                 .append("\"name1\":" + "\"" + fuzeren1 + "\",")
                 .append("\"department2\":" + "\"" + secondBumen + "\",")
                 .append("\"name2\":" + "\"" + fuzeren2 + "\",")
                 .append("\"date\":" + "\"" + date + "\",")
                 .append("\"term\":" + "\"" + qixian + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"content\":" + "\"" + content + "\"")
                 .append("}");
         //添加url?key=value形式的参数
         request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 

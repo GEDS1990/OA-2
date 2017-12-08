@@ -1,13 +1,11 @@
 package com.example.administrator.oa.view.activity;
 
-import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -18,17 +16,9 @@ import com.example.administrator.oa.view.bean.FormBianmaBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
-import com.example.administrator.oa.view.bean.ZuzhiUserBean;
-import com.example.administrator.oa.view.bean.ZuzhiUserListResponse;
-import com.example.administrator.oa.view.bean.organization_structure.ChildrenBean;
-import com.example.administrator.oa.view.bean.organization_structure.OrganizationResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.SPUtils;
-import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
-import com.lsh.XXRecyclerview.CommonViewHolder;
-import com.lsh.XXRecyclerview.XXRecycleView;
-import com.luoshihai.xxdialog.DialogViewHolder;
 import com.luoshihai.xxdialog.XXDialog;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.RequestMethod;
@@ -37,7 +27,6 @@ import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -82,7 +71,8 @@ public class workConectionActivity extends HeadBaseActivity {
 //    private String mContactId;
     private String mLeaderId;
     private String mDepartmentId;
-    private String processDefinitionId;
+    private String processDefinitionId = "";
+    private String businessKey = "";
 
     @Override
     protected int getChildLayoutRes() {
@@ -101,6 +91,7 @@ public class workConectionActivity extends HeadBaseActivity {
         String departmentName = SPUtils.getString(this, "departmentName");
         mDepartmentId = SPUtils.getString(this,"departmentId");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
+        businessKey = getIntent().getStringExtra("businessKey");
         mBumen.setText(departmentName);
         checkFormCaoGao();
     }
@@ -143,45 +134,33 @@ public class workConectionActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-
-                    //按顺序填写数据
-//                    mBianhao.setText(shenheBeen.get(0).getValue());
-//                    mBumen.setText(shenheBeen.get(1).getValue());
-//                    mXiangmuFuzeren.setText(shenheBeen.get(3).getValue());
-//                    mBumenFuzeren.setText(shenheBeen.get(4).getValue());
-//                    mLianxiren.setText(shenheBeen.get(5).getValue());
-//                    mQingjiaShiyou.setText(shenheBeen.get(2).getValue());
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        Log.d("Caogao", bean.getLabel());
-                        Log.d("Caogao", bean.getValue());
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "id":
-                                mBianhao.setText(value);
-                                break;
-                            case "reason":
-                                mQingjiaShiyou.setText(value);
-                                break;
-                            case "project":
-                                mXiangmuFuzeren.setTag(value);
-                                break;
-                            case "project_name":
-                                mXiangmuFuzeren.setText(value);
-                                break;
-                            case "minister":
-//                                mDateStop.setText(value);
-                                break;
-                            case "minister_name":
-//                                mDateStart.setText(value);
-                                break;
-                            case "contacts":
-//                                mDateStop.setText(value);
-                                break;
-                            case "contacts_name":
-//                                mDateStop.setText(value);
-                                break;
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "id":
+                                    if(!TextUtils.isEmpty(value)) {
+                                        mBianhao.setText(value);
+                                    }
+                                    break;
+                                case "reason":
+                                    mQingjiaShiyou.setText(value);
+                                    break;
+                                case "project":
+                                    mXiangmuFuzeren.setTag(value);
+                                    mXiangmuFuzeren.setText(bean.getLabel());
+                                    break;
+                                case "minister":
+                                    mBumenFuzeren.setTag(value);
+                                    mBumenFuzeren.setText(bean.getLabel());
+                                    break; 
+                                case "contacts":
+                                    mLianxiren.setText(bean.getLabel());
+                                    mLianxiren.setTag(value);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -212,30 +191,18 @@ public class workConectionActivity extends HeadBaseActivity {
                 }
                 break;
             case R.id.ll_xiangmu:
-//                if("0".equals(mXiangmuFuzeren.getTag())) {
-//                    mXiangmuFuzeren.setTag("1");
-//                    RequestServerLogin(mXiangmuFuzeren, "请选择项目负责人");
-//                }
                 if("0".equals(mLlXiangmu.getTag())) {
                     mLlXiangmu.setTag("1");
                     RequestServerGetZuzhi(mLlXiangmu, mXiangmuFuzeren, "请选择项目负责人", null);
                 }
                 break;
             case R.id.ll_bumen:
-//                if("0".equals(mBumenFuzeren.getTag())) {
-//                    mBumenFuzeren.setTag("1");
-//                    RequestServerLogin(mBumenFuzeren, "请选择部门负责人");
-//                }
                 if("0".equals(mLlBumen.getTag())) {
                     mLlBumen.setTag("1");
                     RequestServerGetZuzhi(mLlBumen, mBumenFuzeren, "请选择部门负责人", null);
                 }
                 break;
             case R.id.ll_worklianxiren:
-//                if("0".equals(mLianxiren.getTag())) {
-//                    mLianxiren.setTag("1");
-//                    RequestServerLogin(mLianxiren, "请选择工作联系人");
-//                }
                 if("0".equals(mLlWorklianxiren.getTag())) {
                     mLlWorklianxiren.setTag("1");
                     RequestServerGetZuzhi(mLlWorklianxiren, mLianxiren, "请选择工作联系人", null);
@@ -307,13 +274,14 @@ public class workConectionActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + bumen + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + bumen + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"id\":" + "\"" + bianhao + "\",")
                 .append("\"project_name\":" + "\"" + projectleader + "\",")
                 .append("\"project\":" + "\"" + mXiangmuFuzeren.getTag().toString() + "\",")
                 .append("\"minister_name\":" + "\"" + bumenleader + "\",")
-                .append("\"minister\":" + "\"" + mBumen.getTag().toString() + "\",")
+                .append("\"minister\":" + "\"" + mBumenFuzeren.getTag().toString() + "\",")
                 .append("\"contacts_name\":" + "\"" + contacts + "\",")
                 .append("\"contacts\":" + "\"" + mLianxiren.getTag().toString() + "\",")
                 .append("\"reason\":" + "\"" + reason + "\"")
@@ -329,6 +297,7 @@ public class workConectionActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", sessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
@@ -426,13 +395,14 @@ public class workConectionActivity extends HeadBaseActivity {
 
         StringBuilder json = new StringBuilder();
         json.append("{")
-                .append("\"departments_name\":" + "\"" + bumen + "\",")
-                .append("\"departments\":" + "\"" + mDepartmentId + "\",")
+                .append("\"departments\":" + "\"" + bumen + "\",")
+                .append("\"departments_id\":" + "\"" + mDepartmentId + "\",")
+                .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"id\":" + "\"" + bianhao + "\",")
                 .append("\"project_name\":" + "\"" + projectleader + "\",")
                 .append("\"project\":" + "\"" + mXiangmuFuzeren.getTag().toString() + "\",")
                 .append("\"minister_name\":" + "\"" + bumenleader + "\",")
-                .append("\"minister\":" + "\"" + mBumen.getTag().toString() + "\",")
+                .append("\"minister\":" + "\"" + mBumenFuzeren.getTag().toString() + "\",")
                 .append("\"contacts_name\":" + "\"" + contacts + "\",")
                 .append("\"contacts\":" + "\"" + mLianxiren.getTag().toString() + "\",")
                 .append("\"reason\":" + "\"" + reason + "\"")
@@ -448,6 +418,7 @@ public class workConectionActivity extends HeadBaseActivity {
         //添加url?key=value形式的参数
         request.addHeader("sessionId", sessionId);
         request.add("processDefinitionId", processDefinitionId);
+        request.add("businessKey", businessKey);
         request.add("data", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 

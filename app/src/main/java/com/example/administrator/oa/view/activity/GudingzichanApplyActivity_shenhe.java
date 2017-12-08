@@ -71,6 +71,10 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
     EditText mHuiqianyijian;
     @BindView(R.id.ll_huiqianyijian)
     LinearLayout mLlHuiqianyijian;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -114,23 +118,24 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
         mSessionId = SPUtils.getString(this, "sessionId");
 
         //判断是否是发起会签节点
-        if ("vote".equals(mProcessTaskType)) {
-            mBtnCaogao.setText("退回发起人");
-            mLlHuiqianyijian.setVisibility(View.VISIBLE);
-        } else {
-            mBtnCaogao.setText("不同意");
-            mLlHuiqianyijian.setVisibility(View.GONE);
-        }
+//        if ("vote".equals(mProcessTaskType)) {
+//            mBtnCaogao.setText("退回发起人");
+//            mLlHuiqianyijian.setVisibility(View.VISIBLE);
+//        } else {
+//            mBtnCaogao.setText("不同意");
+//            mLlHuiqianyijian.setVisibility(View.GONE);
+//        }
         //获取服务器数据，填充表单数据
         RequestServer();
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
@@ -181,7 +186,7 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "退回发起人":
+                    case "回退发起人":
                         RequestServerTuihui();
                         break;
                 }
@@ -253,72 +258,97 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    //按顺序填写数据
-//                    mBumen.setText(shenheBeen.get(0).getValue());
-//                    mFuzeren.setText(shenheBeen.get(1).getValue());
-//                    mName.setText(shenheBeen.get(2).getValue());
-//                    mDate.setText(shenheBeen.get(3).getValue());
-
+                    ArrayList<String> goods = new ArrayList<>();
+                    ArrayList<String> format = new ArrayList<>();
+                    ArrayList<String> num = new ArrayList<>();
+                    ArrayList<String> remarks = new ArrayList<>();
 
                     for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 固定资产领用领导审核单
+                                case "asset-leader":
+                                    mLlHuiqianren.setVisibility(View.VISIBLE);
+                                    mXxreHuiqianren.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 固定资产领用会签
+                                case "asset-return":
+                                    mLlHuiqianyijian.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 固定资产领用通知
+                                case "asset-notice":
+                                    mLlShenheyijian.setVisibility(View.VISIBLE);
+                                    mShenheyijian.setFocusable(false);
+                                    mBtnCaogao.setVisibility(View.INVISIBLE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 固定资产领用通知
+                                case "asset-request":
+                                    mBtnCaogao.setVisibility(View.INVISIBLE);
+                                    mBtnCommit.setText("提交");
+                                    break;
+                            }
+                        }
+                        if (!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                // 负责人
+                                case "minister_name":
+                                    mFuzeren.setText(value);
+                                    break;
+                                // 部门
+                                case "departments":
+                                    mBumen.setText(value);
+                                    break;
+                                case "name":
+                                    mName.setText(value);
+                                    break;
+                                case "date":
+                                    mDate.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                            }
+                            if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
+                                if (bean.getLabel().startsWith("goods") ) {
+                                    goods.add(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("format")) {
+                                    format.add(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("num")) {
+                                    num.add(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("remarks")) {
+                                    remarks.add(bean.getValue());
+                                }
+                            }
+                        }
+
                         //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getLabel();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "id":
-//                                mBianhao.setText(value);
-                                break;
-//                            case "address":
-//                                mAddress.setText(value);
-//                                break;
-//                            case "startTime":
-//                                mDateStart.setText(value);
-//                                break;
-//                            case "endTime":
-//                                mDateStop.setText(value);
-//                                break;
-                        }
+//                        if ("userpicker".equals(bean.getType())) {
+//                            mLlHuiqianren.setVisibility(View.VISIBLE);
+//                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+//                        }
                     }
 
-                    //垃圾后台，我只想说
-                    //把good，format，num，remarks
-                    ArrayList<QingjiaShenheBean> goods = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> format = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> num = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> remarks = new ArrayList<>();
-
-                    for (QingjiaShenheBean bean : shenheBeen) {
-                        if (bean.getLabel().startsWith("goods")) {
-                            goods.add(bean);
+                    // 把放入list里的物品明细添加进adapter里，展示出来
+                    for (int i = 0;i< goods.size();i++) {
+                        if(remarks.size() < goods.size()){
+                            remarks.add(i, "");
                         }
-                        if (bean.getLabel().startsWith("format")) {
-                            format.add(bean);
-                        }
-                        if (bean.getLabel().startsWith("num")) {
-                            num.add(bean);
-                        }
-                        if (bean.getLabel().startsWith("remarks")) {
-                            remarks.add(bean);
-                        }
-
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        if ("userpicker".equals(bean.getType())) {
-                            mLlHuiqianren.setVisibility(View.VISIBLE);
-                            mXxreHuiqianren.setVisibility(View.VISIBLE);
-                        }
-
-                    }
-
-                    //然后把四个集合的数据一一对应取出组成一个新的含有good，format，num，remarks四个字段实体类的集合
-                    ArrayList<GoodsApplyBlankBean> tempList = new ArrayList<>();
-                    for (int i = 0; i < goods.size(); i++) {
-                        if (!TextUtils.isEmpty(goods.get(i).getValue())) {
-                            tempList.add(new GoodsApplyBlankBean(goods.get(i).getValue(), format.get(i).getValue(),
-                                    num.get(i).getValue(), remarks.get(i).getValue()));
-                        }
-                    }
-                    if (mGoodApplyAdapter != null) {
-                        mGoodApplyAdapter.replaceAll(tempList);
+                        mGoodApplyAdapter.add(new GoodsApplyBlankBean(goods.get(i), format.get(i), num.get(i), remarks.get(i)));
                     }
                 }
             }

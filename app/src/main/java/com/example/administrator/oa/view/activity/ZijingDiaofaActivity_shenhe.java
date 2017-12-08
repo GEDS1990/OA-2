@@ -68,6 +68,10 @@ public class ZijingDiaofaActivity_shenhe extends HeadBaseActivity {
     EditText mHuiqianyijian;
     @BindView(R.id.ll_huiqianyijian)
     LinearLayout mLlHuiqianyijian;
+    @BindView(R.id.shenheyijian)
+    TextView mShenheyijian;
+    @BindView(R.id.ll_shenheyijian)
+    LinearLayout mLlShenheyijian;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -111,23 +115,24 @@ public class ZijingDiaofaActivity_shenhe extends HeadBaseActivity {
         mSessionId = SPUtils.getString(this, "sessionId");
 
         //判断是否是发起会签节点
-        if ("vote".equals(mProcessTaskType)) {
-            mBtnCaogao.setText("退回发起人");
-            mLlHuiqianyijian.setVisibility(View.VISIBLE);
-        } else {
-            mBtnCaogao.setText("不同意");
-            mLlHuiqianyijian.setVisibility(View.GONE);
-        }
+//        if ("vote".equals(mProcessTaskType)) {
+//            mBtnCaogao.setText("退回发起人");
+//            mLlHuiqianyijian.setVisibility(View.VISIBLE);
+//        } else {
+//            mBtnCaogao.setText("不同意");
+//            mLlHuiqianyijian.setVisibility(View.GONE);
+//        }
         //获取服务器数据，填充表单数据
         RequestServer();
         //流程记录的view
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_process_shenhejilu) {
+        mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
             @Override
             public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                holder.setText(R.id.processNameContent, item.getName());
                 holder.setText(R.id.name, item.getAssignee());
-                holder.setText(R.id.content, item.getComment());
-                holder.setText(R.id.date, item.getCompleteTime());
+                holder.setText(R.id.startTimeContent, item.getCreateTime());
+                holder.setText(R.id.completeTimeContent, item.getCompleteTime());
             }
         };
         mXxre.setAdapter(mAdapter);
@@ -178,7 +183,7 @@ public class ZijingDiaofaActivity_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "退回发起人":
+                    case "回退发起人":
                         RequestServerTuihui();
                         break;
                 }
@@ -250,42 +255,87 @@ public class ZijingDiaofaActivity_shenhe extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    //按顺序填写数据
-                    mName.setText(shenheBeen.get(0).getValue());
-                    mBumen.setText(shenheBeen.get(1).getValue());
-                    mBianhao.setText(shenheBeen.get(2).getValue());
-                    //pay，income，money
-                    ArrayList<QingjiaShenheBean> pay = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> income = new ArrayList<>();
-                    ArrayList<QingjiaShenheBean> money = new ArrayList<>();
-
+                    ArrayList<String> pay = new ArrayList<>(10);
+                    ArrayList<String> income = new ArrayList<>(10);
+                    ArrayList<String> money = new ArrayList<>(10);
                     for (QingjiaShenheBean bean : shenheBeen) {
-                        if (bean.getLabel().startsWith("pay")) {
-                            pay.add(bean);
+                        if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
+                            Log.d("FormName", bean.getFormName());
+                            Log.d("FormCode", bean.getFormCode());
+                            switch (bean.getFormCode()) {
+                                // 资金调拨部长审核
+                                case "capital-leader":
+                                    mLlHuiqianren.setVisibility(View.VISIBLE);
+                                    mXxreHuiqianren.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 资金调拨会签
+                                case "capital-return":
+                                    mLlHuiqianyijian.setVisibility(View.VISIBLE);
+                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 资金调拨审核
+                                case "capital-comment":
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 资金调拨通知
+                                case "capital-notice":
+                                    mLlShenheyijian.setVisibility(View.VISIBLE);
+                                    mShenheyijian.setFocusable(false);
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
+                                    break;
+                                // 资金调拨，回退之后
+                                case "capital-request":
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("提交");
+                                    break;
+                            }
                         }
-                        if (bean.getLabel().startsWith("income")) {
-                            income.add(bean);
-                        }
-                        if (bean.getLabel().startsWith("money")) {
-                            money.add(bean);
+                        if (!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "transactor":
+                                    mName.setText(value);
+                                    break;
+                                case "departments":
+                                    mBumen.setText(value);
+                                    break;
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "comment":
+                                    mShenheyijian.setText(value);
+                                    break;
+                            }
                         }
                         //当有type为userpicker的时候说明是可以发起会签的节点
-                        if ("userpicker".equals(bean.getType())) {
-                            mLlHuiqianren.setVisibility(View.VISIBLE);
-                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+//                        if ("userpicker".equals(bean.getType())) {
+//                            mLlHuiqianren.setVisibility(View.VISIBLE);
+//                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+//                        }
+                        // 处理物品明细
+                        if (!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
+                            if (bean.getLabel().startsWith("pay")) {
+                                pay.add(bean.getValue());
+                            }
+                            if (bean.getLabel().startsWith("income")) {
+                                income.add(bean.getValue());
+                            }
+                            if (bean.getLabel().startsWith("money")) {
+                                money.add(bean.getValue());
+                            }
                         }
                     }
 
-                    //然后把四个集合的数据一一对应取出组成一个新的含有good，format，num，remarks四个字段实体类的集合
-                    ArrayList<ZijngDiaoboshenheBean> tempList = new ArrayList<>();
-                    for (int i = 0; i < pay.size(); i++) {
-                        if (!TextUtils.isEmpty(pay.get(i).getValue())) {
-                            tempList.add(new ZijngDiaoboshenheBean(pay.get(i).getValue(), income.get(i).getValue(),
-                                    money.get(i).getValue()));
-                        }
-                    }
-                    if (mGoodApplyAdapter != null) {
-                        mGoodApplyAdapter.replaceAll(tempList);
+                    // 把放入list里的物品明细添加进adapter里，展示出来
+                    for (int i = 0;i< pay.size();i++) {
+                        mGoodApplyAdapter.add(new ZijngDiaoboshenheBean(pay.get(i), income.get(i), money.get(i)));
                     }
                 }
             }
