@@ -3,6 +3,7 @@ package com.example.administrator.oa.view.activity;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -18,13 +19,19 @@ import android.widget.Toast;
 import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.FormBianmaBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
+import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
+import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
+import com.example.administrator.oa.view.bean.ZuzhiUserBean;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.CommonUtil;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.leon.lfilepickerlibrary.LFilePicker;
+import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
+import com.lsh.XXRecyclerview.CommonViewHolder;
+import com.lsh.XXRecyclerview.XXRecycleView;
 import com.yanzhenjie.nohttp.FileBinary;
 import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.NoHttp;
@@ -42,6 +49,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -85,14 +93,24 @@ public class TouziXieyiActivity extends HeadBaseActivity {
     @BindView(R.id.btn_commit)
     Button mBtnCommit;
 
-    private String mSessionId;
-    private String mUserName;
-    private String mUserId;
     private String mDepartmentId;
     private String mDepartmentName;
+
+    // 流程审核记录
+    @BindView(R.id.txtProcess)
+    TextView txtProcess;
+    @BindView(R.id.xxreProcess)
+    XXRecycleView mProcessXxre;
+    private CommonRecyclerAdapter<ProcessShenheHistoryBean> mAdapter;
+    private List<ProcessShenheHistoryBean> datas = new ArrayList<>();
+    private String mSessionId;
+    // 审核信息
+    private String formCode = "";
+    private String mTaskId = "";
     // 草稿信息
     private String processDefinitionId = "";
     private String businessKey = "";
+
     // 附件信息
     private int REQUESTCODE_FROM_ACTIVITY = 1002;
     private String mFilename = "";
@@ -116,96 +134,58 @@ public class TouziXieyiActivity extends HeadBaseActivity {
         initThisView();
     }
 
-    @OnClick({R.id.tzxysb_bianhao, R.id.add_fujian, R.id.btn_uplaod, R.id.btn_cancel, R.id.rl_fujian, R.id.btn_caogao, R.id.btn_commit})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.tzxysb_bianhao:
-                if("0".equals(mBianhao.getTag())) {
-                    mBianhao.setTag("1");
-                    houQuFormCode();
-                }
-                break;
-            case R.id.add_fujian:
-                if("0".equals(mAddFujian.getTag())) {
-                    new LFilePicker()
-                            .withActivity(this)
-                            .withRequestCode(REQUESTCODE_FROM_ACTIVITY)
-                            .start();
-                }
-                break;
-            case R.id.btn_uplaod:
-                if("down".equals(mBtnUplaod.getTag().toString())) {
-                    mBtnUplaod.setVisibility(View.GONE);
-                    mBtnUplaod.setEnabled(false);
-                    RequestServerDownLoad();
-                } else {
-                    if (!TextUtils.isEmpty(mFilePath) && !TextUtils.isEmpty(mFilename)) {
-                        RequestServer(mFilePath, mFilename);
-                    }
-                }
-                break;
-            case R.id.btn_cancel:
-                break;
-            case R.id.rl_fujian:
-                break;
-            case R.id.btn_caogao:
-                if(!TextUtils.isEmpty(mFilePath) && TextUtils.isEmpty(mFilePathReturn)){
-                    Toast.makeText(TouziXieyiActivity.this, "请先提交附件",Toast.LENGTH_LONG).show();
-                } else {
-                    RequestServerGoodsLingqu_Save(mDanwei.getText().toString().trim(),
-                            mBumen.getText().toString().trim(),
-                            mBianhao.getText().toString().trim(),
-                            mNameJia.getText().toString().trim(),
-                            mNameYi.getText().toString().trim(),
-                            mBeizhu.getText().toString().trim());
-                }
-                break;
-            case R.id.btn_commit:
-                // 如果有附件但是没有上传
-                if(!TextUtils.isEmpty(mFilePath) && TextUtils.isEmpty(mFilePathReturn)){
-                    Toast.makeText(TouziXieyiActivity.this, "请先提交附件",Toast.LENGTH_LONG).show();
-                } else {
-                    jianYanshuju();
-                }
-                break;
-        }
-    }
-
     private void initThisView() {
         mSessionId = SPUtils.getString(this, "sessionId");
-        mUserName = SPUtils.getString(this, "userName");
-        mUserId = SPUtils.getString(this, "userId");
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
-        businessKey = getIntent().getStringExtra("businessKey");
         mBumen.setText(mDepartmentName);
 
-        checkFormCaoGao();
-    }
-
-    /**
-     * 检测是否是从草稿箱界面跳转过来
-     */
-    private void checkFormCaoGao(){
-        if(!TextUtils.isEmpty(businessKey)){
-            // 获取草稿信息
-            RequestServerGetInfo(businessKey);
+        mSessionId = SPUtils.getString(this, "sessionId");
+        formCode = getIntent().getStringExtra("formCode");
+        // 如果formcode不是空的，则进入草稿
+        if(!TextUtils.isEmpty(formCode)) {
+            // 草稿
+            if("caogao".equals(formCode)) {
+                businessKey = getIntent().getStringExtra("businessKey");
+                // 获取草稿信息或者是审核信息
+                RequestServerGetInfoFromCaoGao();
+            }
+            // 否则就是审核的重新提交
+            else {
+                mTaskId = getIntent().getStringExtra("taskId");
+                txtProcess.setVisibility(View.VISIBLE);
+                mProcessXxre.setVisibility(View.VISIBLE);
+                mBtnCaogao.setVisibility(View.GONE);
+                mBtnCommit.setText("提交");
+                RequestServerGetInfoFromShenHe();
+                // 实现流程记录的adapter
+                mProcessXxre.setLayoutManager(new LinearLayoutManager(this));
+                mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
+                    @Override
+                    public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                        holder.setText(R.id.processNameContent, item.getName());
+                        holder.setText(R.id.name, item.getAssignee());
+                        holder.setText(R.id.startTimeContent, item.getCreateTime());
+                        holder.setText(R.id.completeTimeContent, item.getCompleteTime());
+                    }
+                };
+                mProcessXxre.setAdapter(mAdapter);
+            }
         }
     }
 
     /**
      * 获取草稿信息
      */
-    private void RequestServerGetInfo(String businessKey) {
-        String sessionId = SPUtils.getString(this, "sessionId");
+    private void RequestServerGetInfoFromCaoGao() {
         //创建请求队列
         RequestQueue Queue = NoHttp.newRequestQueue();
         //创建请求
         Request<QingjiaShenheResponse> request = new JavaBeanRequest<>(UrlConstance.URL_CAOGAOXIANG_INFO,
                 RequestMethod.POST, QingjiaShenheResponse.class);
         //添加url?key=value形式的参数
-        request.addHeader("sessionId", sessionId);
+        request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
         request.add("businessKey", businessKey);
         Queue.add(0, request, new OnResponseListener<QingjiaShenheResponse>() {
@@ -276,6 +256,177 @@ public class TouziXieyiActivity extends HeadBaseActivity {
                 }
             }
         });
+    }
+
+    /**
+     * 获取审核信息
+     */
+    private void RequestServerGetInfoFromShenHe() {
+        //创建请求队列
+        RequestQueue Queue = NoHttp.newRequestQueue();
+        //1-流程审核记录
+        //创建请求
+        Request<ProcessShenheHistoryRes> request = new JavaBeanRequest<>(UrlConstance.URL_GET_PROCESS_HESTORY,
+                RequestMethod.POST, ProcessShenheHistoryRes.class);
+        //添加url?key=value形式的参数
+        request.addHeader("sessionId", mSessionId);
+        request.add("taskId", mTaskId);
+
+        Queue.add(1, request, new OnResponseListener<ProcessShenheHistoryRes>() {
+
+            @Override
+            public void onStart(int what) {
+
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessShenheHistoryRes> response) {
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<ProcessShenheHistoryBean> data = response.get().getData();
+                    if (mAdapter != null) {
+                        mAdapter.replaceAll(data);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessShenheHistoryRes> response) {
+                Toast.makeText(TouziXieyiActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
+            }
+        });
+
+        //2-拉取页面数据
+        //创建请求
+        Request<QingjiaShenheResponse> request2 = new JavaBeanRequest<>(UrlConstance.URL_GET_PROCESS_INIT,
+                RequestMethod.POST, QingjiaShenheResponse.class);
+        //添加url?key=value形式的参数
+        request2.add("taskId", mTaskId);
+        Queue.add(0, request2, new OnResponseListener<QingjiaShenheResponse>() {
+
+            @Override
+            public void onStart(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.show();
+                }
+            }
+
+            @Override
+            public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<QingjiaShenheBean> shenheBeen = response.get().getData();
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            Log.d("Caogao", bean.getName());
+                            Log.d("Caogao", bean.getValue());
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "protocolDepartments":
+                                    mBumen.setText(value);
+                                    break;
+                                case "name1":
+                                    mNameJia.setText(value);
+                                    break;
+                                case "name2":
+                                    mNameYi.setText(value);
+                                    break;
+                                case "protocoltitle":
+                                    mDanwei.setText(value);
+                                    break;
+                                case "protocolContent":
+                                    mBeizhu.setText(value);
+                                    break;
+                                case "protocolId":
+                                    mBianhao.setText(value);
+                                    break;
+                                // 20171129/79d8fd22-9601-4c24-993a-cc9c0f9c066e.prop
+                                case "protocolEnclosure":
+                                    if(!TextUtils.isEmpty(bean.getLabel())) {
+                                        // 实时请求权限
+                                        CommonUtil.verifyStoragePermissions(TouziXieyiActivity.this);
+                                        mFilePathReturn = value;
+                                        mFileNameReturn = bean.getLabel();
+                                        if(!TextUtils.isEmpty(bean.getSize())) {
+                                            fileSize = Integer.parseInt(bean.getSize());
+                                        }
+                                        // 如果文件没有下载过，则开始下载
+                                        checkFileExisted();
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<QingjiaShenheResponse> response) {
+                Toast.makeText(TouziXieyiActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.dismiss();
+                }
+            }
+        });
+
+    }
+
+    @OnClick({R.id.tzxysb_bianhao, R.id.add_fujian, R.id.btn_uplaod, R.id.btn_cancel, R.id.rl_fujian, R.id.btn_caogao, R.id.btn_commit})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.tzxysb_bianhao:
+                if("0".equals(mBianhao.getTag())) {
+                    mBianhao.setTag("1");
+                    houQuFormCode();
+                }
+                break;
+            case R.id.add_fujian:
+                if("0".equals(mAddFujian.getTag())) {
+                    new LFilePicker()
+                            .withActivity(this)
+                            .withRequestCode(REQUESTCODE_FROM_ACTIVITY)
+                            .start();
+                }
+                break;
+            case R.id.btn_uplaod:
+                if("down".equals(mBtnUplaod.getTag().toString())) {
+                    mBtnUplaod.setVisibility(View.GONE);
+                    mBtnUplaod.setEnabled(false);
+                    RequestServerDownLoad();
+                } else {
+                    if (!TextUtils.isEmpty(mFilePath) && !TextUtils.isEmpty(mFilename)) {
+                        RequestServer(mFilePath, mFilename);
+                    }
+                }
+                break;
+            case R.id.btn_cancel:
+                break;
+            case R.id.rl_fujian:
+                break;
+            case R.id.btn_caogao:
+                if(!TextUtils.isEmpty(mFilePath) && TextUtils.isEmpty(mFilePathReturn)){
+                    Toast.makeText(TouziXieyiActivity.this, "您已选择附件，请先上传附件",Toast.LENGTH_LONG).show();
+                } else {
+                    RequestServerGoodsLingqu_Save(mDanwei.getText().toString().trim(),
+                            mBumen.getText().toString().trim(),
+                            mBianhao.getText().toString().trim(),
+                            mNameJia.getText().toString().trim(),
+                            mNameYi.getText().toString().trim(),
+                            mBeizhu.getText().toString().trim());
+                }
+                break;
+            case R.id.btn_commit:
+                jianYanshuju();
+                break;
+        }
     }
 
     @Override
@@ -531,15 +682,21 @@ public class TouziXieyiActivity extends HeadBaseActivity {
             Toast.makeText(this, "请填写乙方单位名称", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mBeizhu.getText().toString().trim())) {
             Toast.makeText(this, "请填写申报事项描述", Toast.LENGTH_SHORT).show();
+        }  else if(TextUtils.isEmpty(mFilePathReturn)){
+            Toast.makeText(this, "请上传附件",Toast.LENGTH_SHORT).show();
         } else {
-            RequestServerGoodsLingqu(
-                    mDanwei.getText().toString().trim(),
-                    mBumen.getText().toString().trim(),
-                    mBianhao.getText().toString().trim(),
-                    mNameJia.getText().toString().trim(),
-                    mNameYi.getText().toString().trim(),
-                    mBeizhu.getText().toString().trim()
-            );
+            if(!TextUtils.isEmpty(formCode) && !"caogao".equals(formCode)){
+                RequestServerReCommit();
+            } else {
+                RequestServerGoodsLingqu(
+                        mDanwei.getText().toString().trim(),
+                        mBumen.getText().toString().trim(),
+                        mBianhao.getText().toString().trim(),
+                        mNameJia.getText().toString().trim(),
+                        mNameYi.getText().toString().trim(),
+                        mBeizhu.getText().toString().trim()
+                );
+            }
         }
     }
 
@@ -706,13 +863,61 @@ public class TouziXieyiActivity extends HeadBaseActivity {
 
     }
 
-//    @Override
-//    public boolean handleMessage(Message msg) {
-//        switch (msg.what){
-//            case 1001:
-//                RequestServerDownLoad(mFilePathReturn);
-//                break;
-//        }
-//        return false;
-//    }
+    /**
+     * 提交页面数据，完成当前审核
+     */
+    private void RequestServerReCommit() {
+        StringBuilder json = new StringBuilder();
+        json.append("{")
+                .append("\"protocoltitle\":" + "\"" + mDanwei.getText().toString() + "\",")
+                .append("\"protocolDepartments\":" + "\"" + mBumen.getText().toString() + "\",")
+                .append("\"protocolId\":" + "\"" + mBianhao.getText().toString() + "\",")
+                .append("\"name1\":" + "\"" + mNameJia.getText().toString() + "\",")
+                .append("\"name2\":" + "\"" + mNameYi.getText().toString() + "\",")
+                .append("\"protocolContent\":" + "\"" + mBeizhu.getText().toString() + "\",")
+                .append("\"protocolEnclosure\":" + "\"" + mFilePathReturn + "\"")
+//                .append("\"comment\":" + "\"" + comment + "\"")
+                .append("}");
+
+        //创建请求队列
+        RequestQueue Queue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<ProcessJieguoResponse> requestCommit = new JavaBeanRequest<>(UrlConstance.URL_PROCESS_COMMIT,
+                RequestMethod.POST, ProcessJieguoResponse.class);
+        //添加url?key=value形式的参数
+        requestCommit.addHeader("sessionId", mSessionId);
+        requestCommit.add("taskId", mTaskId);
+        requestCommit.add("data", json.toString());
+        Queue.add(0, requestCommit, new OnResponseListener<ProcessJieguoResponse>() {
+
+            @Override
+            public void onStart(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.show();
+                }
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessJieguoResponse> response) {
+                if (null != response && null != response.get()) {
+                    if (response.get().getCode() == 200) {
+                        Toast.makeText(TouziXieyiActivity.this, "提交成功", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessJieguoResponse> response) {
+                Toast.makeText(TouziXieyiActivity.this, "提交失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.dismiss();
+                }
+            }
+        });
+    }
 }

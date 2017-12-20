@@ -177,7 +177,8 @@
                 android:background="@color/white"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="@dimen/dp_13">
+                android:padding="@dimen/dp_13"
+                android:tag="0">
 
                 <TextView
                     android:layout_width="wrap_content"

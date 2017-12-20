@@ -190,7 +190,7 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
                                 case "leave-return":
                                     mLlShenheyijian.setVisibility(View.VISIBLE);
                                     mShenheyijian.setFocusable(false);
-                                    mBtnCaogao.setVisibility(View.INVISIBLE);
+                                    mBtnCaogao.setVisibility(View.GONE);
                                     mBtnCommit.setText("完成");
                                     break;
                             }

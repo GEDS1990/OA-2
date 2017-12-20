@@ -207,7 +207,7 @@ public class YongcheActivity_shenhe extends HeadBaseActivity {
                                 case "car-return":
                                     mLlShenheyijian.setVisibility(View.VISIBLE);
                                     mShenheyijian.setFocusable(false);
-                                    mBtnCaogao.setVisibility(View.INVISIBLE);
+                                    mBtnCaogao.setVisibility(View.GONE);
                                     mBtnCommit.setText("完成");
                                     break;
                             }

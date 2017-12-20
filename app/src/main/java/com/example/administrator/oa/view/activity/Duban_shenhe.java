@@ -324,7 +324,6 @@ public class Duban_shenhe extends HeadBaseActivity {
 
     }
 
-
     /**
      * 提交页面数据，完成当前审核
      */
@@ -406,7 +405,7 @@ public class Duban_shenhe extends HeadBaseActivity {
      */
     private void RequestServerTuihui() {
         String yijian = mHuiqianyijian.getText().toString().trim();
-        if (!TextUtils.isEmpty(yijian)) {
+//        if (!TextUtils.isEmpty(yijian)) {
             //创建请求队列
             RequestQueue Queue = NoHttp.newRequestQueue();
             //创建请求
@@ -445,9 +444,9 @@ public class Duban_shenhe extends HeadBaseActivity {
                     }
                 }
             });
-        } else {
-            Toast.makeText(this, "请填写会签处理意见", Toast.LENGTH_SHORT).show();
-        }
+//        } else {
+//            Toast.makeText(this, "请填写会签处理意见", Toast.LENGTH_SHORT).show();
+//        }
     }
 
     /**

@@ -15,9 +15,13 @@ import android.widget.Toast;
 import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.FormBianmaBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
+import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
+import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.bean.ZijinDiaoboBean;
+import com.example.administrator.oa.view.bean.ZijngDiaoboshenheBean;
+import com.example.administrator.oa.view.bean.ZuzhiUserBean;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.SPUtils;
@@ -68,13 +72,24 @@ public class ZijinActivity extends HeadBaseActivity {
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
     Button mBtnCommit;
-    private CommonRecyclerAdapter<ZijinDiaoboBean> mAdapter;
-    private List<ZijinDiaoboBean> datas = new ArrayList<>();
-    private String mSessionId;
+    private CommonRecyclerAdapter<ZijinDiaoboBean> mGoodAdapter;
+    private List<ZijinDiaoboBean> mGoodDatas = new ArrayList<>();
     private String mUserName;
     private String mUserId;
     private String mDepartmentId;
     private String mDepartmentName;
+    // 流程审核记录
+    @BindView(R.id.txtProcess)
+    TextView txtProcess;
+    @BindView(R.id.xxreProcess)
+    XXRecycleView mProcessXxre;
+    private CommonRecyclerAdapter<ProcessShenheHistoryBean> mAdapter;
+    private List<ProcessShenheHistoryBean> datas = new ArrayList<>();
+    private String mSessionId;
+    // 审核信息
+    private String formCode = "";
+    private String mTaskId = "";
+    // 草稿信息
     private String processDefinitionId = "";
     private String businessKey = "";
 
@@ -98,13 +113,44 @@ public class ZijinActivity extends HeadBaseActivity {
         mDepartmentId = SPUtils.getString(this, "departmentId");
         mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
-        businessKey = getIntent().getStringExtra("businessKey");
         mName.setText(mUserName);
         mBumen.setText(mDepartmentName);
 
+        mSessionId = SPUtils.getString(this, "sessionId");
+        formCode = getIntent().getStringExtra("formCode");
+        // 如果formcode不是空的，则进入草稿
+        if(!TextUtils.isEmpty(formCode)) {
+            // 草稿
+            if("caogao".equals(formCode)) {
+                businessKey = getIntent().getStringExtra("businessKey");
+                // 获取草稿信息或者是审核信息
+                RequestServerGetInfoFromCaoGao();
+            }
+            // 否则就是审核的重新提交
+            else {
+                mTaskId = getIntent().getStringExtra("taskId");
+                txtProcess.setVisibility(View.VISIBLE);
+                mProcessXxre.setVisibility(View.VISIBLE);
+                mBtnCaogao.setVisibility(View.GONE);
+                mBtnCommit.setText("提交");
+                RequestServerGetInfoFromShenHe();
+                // 实现流程记录的adapter
+                mProcessXxre.setLayoutManager(new LinearLayoutManager(this));
+                mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
+                    @Override
+                    public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                        holder.setText(R.id.processNameContent, item.getName());
+                        holder.setText(R.id.name, item.getAssignee());
+                        holder.setText(R.id.startTimeContent, item.getCreateTime());
+                        holder.setText(R.id.completeTimeContent, item.getCompleteTime());
+                    }
+                };
+                mProcessXxre.setAdapter(mAdapter);
+            }
+        }
 
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CommonRecyclerAdapter<ZijinDiaoboBean>(this, datas, R.layout.item_zijing_diaobo) {
+        mGoodAdapter = new CommonRecyclerAdapter<ZijinDiaoboBean>(this, mGoodDatas, R.layout.item_zijing_diaobo) {
             @Override
             public void convert(CommonViewHolder holder, final ZijinDiaoboBean item, int position, boolean b) {
 
@@ -116,38 +162,25 @@ public class ZijinActivity extends HeadBaseActivity {
                 holder.getView(R.id.delet).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mAdapter.remove(item);
+                        mGoodAdapter.remove(item);
                     }
                 });
             }
         };
-        mXxre.setAdapter(mAdapter);
-
-        checkFormCaoGao();
-    }
-
-    /**
-     * 检测是否是从草稿箱界面跳转过来
-     */
-    private void checkFormCaoGao(){
-        if(!TextUtils.isEmpty(businessKey)){
-            // 获取草稿信息
-            RequestServerGetInfo(businessKey);
-        }
+        mXxre.setAdapter(mGoodAdapter);
     }
 
     /**
      * 获取草稿信息
      */
-    private void RequestServerGetInfo(String businessKey) {
-        String sessionId = SPUtils.getString(this, "sessionId");
+    private void RequestServerGetInfoFromCaoGao() {
         //创建请求队列
         RequestQueue Queue = NoHttp.newRequestQueue();
         //创建请求
         Request<QingjiaShenheResponse> request = new JavaBeanRequest<>(UrlConstance.URL_CAOGAOXIANG_INFO,
                 RequestMethod.POST, QingjiaShenheResponse.class);
         //添加url?key=value形式的参数
-        request.addHeader("sessionId", sessionId);
+        request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
         request.add("businessKey", businessKey);
         Queue.add(0, request, new OnResponseListener<QingjiaShenheResponse>() {
@@ -194,7 +227,7 @@ public class ZijinActivity extends HeadBaseActivity {
                     }
                     // 把放入list里的物品明细添加进adapter里，展示出来
                     for (int i = 0;i< pay.size();i++) {
-                        mAdapter.add(new ZijinDiaoboBean(pay.get(i), income.get(i), money.get(i)));
+                        mGoodAdapter.add(new ZijinDiaoboBean(pay.get(i), income.get(i), money.get(i)));
                     }
                 }
             }
@@ -211,6 +244,122 @@ public class ZijinActivity extends HeadBaseActivity {
                 }
             }
         });
+    }
+
+    /**
+     * 获取审核信息
+     */
+    private void RequestServerGetInfoFromShenHe() {
+        //创建请求队列
+        RequestQueue Queue = NoHttp.newRequestQueue();
+        //1-流程审核记录
+        //创建请求
+        Request<ProcessShenheHistoryRes> request = new JavaBeanRequest<>(UrlConstance.URL_GET_PROCESS_HESTORY,
+                RequestMethod.POST, ProcessShenheHistoryRes.class);
+        //添加url?key=value形式的参数
+        request.addHeader("sessionId", mSessionId);
+        request.add("taskId", mTaskId);
+        Queue.add(1, request, new OnResponseListener<ProcessShenheHistoryRes>() {
+
+            @Override
+            public void onStart(int what) {
+
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessShenheHistoryRes> response) {
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<ProcessShenheHistoryBean> data = response.get().getData();
+                    if (mAdapter != null) {
+                        mAdapter.replaceAll(data);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessShenheHistoryRes> response) {
+                Toast.makeText(ZijinActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
+            }
+        });
+
+        //2-拉取页面数据
+        //创建请求
+        Request<QingjiaShenheResponse> request2 = new JavaBeanRequest<>(UrlConstance.URL_GET_PROCESS_INIT,
+                RequestMethod.POST, QingjiaShenheResponse.class);
+        //添加url?key=value形式的参数
+        request2.add("taskId", mTaskId);
+        Queue.add(0, request2, new OnResponseListener<QingjiaShenheResponse>() {
+
+            @Override
+            public void onStart(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.show();
+                }
+            }
+
+            @Override
+            public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<QingjiaShenheBean> shenheBeen = response.get().getData();
+                    ArrayList<String> pay = new ArrayList<>(10);
+                    ArrayList<String> income = new ArrayList<>(10);
+                    ArrayList<String> money = new ArrayList<>(10);
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if (!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "transactor":
+                                    mName.setText(value);
+                                    break;
+                                case "departments":
+                                    mBumen.setText(value);
+                                    break;
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                            }
+                        }
+                        // 处理物品明细
+                        if (!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
+                            if (bean.getLabel().startsWith("pay")) {
+                                pay.add(bean.getValue());
+                            }
+                            if (bean.getLabel().startsWith("income")) {
+                                income.add(bean.getValue());
+                            }
+                            if (bean.getLabel().startsWith("money")) {
+                                money.add(bean.getValue());
+                            }
+                        }
+                    }
+
+                    // 把放入list里的物品明细添加进adapter里，展示出来
+                    for (int i = 0;i< pay.size();i++) {
+                        mGoodAdapter.add(new ZijinDiaoboBean(pay.get(i), income.get(i), money.get(i)));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<QingjiaShenheResponse> response) {
+                Toast.makeText(ZijinActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.dismiss();
+                }
+            }
+        });
+
     }
 
     // , R.id.ll_fenguanleader,
@@ -234,8 +383,8 @@ public class ZijinActivity extends HeadBaseActivity {
                 } else if (TextUtils.isEmpty(money)) {
                     Toast.makeText(this, "请输入金额", Toast.LENGTH_SHORT).show();
                 } else {
-                    mAdapter.add(new ZijinDiaoboBean(pay, income, money));
-                    mXxre.scrollToPosition(mAdapter.getItemCount() - 1);
+                    mGoodAdapter.add(new ZijinDiaoboBean(pay, income, money));
+                    mXxre.scrollToPosition(mGoodAdapter.getItemCount() - 1);
                     mPayAccount.setText("");
                     mShouKuanAccount.setText("");
                     mMoney.setText("");
@@ -266,10 +415,14 @@ public class ZijinActivity extends HeadBaseActivity {
 //            Toast.makeText(this, "请选择分管领导", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mBianhao.getText().toString().trim())) {
             Toast.makeText(this, "请点击获取编号", Toast.LENGTH_SHORT).show();
-        } else if (mAdapter.getDatas().size() < 1) {
+        } else if (mGoodAdapter.getDatas().size() < 1) {
             Toast.makeText(this, "请填写资金调拨明细单，并确认添加", Toast.LENGTH_SHORT).show();
         } else {
-            RequestServerGoodsLingqu(mBianhao.getText().toString().trim());
+            if(!TextUtils.isEmpty(formCode) && !"caogao".equals(formCode)){
+                RequestServerReCommit();
+            } else {
+                RequestServerGoodsLingqu(mBianhao.getText().toString().trim());
+            }
         }
 
     }
@@ -295,8 +448,8 @@ public class ZijinActivity extends HeadBaseActivity {
 //                .append("\"manager\":" + "\"" + mZuzhiUserBean.getId() + "\",");
 
         for (int i = 0; i < 10; i++) {
-            if (i <= mAdapter.getDatas().size() - 1) {
-                ZijinDiaoboBean bean = mAdapter.getDatas().get(i);
+            if (i <= mGoodAdapter.getDatas().size() - 1) {
+                ZijinDiaoboBean bean = mGoodAdapter.getDatas().get(i);
                 json.append("\"pay" + (i + 1) + "\":" + "\"" + bean.getFukuanAccount() + "\",")
                         .append("\"income" + (i + 1) + "\":" + "\"" + bean.getShoukuanAccount() + "\",")
                         .append("\"money" + (i + 1) + "\":" + "\"" + bean.getMoney() + "\",");
@@ -411,8 +564,8 @@ public class ZijinActivity extends HeadBaseActivity {
 //                .append("\"manager\":" + "\"" + mZuzhiUserBean.getId() + "\",");
 
         for (int i = 0; i < 10; i++) {
-            if (i <= mAdapter.getDatas().size() - 1) {
-                ZijinDiaoboBean bean = mAdapter.getDatas().get(i);
+            if (i <= mGoodAdapter.getDatas().size() - 1) {
+                ZijinDiaoboBean bean = mGoodAdapter.getDatas().get(i);
                 json.append("\"pay" + (i + 1) + "\":" + "\"" + bean.getFukuanAccount() + "\",")
                         .append("\"income" + (i + 1) + "\":" + "\"" + bean.getShoukuanAccount() + "\",")
                         .append("\"money" + (i + 1) + "\":" + "\"" + bean.getMoney() + "\",");
@@ -454,6 +607,84 @@ public class ZijinActivity extends HeadBaseActivity {
             @Override
             public void onFailed(int what, Response<ProcessJieguoResponse> response) {
                 Toast.makeText(ZijinActivity.this, "保存草稿失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    /**
+     * 提交页面数据，完成当前审核
+     */
+    private void RequestServerReCommit() {
+        //拼接data的json
+        String name = mName.getText().toString();
+        String danwei = mBumen.getText().toString();
+        String biahao = mBianhao.getText().toString();
+
+        StringBuilder json = new StringBuilder();
+        json.append("{")
+                .append("\"departments_name\":" + "\"" + danwei + "\",")
+                .append("\"name\":" + "\"" + name + "\",")
+                .append("\"id\":" + "\"" + biahao + "\",");
+//                .append("\"leader\":" + "\"" + leadersID.toString() + "\",")
+//                .append("\"leader_name\":" + "\"" + leadersName.toString() + "\",")
+//                .append("\"comment\":" + "\"" + comment + "\",");
+
+        for (int i = 0; i < 10; i++) {
+            if (i <= mGoodAdapter.getDatas().size() - 1) {
+                ZijinDiaoboBean bean = mGoodAdapter.getDatas().get(i);
+                json.append("\"pay" + (i + 1) + "\":" + "\"" + bean.getFukuanAccount() + "\",")
+                        .append("\"income" + (i + 1) + "\":" + "\"" + bean.getShoukuanAccount() + "\",")
+                        .append("\"money" + (i + 1) + "\":" + "\"" + bean.getMoney() + "\",");
+            } else {
+                json.append("\"pay" + (i + 1) + "\":" + "\"\",")
+                        .append("\"income" + (i + 1) + "\":" + "\"\",")
+                        .append("\"money" + (i + 1) + "\":" + "\"\",");
+            }
+        }
+
+        json.deleteCharAt(json.length() - 1);
+        json.append("}");
+
+        //创建请求队列
+        RequestQueue Queue = NoHttp.newRequestQueue();
+
+        //1-流程审核记录
+        //创建请求
+        Request<ProcessJieguoResponse> requestCommit = new JavaBeanRequest<>(UrlConstance.URL_PROCESS_COMMIT,
+                RequestMethod.POST, ProcessJieguoResponse.class);
+        //添加url?key=value形式的参数
+        requestCommit.addHeader("sessionId", mSessionId);
+        requestCommit.add("taskId", mTaskId);
+        requestCommit.add("data", json.toString());
+        Queue.add(0, requestCommit, new OnResponseListener<ProcessJieguoResponse>() {
+
+            @Override
+            public void onStart(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.show();
+                }
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessJieguoResponse> response) {
+                if (null != response && null != response.get()) {
+                    if (response.get().getCode() == 200) {
+                        Toast.makeText(ZijinActivity.this, "提交成功", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessJieguoResponse> response) {
+                Toast.makeText(ZijinActivity.this, "提交失败", Toast.LENGTH_SHORT).show();
             }
 
             @Override

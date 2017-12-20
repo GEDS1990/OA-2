@@ -251,6 +251,9 @@ public class JiekuanApplyActivity_shenhe extends HeadBaseActivity {
                                 // 现金借款会签
                                 case "loan-jion-comment":
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
+                                    mShenheyijian.requestFocus();
+                                    mShenheyijian.setFocusable(true);
+                                    mShenheyijian.setFocusableInTouchMode(true);
                                     mBtnCaogao.setText("回退发起人");
                                     mBtnCommit.setText("完成");
                                     break;
@@ -290,20 +293,30 @@ public class JiekuanApplyActivity_shenhe extends HeadBaseActivity {
                                     mShiyou.setText(value);
                                     break;
                                 case "jkje":
-                                    mMoney.setText(value);
+                                    mMoney.setText(value+"元");
                                     break;
                                 case "comment":
                                     mShenheyijian.setText(value);
+                                    break;
+                                case "leader":
+                                    if (TextUtils.isEmpty(bean.getLabel())) {
+                                        return;
+                                    }
+                                    String[] ids = value.split(",");
+                                    String[] names = bean.getLabel().split(",");
+                                    for (int i=0; i<ids.length;i++) {
+                                        mHuiqianAdapter.add(new ZuzhiUserBean(ids[i], names[i]));
+                                    }
                                     break;
 
                             }
                         }
 
                         //当有type为userpicker的时候说明是可以发起会签的节点
-                        if (!TextUtils.isEmpty(bean.getType()) && "userpicker".equals(bean.getType())) {
-                            mLlHuiqianren.setVisibility(View.VISIBLE);
-                            mXxreHuiqianren.setVisibility(View.VISIBLE);
-                        }
+//                        if (!TextUtils.isEmpty(bean.getType()) && "userpicker".equals(bean.getType())) {
+//                            mLlHuiqianren.setVisibility(View.VISIBLE);
+//                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+//                        }
                     }
                 }
             }

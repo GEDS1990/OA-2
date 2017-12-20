@@ -14,6 +14,8 @@ import android.widget.Toast;
 import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.FormBianmaBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
+import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
+import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.bean.WorkFromTypeBean;
@@ -71,11 +73,18 @@ public class DubanActivity extends HeadBaseActivity {
     @BindView(R.id.btn_commit)
     Button mBtnCommit;
 
+    // 流程审核记录
+    @BindView(R.id.txtProcess)
+    TextView txtProcess;
+    @BindView(R.id.xxreProcess)
+    XXRecycleView mProcessXxre;
+    private CommonRecyclerAdapter<ProcessShenheHistoryBean> mAdapter;
+    private List<ProcessShenheHistoryBean> datas = new ArrayList<>();
     private String mSessionId;
-    private String mUserName;
-    private String mUserId;
-    private String mDepartmentId;
-    private String mDepartmentName;
+    // 审核信息
+    private String formCode = "";
+    private String mTaskId = "";
+    // 草稿信息
     private String processDefinitionId = "";
     private String businessKey = "";
 
@@ -94,37 +103,51 @@ public class DubanActivity extends HeadBaseActivity {
 
     private void initThisView() {
         mSessionId = SPUtils.getString(this, "sessionId");
-        mUserName = SPUtils.getString(this, "userName");
-        mUserId = SPUtils.getString(this, "userId");
-        mDepartmentId = SPUtils.getString(this, "departmentId");
-        mDepartmentName = SPUtils.getString(this, "departmentName");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
-        businessKey = getIntent().getStringExtra("businessKey");
-        checkFormCaoGao();
-    }
-
-    /**
-     * 检测是否是从草稿箱界面跳转过来
-     */
-    private void checkFormCaoGao(){
-        if(!TextUtils.isEmpty(businessKey)){
-            // 获取草稿信息
-            RequestServerGetInfo(businessKey);
+        formCode = getIntent().getStringExtra("formCode");
+        // 如果formcode不是空的，则进入草稿
+        if(!TextUtils.isEmpty(formCode)) {
+            // 草稿
+            if("caogao".equals(formCode)) {
+                businessKey = getIntent().getStringExtra("businessKey");
+                // 获取草稿信息或者是审核信息
+                RequestServerGetInfoFromCaoGao();
+            }
+            // 否则就是审核的重新提交
+            else {
+                mTaskId = getIntent().getStringExtra("taskId");
+                txtProcess.setVisibility(View.VISIBLE);
+                mProcessXxre.setVisibility(View.VISIBLE);
+                mBtnCaogao.setVisibility(View.GONE);
+                mBtnCommit.setText("提交");
+                RequestServerGetInfoFromShenHe();
+                // 实现流程记录的adapter
+                mProcessXxre.setLayoutManager(new LinearLayoutManager(this));
+                mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
+                    @Override
+                    public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                        holder.setText(R.id.processNameContent, item.getName());
+                        holder.setText(R.id.name, item.getAssignee());
+                        holder.setText(R.id.startTimeContent, item.getCreateTime());
+                        holder.setText(R.id.completeTimeContent, item.getCompleteTime());
+                    }
+                };
+                mProcessXxre.setAdapter(mAdapter);
+            }
         }
     }
 
     /**
      * 获取草稿信息
      */
-    private void RequestServerGetInfo(String businessKey) {
-        String sessionId = SPUtils.getString(this, "sessionId");
+    private void RequestServerGetInfoFromCaoGao() {
         //创建请求队列
         RequestQueue Queue = NoHttp.newRequestQueue();
         //创建请求
         Request<QingjiaShenheResponse> request = new JavaBeanRequest<>(UrlConstance.URL_CAOGAOXIANG_INFO,
                 RequestMethod.POST, QingjiaShenheResponse.class);
         //添加url?key=value形式的参数
-        request.addHeader("sessionId", sessionId);
+        request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
         request.add("businessKey", businessKey);
         Queue.add(0, request, new OnResponseListener<QingjiaShenheResponse>() {
@@ -197,6 +220,119 @@ public class DubanActivity extends HeadBaseActivity {
         });
     }
 
+    /**
+     * 获取审核信息
+     */
+    private void RequestServerGetInfoFromShenHe() {
+        //创建请求队列
+        RequestQueue Queue = NoHttp.newRequestQueue();
+        //1-流程审核记录
+        //创建请求
+        Request<ProcessShenheHistoryRes> request = new JavaBeanRequest<>(UrlConstance.URL_GET_PROCESS_HESTORY,
+                RequestMethod.POST, ProcessShenheHistoryRes.class);
+        //添加url?key=value形式的参数
+        request.addHeader("sessionId", mSessionId);
+        request.add("taskId", mTaskId);
+        Queue.add(1, request, new OnResponseListener<ProcessShenheHistoryRes>() {
+
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessShenheHistoryRes> response) {
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<ProcessShenheHistoryBean> data = response.get().getData();
+                    if (mAdapter != null) {
+                        mAdapter.replaceAll(data);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessShenheHistoryRes> response) {
+                Toast.makeText(DubanActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
+            }
+        });
+
+        //2-拉取页面数据
+        //创建请求
+        Request<QingjiaShenheResponse> request2 = new JavaBeanRequest<>(UrlConstance.URL_GET_PROCESS_INIT,
+                RequestMethod.POST, QingjiaShenheResponse.class);
+        //添加url?key=value形式的参数
+        request2.add("taskId", mTaskId);
+        Queue.add(0, request2, new OnResponseListener<QingjiaShenheResponse>() {
+
+            @Override
+            public void onStart(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.show();
+                }
+            }
+
+            @Override
+            public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<QingjiaShenheBean> shenheBeen = response.get().getData();
+                    //按顺序填写数据
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "work_name":
+                                    mWorkfrom.setText(value);
+                                    break;
+                                case "department1":
+                                    mFirstBumen.setText(value);
+                                    break;
+                                case "name1":
+                                    mFuzeren1.setText(value);
+                                    break;
+                                case "department2":
+                                    mSecondBumen.setText(value);
+                                    break;
+                                case "name2":
+                                    mFuzeren2.setText(value);
+                                    break;
+                                case "date":
+                                    mDate.setText(value);
+                                    break;
+                                case "term":
+                                    mQixian.setText(value);
+                                    break;
+                                case "content":
+                                    mContent.setText(value);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<QingjiaShenheResponse> response) {
+                Toast.makeText(DubanActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.dismiss();
+                }
+            }
+        });
+
+    }
+
     @OnClick({R.id.gzdbd_bianhao, R.id.ll_workfrom, R.id.ll_date, R.id.btn_caogao, R.id.btn_commit})
     public void onViewClicked(View view) {
         switch (view.getId()) {
@@ -210,7 +346,7 @@ public class DubanActivity extends HeadBaseActivity {
                 HuoquWorkNameAndID();
                 break;
             case R.id.ll_date:
-                selectDate(mDate, "");
+                selectDate("", mDate, "");
                 break;
             case R.id.btn_caogao:
                 RequestServerGoodsLingqu_Save(
@@ -328,17 +464,21 @@ public class DubanActivity extends HeadBaseActivity {
         } else if (TextUtils.isEmpty(mContent.getText().toString().trim())) {
             Toast.makeText(this, "请填写督办内容", Toast.LENGTH_SHORT).show();
         } else {
-            RequestServerGoodsLingqu(
-                    mWorkfrom.getText().toString().trim(),
-                    mBianhao.getText().toString().trim(),
-                    mFirstBumen.getText().toString().trim(),
-                    mFuzeren1.getText().toString().trim(),
-                    mSecondBumen.getText().toString().trim(),
-                    mFuzeren2.getText().toString().trim(),
-                    mDate.getText().toString().trim(),
-                    mQixian.getText().toString().trim(),
-                    mContent.getText().toString().trim()
-            );
+            if(!TextUtils.isEmpty(formCode) && !"caogao".equals(formCode)){
+                RequestServerReCommit();
+            } else {
+                RequestServerGoodsLingqu(
+                        mWorkfrom.getText().toString().trim(),
+                        mBianhao.getText().toString().trim(),
+                        mFirstBumen.getText().toString().trim(),
+                        mFuzeren1.getText().toString().trim(),
+                        mSecondBumen.getText().toString().trim(),
+                        mFuzeren2.getText().toString().trim(),
+                        mDate.getText().toString().trim(),
+                        mQixian.getText().toString().trim(),
+                        mContent.getText().toString().trim()
+                );
+            }
         }
 
     }
@@ -451,7 +591,8 @@ public class DubanActivity extends HeadBaseActivity {
      * 保存草稿
      */
     private void RequestServerGoodsLingqu_Save(String workfrom, String bianhao
-            , String firstBumen, String fuzeren1, String secondBumen, String fuzeren2, String date, String qixian, String content) {
+            , String firstBumen, String fuzeren1, String secondBumen, String fuzeren2,
+                                               String date, String qixian, String content) {
         //创建请求队列
         RequestQueue Queue = NoHttp.newRequestQueue();
         //创建请求
@@ -499,6 +640,82 @@ public class DubanActivity extends HeadBaseActivity {
             @Override
             public void onFailed(int what, Response<ProcessJieguoResponse> response) {
                 Toast.makeText(DubanActivity.this, "保存草稿失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    /**
+     * 提交页面数据，完成当前审核
+     */
+    private void RequestServerReCommit() {
+        //拼接data的json
+        String workfrom = mWorkfrom.getText().toString().trim();
+        String bianhao = mBianhao.getText().toString().trim();
+        String firstbumen = mFirstBumen.getText().toString().trim();
+        String fuzeren1 = mFuzeren1.getText().toString().trim();
+        String secondbumen = mSecondBumen.getText().toString().trim();
+        String fuzeren2 = mFuzeren2.getText().toString().trim();
+        String date = mDate.getText().toString().trim();
+        String qixian = mQixian.getText().toString().trim();
+        String content = mContent.getText().toString().trim();
+
+        StringBuilder json = new StringBuilder();
+        json.append("{")
+                .append("\"id\":" + "\"" + bianhao + "\",")
+                .append("\"work_name\":" + "\"" + workfrom + "\",")
+                .append("\"department1\":" + "\"" + firstbumen + "\",")
+                .append("\"name1\":" + "\"" + fuzeren1 + "\",")
+                .append("\"department2\":" + "\"" + secondbumen + "\",")
+                .append("\"name2\":" + "\"" + fuzeren2 + "\",")
+                .append("\"date\":" + "\"" + date + "\",")
+                .append("\"term\":" + "\"" + qixian + "\",")
+                .append("\"content\":" + "\"" + content + "\",")
+//                .append("\"user\":" + "\"" + banlirenId + "\",")
+//                .append("\"user_name\":" + "\"" + mTvBanliren.getText().toString() + "\"")
+                .append("}");
+
+        //创建请求队列
+        RequestQueue Queue = NoHttp.newRequestQueue();
+
+        //1-流程审核记录
+        //创建请求
+        Request<ProcessJieguoResponse> requestCommit = new JavaBeanRequest<>(UrlConstance.URL_PROCESS_COMMIT,
+                RequestMethod.POST, ProcessJieguoResponse.class);
+        //添加url?key=value形式的参数
+        requestCommit.addHeader("sessionId", mSessionId);
+        requestCommit.add("taskId", mTaskId);
+        requestCommit.add("data", json.toString());
+        Queue.add(0, requestCommit, new OnResponseListener<ProcessJieguoResponse>() {
+
+            @Override
+            public void onStart(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.show();
+                }
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessJieguoResponse> response) {
+                if (null != response && null != response.get()) {
+                    if (response.get().getCode() == 200) {
+                        Toast.makeText(DubanActivity.this, "提交成功", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                } else {
+                    Toast.makeText(DubanActivity.this, "提交失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessJieguoResponse> response) {
+                Toast.makeText(DubanActivity.this, "提交失败", Toast.LENGTH_SHORT).show();
             }
 
             @Override

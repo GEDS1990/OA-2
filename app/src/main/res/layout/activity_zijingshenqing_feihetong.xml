@@ -7,7 +7,11 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="65dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -208,10 +212,25 @@
                     <!--android:src="@drawable/icon_reimbursement_mail"/>-->
             <!--</LinearLayout>-->
 
+            <TextView
+                android:id="@+id/txtProcess"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/blue5"
+                android:layout_marginTop="10dp"
+                android:padding="@dimen/dp_10"
+                android:text="流程审核记录"
+                android:textColor="@color/white"
+                android:visibility="gone"/>
+
+            <com.lsh.XXRecyclerview.XXRecycleView
+                android:id="@+id/xxreProcess"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
         </LinearLayout>
-
     </ScrollView>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

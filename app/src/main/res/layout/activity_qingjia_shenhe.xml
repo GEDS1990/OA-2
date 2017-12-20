@@ -244,7 +244,7 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="@dimen/dp_13"
-                >
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -261,8 +261,7 @@
                     android:gravity="right"
                     android:layout_marginLeft="@dimen/dp_10"
                     android:background="@color/white"
-                    android:textSize="@dimen/dp_15"
-                    android:text="同意"/>
+                    android:textSize="@dimen/dp_15"/>
             </LinearLayout>
 
             <TextView

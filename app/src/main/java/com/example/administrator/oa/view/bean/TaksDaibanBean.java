@@ -21,6 +21,8 @@ public class TaksDaibanBean {
     private String presentationSubject;
     // 流程定义实例ID
     private String processId;
+    // 表单code，如果是回退后重新编辑，则跳入编辑界面
+    private String formCode;
 
     public String getAssignee() {
         return assignee;
@@ -75,5 +77,13 @@ public class TaksDaibanBean {
 
     public void setProcessId(String processId) {
         this.processId = processId;
+    }
+
+    public String getFormCode() {
+        return formCode;
+    }
+
+    public void setFormCode(String formCode) {
+        this.formCode = formCode;
     }
 }

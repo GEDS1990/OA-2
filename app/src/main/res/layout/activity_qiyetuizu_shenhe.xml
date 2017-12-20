@@ -172,7 +172,7 @@
 
                 <TextView
                     style="@style/WorkInfoLeftTextView"
-                    android:text="会签人："/>
+                    android:text="会签人"/>
 
                 <TextView
                     android:id="@+id/tv_huiqian"
@@ -214,6 +214,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/dp_10"
                     android:hint="请输入办理意见"
+                    android:gravity="right"
                     android:layout_weight="1"
                     android:background="@color/white"
                     android:lineSpacingExtra="@dimen/dp_3"
@@ -236,7 +237,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="审核意见："
+                    android:text="审核意见"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 

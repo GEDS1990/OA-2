@@ -168,7 +168,6 @@
                     android:gravity="right"
                     android:layout_marginLeft="@dimen/dp_10"
                     android:layout_weight="1"
-                    android:hint="请输入出差地点（必填）"
                     android:maxLines="3"
                     android:textSize="@dimen/dp_15"/>
             </LinearLayout>
@@ -196,7 +195,6 @@
                     android:gravity="right"
                     android:layout_marginLeft="@dimen/dp_10"
                     android:layout_weight="1"
-                    android:hint="请输入出差事由（必填）"
                     android:lineSpacingExtra="@dimen/dp_3"
                     android:maxLines="9"
                     android:textSize="@dimen/dp_15"/>
@@ -226,7 +224,6 @@
                     android:layout_marginLeft="@dimen/dp_10"
                     android:layout_weight="1"
                     android:background="@color/white"
-                    android:hint="请输入需要备注的信息（选填）"
                     android:lineSpacingExtra="@dimen/dp_3"
                     android:maxLines="9"
                     android:textSize="@dimen/dp_15"/>
@@ -259,7 +256,6 @@
                     android:gravity="right"
                     android:layout_marginLeft="@dimen/dp_10"
                     android:background="@color/white"
-                    android:text="同意"
                     android:textSize="@dimen/dp_15"/>
             </LinearLayout>
 

@@ -237,12 +237,12 @@ public class WorkConnection_shenhe extends HeadBaseActivity {
                                 case "contact-notice":
                                     mLlShenheyijian.setVisibility(View.VISIBLE);
                                     mShenheyijian.setFocusable(false);
-                                    mBtnCaogao.setVisibility(View.INVISIBLE);
+                                    mBtnCaogao.setVisibility(View.GONE);
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 回退之后
                                 case "contact-request":
-                                    mBtnCaogao.setVisibility(View.INVISIBLE);
+                                    mBtnCaogao.setVisibility(View.GONE);
                                     mBtnCommit.setText("提交");
                                     break;
                             }
@@ -274,6 +274,16 @@ public class WorkConnection_shenhe extends HeadBaseActivity {
                                     break;
                                 case "comment":
                                     mShenheyijian.setText(value);
+                                    break;
+                                case "leader":
+                                    if (TextUtils.isEmpty(bean.getLabel())) {
+                                        return;
+                                    }
+                                    String[] ids = value.split(",");
+                                    String[] names = bean.getLabel().split(",");
+                                    for (int i=0; i<ids.length;i++) {
+                                        mHuiqianAdapter.add(new ZuzhiUserBean(ids[i], names[i]));
+                                    }
                                     break;
                             }
                         }
@@ -350,7 +360,6 @@ public class WorkConnection_shenhe extends HeadBaseActivity {
         //添加url?key=value形式的参数
         requestCommit.addHeader("sessionId", mSessionId);
         requestCommit.add("taskId", mTaskId);
-
         requestCommit.add("data", json.toString());
         Queue.add(0, requestCommit, new OnResponseListener<ProcessJieguoResponse>() {
 

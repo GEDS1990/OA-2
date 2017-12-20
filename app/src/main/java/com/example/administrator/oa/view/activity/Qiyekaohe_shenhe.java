@@ -406,6 +406,7 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
                                 case "assessment-return":
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
                                     mBtnCaogao.setText("回退发起人");
+                                    mBtnCommit.setText("完成");
                                     break;
                                 // 企业考核领导审核表
                                 case "assessment-leader":
@@ -443,6 +444,16 @@ public class Qiyekaohe_shenhe extends HeadBaseActivity {
                                     break;
                                 case "comment":
                                     mShenheyijian.setText(value);
+                                    break;
+                                case "leader":
+                                    if (TextUtils.isEmpty(bean.getLabel())) {
+                                        return;
+                                    }
+                                    String[] ids = value.split(",");
+                                    String[] names = bean.getLabel().split(",");
+                                    for (int i=0; i<ids.length;i++) {
+                                        mHuiqianAdapter.add(new ZuzhiUserBean(ids[i], names[i]));
+                                    }
                                     break;
                                 case "cost":
                                     wuyeshuidian.setText(value);

@@ -229,6 +229,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/dp_10"
+                    android:gravity="right"
+                    android:hint="请输入办理意见"
                     android:layout_weight="1"
                     android:background="@color/white"
                     android:textSize="@dimen/dp_15"/>

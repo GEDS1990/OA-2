@@ -11,16 +11,36 @@
         android:orientation="vertical"
         >
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/blue2">
+        <RelativeLayout
+            android:id="@+id/dialog_back"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_centerInParent="true"
+                android:layout_marginLeft="15dp"
+                android:src="@drawable/back"
+                />
+        </RelativeLayout>
         <TextView
             android:id="@+id/dialog_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/blue2"
+
             android:padding="@dimen/dp_10"
             android:text="标题"
             android:singleLine="true"
             android:textColor="@color/white"
             android:textSize="@dimen/dp_16"/>
+        </LinearLayout>
 
         <com.lsh.XXRecyclerview.XXRecycleView
             android:id="@+id/dialog_xxre"

@@ -34,7 +34,7 @@
                     android:id="@+id/textView3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="来文单位 :"
+                    android:text="来文单位"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -63,7 +63,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="文件标题 :"
+                    android:text="文件标题"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -91,7 +91,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="呈      请 :"
+                    android:text="呈请"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -119,7 +119,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="文      号 :"
+                    android:text="文号"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -150,7 +150,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="备      注 :"
+                    android:text="备注"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 
@@ -174,7 +174,8 @@
                 android:background="@color/white"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="@dimen/dp_13">
+                android:padding="@dimen/dp_13"
+                android:tag="0">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -252,11 +253,11 @@
                 android:id="@+id/ll_huiqianren"
                 style="@style/WorkInfoLinearLayout"
                 android:layout_marginTop="@dimen/dp_10"
-                >
+                android:visibility="gone">
 
                 <TextView
                     style="@style/WorkInfoLeftTextView"
-                    android:text="会签人："/>
+                    android:text="会签人"/>
 
                 <TextView
                     android:id="@+id/tv_huiqian"
@@ -282,7 +283,8 @@
                 android:background="@color/white"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="@dimen/dp_13">
+                android:padding="@dimen/dp_13"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -296,6 +298,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/dp_10"
+                    android:gravity="right"
+                    android:hint="请输入办理意见"
                     android:layout_weight="1"
                     android:background="@color/white"
                     android:lineSpacingExtra="@dimen/dp_3"

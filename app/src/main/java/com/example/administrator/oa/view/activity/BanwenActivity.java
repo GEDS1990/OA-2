@@ -1,13 +1,10 @@
 package com.example.administrator.oa.view.activity;
 
-import android.Manifest;
 import android.content.Intent;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -22,6 +19,8 @@ import android.widget.Toast;
 import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.FormBianmaBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
+import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
+import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
@@ -29,7 +28,9 @@ import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.CommonUtil;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.leon.lfilepickerlibrary.LFilePicker;
-import com.tbruyelle.rxpermissions.RxPermissions;
+import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
+import com.lsh.XXRecyclerview.CommonViewHolder;
+import com.lsh.XXRecyclerview.XXRecycleView;
 import com.yanzhenjie.nohttp.FileBinary;
 import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.NoHttp;
@@ -43,17 +44,12 @@ import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import rx.functions.Action1;
 
 /**
  * Created by Administrator on 2017/7/6.
@@ -89,9 +85,21 @@ public class BanwenActivity extends HeadBaseActivity {
     @BindView(R.id.rl_fujian)
     RelativeLayout mRlFujian;
 
+    // 流程审核记录
+    @BindView(R.id.txtProcess)
+    TextView txtProcess;
+    @BindView(R.id.xxreProcess)
+    XXRecycleView mProcessXxre;
+    private CommonRecyclerAdapter<ProcessShenheHistoryBean> mAdapter;
+    private List<ProcessShenheHistoryBean> datas = new ArrayList<>();
+    private String mSessionId;
+    // 审核信息
+    private String formCode = "";
+    private String mTaskId = "";
     // 草稿信息
     private String processDefinitionId = "";
     private String businessKey = "";
+
     // 附件信息
     private int REQUESTCODE_FROM_ACTIVITY = 1002;
     private String mFilename = "";
@@ -118,33 +126,52 @@ public class BanwenActivity extends HeadBaseActivity {
     }
 
     private void initThisView() {
+        mSessionId = SPUtils.getString(this, "sessionId");
         processDefinitionId = getIntent().getStringExtra("processDefinitionId");
-        businessKey = getIntent().getStringExtra("businessKey");
-        checkFormCaoGao();
-    }
-
-    /**
-     * 检测是否是从草稿箱界面跳转过来
-     */
-    private void checkFormCaoGao(){
-        if(!TextUtils.isEmpty(businessKey)){
-            // 获取草稿信息
-            RequestServerGetInfo(businessKey);
+        formCode = getIntent().getStringExtra("formCode");
+        // 如果formcode不是空的，则进入草稿
+        if(!TextUtils.isEmpty(formCode)) {
+            // 草稿
+            if("caogao".equals(formCode)) {
+                businessKey = getIntent().getStringExtra("businessKey");
+                // 获取草稿信息或者是审核信息
+                RequestServerGetInfoFromCaoGao();
+            }
+            // 否则就是审核的重新提交
+            else {
+                mTaskId = getIntent().getStringExtra("taskId");
+                txtProcess.setVisibility(View.VISIBLE);
+                mProcessXxre.setVisibility(View.VISIBLE);
+                mBtnCaogao.setVisibility(View.GONE);
+                mBtnCommit.setText("提交");
+                RequestServerGetInfoFromShenHe();
+                // 实现流程记录的adapter
+                mProcessXxre.setLayoutManager(new LinearLayoutManager(this));
+                mAdapter = new CommonRecyclerAdapter<ProcessShenheHistoryBean>(this, datas, R.layout.item_myprocess_shenhejilu) {
+                    @Override
+                    public void convert(CommonViewHolder holder, ProcessShenheHistoryBean item, int i, boolean b) {
+                        holder.setText(R.id.processNameContent, item.getName());
+                        holder.setText(R.id.name, item.getAssignee());
+                        holder.setText(R.id.startTimeContent, item.getCreateTime());
+                        holder.setText(R.id.completeTimeContent, item.getCompleteTime());
+                    }
+                };
+                mProcessXxre.setAdapter(mAdapter);
+            }
         }
     }
 
     /**
      * 获取草稿信息
      */
-    private void RequestServerGetInfo(String businessKey) {
-        String sessionId = SPUtils.getString(this, "sessionId");
+    private void RequestServerGetInfoFromCaoGao() {
         //创建请求队列
         RequestQueue Queue = NoHttp.newRequestQueue();
         //创建请求
         Request<QingjiaShenheResponse> request = new JavaBeanRequest<>(UrlConstance.URL_CAOGAOXIANG_INFO,
                 RequestMethod.POST, QingjiaShenheResponse.class);
         //添加url?key=value形式的参数
-        request.addHeader("sessionId", sessionId);
+        request.addHeader("sessionId", mSessionId);
         request.add("processDefinitionId", processDefinitionId);
         request.add("businessKey", businessKey);
         Queue.add(0, request, new OnResponseListener<QingjiaShenheResponse>() {
@@ -162,36 +189,36 @@ public class BanwenActivity extends HeadBaseActivity {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-                        String label = bean.getName();
-                        String value = bean.getValue();
-                        switch (label) {
-                            case "id":
-                                mBianhao.setText(value);
-                                break;
-                            case "company":
-                                mDanweiDanwei.setText(value);
-                                break;
-                            case "title":
-                                mTitle.setText(value);
-                                break;
-                            case "remarks":
-                                mBeizhu.setText(value);
-                                break;
-                            case "enclosure":
-                                if(!TextUtils.isEmpty(bean.getLabel())) {
-                                    // 实时请求权限
-                                    CommonUtil.verifyStoragePermissions(BanwenActivity.this);
-                                    mFilePathReturn = value;
-                                    mFileNameReturn = bean.getLabel();
-                                    if(!TextUtils.isEmpty(bean.getSize())) {
-                                        fileSize = Integer.parseInt(bean.getSize());
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "company":
+                                    mDanweiDanwei.setText(value);
+                                    break;
+                                case "title":
+                                    mTitle.setText(value);
+                                    break;
+                                case "remarks":
+                                    mBeizhu.setText(value);
+                                    break;
+                                case "enclosure":
+                                    if(!TextUtils.isEmpty(bean.getLabel())) {
+                                        // 实时请求权限
+                                        CommonUtil.verifyStoragePermissions(BanwenActivity.this);
+                                        mFilePathReturn = value;
+                                        mFileNameReturn = bean.getLabel();
+                                        if(!TextUtils.isEmpty(bean.getSize())) {
+                                            fileSize = Integer.parseInt(bean.getSize());
+                                        }
+                                        // 如果文件没有下载过，则开始下载
+                                        checkFileExisted();
                                     }
-                                    // 如果文件没有下载过，则开始下载
-                                    checkFileExisted();
-                                }
-                                break;
-                        }
+                                    break;
+                            }
                         }
                     }
                 }
@@ -207,6 +234,115 @@ public class BanwenActivity extends HeadBaseActivity {
                 if (mLoadingDialog != null) {
                     mLoadingDialog.dismiss();
                 }
+            }
+        });
+    }
+
+    /**
+     * 请求网络接口-流程审核记录
+     */
+    private void RequestServerGetInfoFromShenHe() {
+        //创建请求队列
+        RequestQueue Queue = NoHttp.newRequestQueue();
+
+        //1-流程审核记录
+        //创建请求
+        Request<ProcessShenheHistoryRes> request = new JavaBeanRequest<>(UrlConstance.URL_GET_PROCESS_HESTORY,
+                RequestMethod.POST, ProcessShenheHistoryRes.class);
+        //添加url?key=value形式的参数
+        request.addHeader("sessionId", mSessionId);
+        request.add("taskId", mTaskId);
+
+        Queue.add(1, request, new OnResponseListener<ProcessShenheHistoryRes>() {
+
+            @Override
+            public void onStart(int what) {
+
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessShenheHistoryRes> response) {
+                Log.w("2222", response.toString());
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<ProcessShenheHistoryBean> data = response.get().getData();
+                    if (null != mAdapter) {
+                        mAdapter.replaceAll(data);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessShenheHistoryRes> response) {
+                Toast.makeText(BanwenActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
+            }
+        });
+
+        //2-拉取页面数据
+        //创建请求
+        Request<QingjiaShenheResponse> request2 = new JavaBeanRequest<>(UrlConstance.URL_GET_PROCESS_INIT,
+                RequestMethod.POST, QingjiaShenheResponse.class);
+        //添加url?key=value形式的参数
+        request2.add("taskId", mTaskId);
+        Queue.add(0, request2, new OnResponseListener<QingjiaShenheResponse>() {
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
+                Log.w("3333", response.toString());
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<QingjiaShenheBean> shenheBeen = response.get().getData();
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
+                            //当有type为userpicker的时候说明是可以发起会签的节点
+                            String label = bean.getName();
+                            String value = bean.getValue();
+                            switch (label) {
+                                case "id":
+                                    mBianhao.setText(value);
+                                    break;
+                                case "company":
+                                    mDanweiDanwei.setText(value);
+                                    break;
+                                case "title":
+                                    mTitle.setText(value);
+                                    break;
+                                case "remarks":
+                                    mBeizhu.setText(value);
+                                    break;
+                                case "enclosure":
+                                    if(!TextUtils.isEmpty(bean.getLabel())) {
+                                        // 实时请求权限
+                                        CommonUtil.verifyStoragePermissions(BanwenActivity.this);
+                                        mFilePathReturn = value;
+                                        mFileNameReturn = bean.getLabel();
+                                        if(!TextUtils.isEmpty(bean.getSize())) {
+                                            fileSize = Integer.parseInt(bean.getSize());
+                                        }
+                                        // 如果文件没有下载过，则开始下载
+                                        checkFileExisted();
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<QingjiaShenheResponse> response) {
+                Toast.makeText(BanwenActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
             }
         });
     }
@@ -247,7 +383,7 @@ public class BanwenActivity extends HeadBaseActivity {
             case R.id.btn_caogao:
                 // 如果有附件但是没有上传
                 if(!TextUtils.isEmpty(mFilePath) && TextUtils.isEmpty(mFilePathReturn)){
-                    Toast.makeText(BanwenActivity.this, "请先提交附件",Toast.LENGTH_LONG).show();
+                    Toast.makeText(BanwenActivity.this, "您已选择附件，请先上传附件",Toast.LENGTH_LONG).show();
                 } else {
                     RequestServerCommit_Save(mDanweiDanwei.getText().toString().trim(),
                             mTitle.getText().toString().trim(),
@@ -258,12 +394,7 @@ public class BanwenActivity extends HeadBaseActivity {
                 }
                 break;
             case R.id.btn_commit:
-                // 如果有附件但是没有上传
-                if(!TextUtils.isEmpty(mFilePath) && TextUtils.isEmpty(mFilePathReturn)){
-                    Toast.makeText(BanwenActivity.this, "请先提交附件",Toast.LENGTH_LONG).show();
-                } else {
-                    jianYanshuju();
-                }
+                jianYanshuju();
                 break;
         }
     }
@@ -557,13 +688,19 @@ public class BanwenActivity extends HeadBaseActivity {
             Toast.makeText(this, "请填写文章标题", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mBeizhu.getText().toString().trim())) {
             Toast.makeText(this, "请填写备注信息", Toast.LENGTH_SHORT).show();
+        } else if(TextUtils.isEmpty(mFilePathReturn)){
+            Toast.makeText(this, "请上传附件",Toast.LENGTH_SHORT).show();
         } else {
-            RequestServerCommit(mDanweiDanwei.getText().toString().trim(),
-                    mTitle.getText().toString().trim(),
-                    mBeizhu.getText().toString().trim(),
-                    mBianhao.getText().toString().trim(),
-                    mFilePathReturn
-            );
+            if(!TextUtils.isEmpty(formCode) && !"caogao".equals(formCode)){
+                RequestServerReCommit();
+            } else {
+                RequestServerCommit(mDanweiDanwei.getText().toString().trim(),
+                        mTitle.getText().toString().trim(),
+                        mBeizhu.getText().toString().trim(),
+                        mBianhao.getText().toString().trim(),
+                        mFilePathReturn
+                );
+            }
         }
     }
 
@@ -676,6 +813,60 @@ public class BanwenActivity extends HeadBaseActivity {
             @Override
             public void onFailed(int what, Response<ProcessJieguoResponse> response) {
                 Toast.makeText(BanwenActivity.this, "保存草稿失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+                if (null != mLoadingDialog) {
+                    mLoadingDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    /**
+     * 提交页面数据，完成当前审核
+     */
+    private void RequestServerReCommit() {
+        StringBuilder json = new StringBuilder();
+        json.append("{")
+                .append("\"company\":" + "\"" + mDanweiDanwei.getText().toString() + "\",")
+                .append("\"title\":" + "\"" + mTitle.getText().toString() + "\",")
+                .append("\"id\":" + "\"" + mBianhao.getText().toString() + "\",")
+                .append("\"remarks\":" + "\"" + mBeizhu.getText().toString() + "\",")
+                .append("\"enclosure\":" + "\"" + mFilePathReturn + "\"")
+                .append("}");
+
+        //创建请求队列
+        RequestQueue Queue = NoHttp.newRequestQueue();
+        Request<ProcessJieguoResponse> requestCommit = new JavaBeanRequest<>(UrlConstance.URL_PROCESS_COMMIT,
+                RequestMethod.POST, ProcessJieguoResponse.class);
+        //添加url?key=value形式的参数
+        requestCommit.addHeader("sessionId", mSessionId);
+        requestCommit.add("taskId", mTaskId);
+        requestCommit.add("data", json.toString());
+        Queue.add(0, requestCommit, new OnResponseListener<ProcessJieguoResponse>() {
+
+            @Override
+            public void onStart(int what) {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.show();
+                }
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessJieguoResponse> response) {
+                if (null != response && null != response.get()) {
+                    if (response.get().getCode() == 200) {
+                        Toast.makeText(BanwenActivity.this, "提交成功", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessJieguoResponse> response) {
+                Toast.makeText(BanwenActivity.this, "提交失败", Toast.LENGTH_SHORT).show();
             }
 
             @Override

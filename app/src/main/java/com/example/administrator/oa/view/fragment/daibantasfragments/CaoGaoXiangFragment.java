@@ -196,6 +196,7 @@ public class CaoGaoXiangFragment extends Fragment {
     private void GoFaqiliuchong(String processId, String processDefinitionId, String businessKey) {
         Bundle bundle = new Bundle();
 //        bundle.putString("processId", processId);
+        bundle.putString("formCode", "caogao");
         bundle.putString("processDefinitionId", processDefinitionId);
         bundle.putString("businessKey", businessKey);
         switch (processId) {

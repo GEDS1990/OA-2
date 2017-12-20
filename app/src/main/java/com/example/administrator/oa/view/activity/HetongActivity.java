@@ -108,7 +108,7 @@ public class HetongActivity extends HeadBaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll_start:
-                selectDate(mDate, "");
+                selectDate("", mDate, "");
                 break;
             case R.id.btn_caogao:
                 break;

@@ -36,4 +36,5 @@
     <color name="maintext_hint">#CECECE</color>
     <!-- 文本标题，左边较浅色 -->
     <color name="maintext_title">#808080</color>
+
 </resources>

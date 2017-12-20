@@ -218,7 +218,7 @@ public class ChuchaiActivity_shenhe extends HeadBaseActivity {
                                 case "travel-return":
                                     mLlShenheyijian.setVisibility(View.VISIBLE);
                                     mShenheyijian.setFocusable(false);
-                                    mBtnCaogao.setVisibility(View.INVISIBLE);
+                                    mBtnCaogao.setVisibility(View.GONE);
                                     mBtnCommit.setText("完成");
                                     break;
                             }

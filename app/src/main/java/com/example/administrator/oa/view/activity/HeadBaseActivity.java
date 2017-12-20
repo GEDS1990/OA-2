@@ -70,7 +70,7 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
     private XXDialog mxxUsersDialog;
 //    public ZuzhiUserBean mZuzhiUserBean;
     private RequestQueue mQueue;
-    public String mSetIp="";;
+    public String mSetIp="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -205,14 +205,24 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
         finish();
     }
 
+    /**
+     *
+     * @param type 请假里有个“按小时请假”的类型，需要控制时长不能超过8小时
+     * @param tv
+     * @param startTime
+     */
     // , final boolean hourOrDay
-    protected void selectDate(final TextView tv, final String startTime) {
+    protected void selectDate(final String type, final TextView tv, final String startTime) {
         //时间选择器
         TimePickerView pvTime = new TimePickerView.Builder(this, new TimePickerView.OnTimeSelectListener() {
             @Override
             public void onTimeSelect(Date date, View v) {//选中事件回调
                 if (startTime.compareTo(getTime(date)) < 0) {
-                    tv.setText(getTime(date));
+                    if ("按小时请假".equals(type) && 8 < getTimeDifferenceHour(startTime, getTime(date))){
+                        Toast.makeText(HeadBaseActivity.this, "按小时请假时，不可超过8小时", Toast.LENGTH_SHORT).show();
+                    } else {
+                        tv.setText(getTime(date));
+                    }
                 } else {
                     Toast.makeText(HeadBaseActivity.this, "结束时间不可早于开始时间", Toast.LENGTH_SHORT).show();
                 }
@@ -256,6 +266,37 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
     protected String getTime(Date date) {//可根据需要自行截取数据显示
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return format.format(date);
+    }
+
+    /**
+     * 计算相差的小时
+     *
+     * @param starTime
+     * @param endTime
+     * @return
+     */
+    public Float getTimeDifferenceHour(String starTime, String endTime) {
+        float hour1 = 0f;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        try {
+            Date parse = dateFormat.parse(starTime);
+            Date parse1 = dateFormat.parse(endTime);
+
+            long diff = parse1.getTime() - parse.getTime();
+            String string = Long.toString(diff);
+
+            float parseFloat = Float.parseFloat(string);
+
+            hour1 = parseFloat / (60 * 60 * 1000);
+
+//            timeString = Float.toString(hour1);
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return hour1;
+
     }
 
     XXDialog mxxDialog;
@@ -371,7 +412,7 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
         };
     }
 
-
+    int count = 1;
     /**
      * 请求网络接口，获取组织结构数据
      *
@@ -396,7 +437,9 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
                 Log.w("3333", response.toString());
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     if (response.get().getData().get(0).isOpen()) {
-                        chooseDate2(response.get().getData().get(0).getChildren(), title, mLlBumen, textview, mHuiqianAdapter);
+                        count = 1;
+                        chooseDate2(null, null, response.get().getData().get(0).getChildren(),
+                                title, mLlBumen, textview, mHuiqianAdapter, count);
                     }
                 }
             }
@@ -416,12 +459,15 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
     /**
      * 选择相关机构
      *
-     * @param data
      * @param title
+     * @param currenLevel 第一级没有返回按钮，其他子级都有返回按钮
      */
-    private void chooseDate2(final List<ChildrenBean> data, final String title,
+    private void chooseDate2(final List<ChildrenBean> firstData, final List<ChildrenBean> secondData,
+                             final List<ChildrenBean> currentData, final String title,
                              final LinearLayout mLlBumen, final TextView textview,
-                             final CommonRecyclerAdapter<ZuzhiUserBean> mHuiqianAdapter) {
+                             final CommonRecyclerAdapter<ZuzhiUserBean> mHuiqianAdapter,
+                             final int currenLevel) {
+
         if(null != mxxDialog2){
             mxxDialog2.dismiss();
         }
@@ -430,6 +476,30 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
             public void convert(DialogViewHolder holder) {
                 XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
                 holder.setText(R.id.dialog_title, title);
+                // 如果是第二级，则显示返回按钮，并且将firstData放入currrentData
+                if(2 == count){
+                    holder.getView(R.id.dialog_back).setVisibility(View.VISIBLE);
+                    holder.getView(R.id.dialog_back).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            count--;
+                            mxxDialog2.dismiss();
+                            chooseDate2(firstData, secondData, firstData, title, mLlBumen, textview, mHuiqianAdapter, count);
+                        }
+                    });
+                }
+                // 如果是第三级，则显示返回按钮，并且将secondData放入currrentData
+                else if(3 == count){
+                    holder.getView(R.id.dialog_back).setVisibility(View.VISIBLE);
+                    holder.getView(R.id.dialog_back).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            count--;
+                            mxxDialog2.dismiss();
+                            chooseDate2(firstData, secondData, secondData, title, mLlBumen, textview, mHuiqianAdapter, count);
+                        }
+                    });
+                }
                 xxre.setLayoutManager(new LinearLayoutManager(HeadBaseActivity.this));
                 List<ChildrenBean> datas = new ArrayList();
                 final CommonRecyclerAdapter<ChildrenBean> adapter = new CommonRecyclerAdapter<ChildrenBean>(HeadBaseActivity.this,
@@ -446,16 +516,24 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
                         holder1.getView(R.id.more).setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                count++;
                                 mxxDialog2.dismiss();
                                 if (item.isOpen()) {
-                                    chooseDate2(item.getChildren(), title, mLlBumen, textview, mHuiqianAdapter);
+                                    // 如果进入第二级，则将currrentData放入firstData,item.getChildren()放入secondData
+                                    if(2==count) {
+                                        chooseDate2(currentData, item.getChildren(), item.getChildren(), title, mLlBumen, textview, mHuiqianAdapter, count);
+                                    }
+                                    // 如果进入第三级，则将firstData放入firstData，currrentData放入secondData
+                                    else if(3==count) {
+                                        chooseDate2(firstData, currentData, item.getChildren(), title, mLlBumen, textview, mHuiqianAdapter, count);
+                                    }
                                 }
                             }
                         });
                     }
                 };
                 xxre.setAdapter(adapter);
-                adapter.replaceAll(data);
+                adapter.replaceAll(currentData);
                 adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
                     @Override
                     public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {

@@ -118,13 +118,13 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
         mSessionId = SPUtils.getString(this, "sessionId");
 
         //判断是否是发起会签节点
-        if ("vote".equals(mProcessTaskType)) {
-            mBtnCaogao.setText("退回发起人");
-            mLlHuiqianyijian.setVisibility(View.VISIBLE);
-        } else {
-            mBtnCaogao.setText("不同意");
-            mLlHuiqianyijian.setVisibility(View.GONE);
-        }
+//        if ("vote".equals(mProcessTaskType)) {
+//            mBtnCaogao.setText("退回发起人");
+//            mLlHuiqianyijian.setVisibility(View.VISIBLE);
+//        } else {
+//            mBtnCaogao.setText("不同意");
+//            mLlHuiqianyijian.setVisibility(View.GONE);
+//        }
         //获取服务器数据，填充表单数据
         RequestServer();
         //流程记录的view
@@ -302,6 +302,16 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
                                     break;
                                 case "comment":
                                     mShenheyijian.setText(value);
+                                    break;
+                                case "manager":
+                                    if (TextUtils.isEmpty(bean.getLabel())) {
+                                        return;
+                                    }
+                                    String[] ids = value.split(",");
+                                    String[] names = bean.getLabel().split(",");
+                                    for (int i=0; i<ids.length;i++) {
+                                        mHuiqianAdapter.add(new ZuzhiUserBean(ids[i], names[i]));
+                                    }
                                     break;
                             }
                         }

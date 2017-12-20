@@ -330,6 +330,16 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                                 case "rentalAsset":
                                     mZichanyyYijian.setText(value);
                                     break;
+                                case "countersignRental":
+                                    if (TextUtils.isEmpty(bean.getLabel())) {
+                                        return;
+                                    }
+                                    String[] ids = value.split(",");
+                                    String[] names = bean.getLabel().split(",");
+                                    for (int i=0; i<ids.length;i++) {
+                                        mHuiqianAdapter.add(new ZuzhiUserBean(ids[i], names[i]));
+                                    }
+                                    break;
                             }
                         }
 //                        if ("userpicker".equals(bean.getType())) {
@@ -361,7 +371,6 @@ public class HouseRent_shenhe extends HeadBaseActivity {
     /**
      * 提交页面数据，完成当前审核
      */
-
     private void RequestServerCommit(String comment) {
         //拼接data的json
 
@@ -408,8 +417,8 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                 .append("\"rentalAddress\":" + "\"" + address + "\",")
                 .append("\"rentalContent\":" + "\"" + content + "\",")
                 .append("\"rentalAsset\":" + "\"" + zichanyy + "\",")
-                .append("\"leader\":" + "\"" + leadersID.toString() + "\",")
-                .append("\"leader_name\":" + "\"" + leadersName.toString() + "\",")
+                .append("\"countersignRental\":" + "\"" + leadersID.toString() + "\",")
+                .append("\"countersignRental_name\":" + "\"" + leadersName.toString() + "\",")
                 .append("\"comment\":" + "\"" + comment + "\"")
                 .append("}");
 

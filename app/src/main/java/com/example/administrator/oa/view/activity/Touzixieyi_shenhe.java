@@ -1,5 +1,6 @@
 package com.example.administrator.oa.view.activity;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,11 +27,14 @@ import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.CommonUtil;
 import com.example.administrator.oa.view.utils.SPUtils;
+import com.leon.lfilepickerlibrary.LFilePicker;
 import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
 import com.lsh.XXRecyclerview.CommonViewHolder;
 import com.lsh.XXRecyclerview.XXRecycleView;
+import com.yanzhenjie.nohttp.FileBinary;
 import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.NoHttp;
+import com.yanzhenjie.nohttp.OnUploadListener;
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.download.DownloadListener;
 import com.yanzhenjie.nohttp.download.DownloadQueue;
@@ -108,6 +112,9 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
     private List<ZuzhiUserBean> datas2 = new ArrayList<>();
 
     // 附件
+    private int REQUESTCODE_FROM_ACTIVITY = 1002;
+    private String mFilename = "";
+    private String mFilePath = "";
     private String mFilePathReturn = "";
     private String mFileNameReturn = "";
     // 文件总大小
@@ -174,13 +181,27 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
         mXxreHuiqianren.setAdapter(mHuiqianAdapter);
     }
 
-    @OnClick({R.id.ll_huiqianren, R.id.btn_uplaod, R.id.btn_caogao, R.id.btn_commit})
+    @OnClick({R.id.add_fujian, R.id.btn_uplaod, R.id.rl_fujian, R.id.ll_huiqianren, R.id.btn_caogao, R.id.btn_commit})
     public void onViewClicked(View view) {
         switch (view.getId()) {
+            case R.id.add_fujian:
+                if("0".equals(mAddFujian.getTag())) {
+                    new LFilePicker()
+                            .withActivity(this)
+                            .withRequestCode(REQUESTCODE_FROM_ACTIVITY)
+                            .start();
+                }
+                break;
             case R.id.btn_uplaod:
-                mBtnUplaod.setVisibility(View.GONE);
-                mBtnUplaod.setEnabled(false);
-                RequestServerDownLoad();
+                if("down".equals(mBtnUplaod.getTag().toString())) {
+                    mBtnUplaod.setVisibility(View.GONE);
+                    mBtnUplaod.setEnabled(false);
+                    RequestServerDownLoad();
+                } else {
+                    if (!TextUtils.isEmpty(mFilePath) && !TextUtils.isEmpty(mFilename)) {
+                        RequestServerUploadFile(mFilePath, mFilename);
+                    }
+                }
                 break;
             case R.id.ll_huiqianren:
 //                RequestServerGetZuzhi("选择会签人");
@@ -202,6 +223,25 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
             case R.id.btn_commit:
                 RequestServerCommit("同意");
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUESTCODE_FROM_ACTIVITY) {
+                //List<String> list = data.getStringArrayListExtra(Constant.RESULT_INFO);//Constant.RESULT_INFO == "paths"
+                List<String> list = data.getStringArrayListExtra("paths");
+                if (list.size() == 1) {
+                    mBtnUplaod.setImageDrawable(getResources().getDrawable(R.drawable.upload));
+                    getFileInfo(list.get(0));
+                } else if (list.size() == 0) {
+                    Toast.makeText(this, "请重新选择附件", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "只能上传一个附件", Toast.LENGTH_SHORT).show();
+                }
+            }
         }
     }
 
@@ -321,11 +361,22 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
                                 case "comment":
                                     mShenheyijian.setText(value);
                                     break;
+                                case "countersign":
+                                    if (TextUtils.isEmpty(bean.getLabel())) {
+                                        return;
+                                    }
+                                    String[] ids = value.split(",");
+                                    String[] names = bean.getLabel().split(",");
+                                    for (int i=0; i<ids.length;i++) {
+                                        mHuiqianAdapter.add(new ZuzhiUserBean(ids[i], names[i]));
+                                    }
+                                    break;
                                 // 20171129/79d8fd22-9601-4c24-993a-cc9c0f9c066e.prop
                                 case "protocolEnclosure":
                                     if(!TextUtils.isEmpty(bean.getLabel())) {
                                         // 实时请求权限
                                         CommonUtil.verifyStoragePermissions(Touzixieyi_shenhe.this);
+                                        mAddFujian.setTag("1");
                                         mFilePathReturn = value;
                                         mFileNameReturn = bean.getLabel();
                                         if(!TextUtils.isEmpty(bean.getSize())) {
@@ -337,10 +388,10 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
                                     break;
                             }
                         }
-                        if ("userpicker".equals(bean.getType())) {
-                            mLlHuiqianren.setVisibility(View.VISIBLE);
-                            mXxreHuiqianren.setVisibility(View.VISIBLE);
-                        }
+//                        if ("userpicker".equals(bean.getType())) {
+//                            mLlHuiqianren.setVisibility(View.VISIBLE);
+//                            mXxreHuiqianren.setVisibility(View.VISIBLE);
+//                        }
                     }
                 }
             }
@@ -407,10 +458,15 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
         mRlFujian.setVisibility(View.VISIBLE);
         String[] strings = filePath.split("/");
         int count = strings.length;
-        String mFilename = strings[count - 1];
-        mFileName.setText(mFilename);
+        String name = strings[count - 1];
+        mFileName.setText(name);
         File file = new File(filePath);
         mFilesize.setText(ShowLongFileSzie(file.length()));
+        mFilePath = filePath;
+        mFilename = name;
+//        if (0 >= file.length()) {
+//            Toast.makeText(this, "附件大小为0k，请重新选择附件", Toast.LENGTH_SHORT).show();
+//        }
         if (mFilename.contains(".")) {
             switch (mFilename.split("\\.")[1]) {
                 case "TXT":
@@ -439,6 +495,82 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
         }
 
     }
+
+    /**
+     * 上传附件
+     */
+    private void RequestServerUploadFile(String picpath, String filename) {
+        //创建请求队列
+        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<ProcessJieguoResponse> request = new JavaBeanRequest<>(UrlConstance.URL_UPLOAD,
+                RequestMethod.POST, ProcessJieguoResponse.class);
+        //String picpath = CommonUtil2.saveBitmapToSD(BanwenActivity.this, "/CoolImage/");
+        FileBinary fileBinary = new FileBinary(new File(picpath), filename);
+        // 设置一个上传监听器。
+        fileBinary.setUploadListener(0, mOnUploadListener);
+        request.add("data", fileBinary);
+
+        ProcessQueue.add(1, request, new OnResponseListener<ProcessJieguoResponse>() {
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<ProcessJieguoResponse> response) {
+                Log.w("workConectionActivity", "response:" + response);
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    Toast.makeText(Touzixieyi_shenhe.this, "上传成功", Toast.LENGTH_SHORT).show();
+//                mBtnCancel.setVisibility(View.VISIBLE);
+                    mBtnUplaod.setVisibility(View.GONE);
+                    mBtnUplaod.setEnabled(false);
+                    mAddFujian.setTag("1");
+                    mFilePathReturn = response.get().getData();
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<ProcessJieguoResponse> response) {
+                Toast.makeText(Touzixieyi_shenhe.this, "上传失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+            }
+        });
+
+    }
+
+    /**
+     * 上传文件进度的监听器
+     */
+    private OnUploadListener mOnUploadListener = new OnUploadListener() {
+        @Override
+        public void onStart(int what) {
+
+        }
+
+        @Override
+        public void onCancel(int what) {
+
+        }
+
+        @Override
+        public void onProgress(int what, int progress) {
+            Log.w("2BanwenActivity", "progress:" + progress);
+            mPb.setProgress(progress);
+        }
+
+        @Override
+        public void onFinish(int what) {
+//            Toast.makeText(NewsfabuActivity.this, "ok", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onError(int what, Exception exception) {
+
+        }
+    };
 
     /**
      * 下载附件
@@ -518,6 +650,8 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
                 .append("\"name2\":" + "\"" + mNameYi.getText().toString() + "\",")
                 .append("\"protocolContent\":" + "\"" + mBeizhu.getText().toString() + "\",")
                 .append("\"protocolEnclosure\":" + "\"" + mFilePathReturn + "\",")
+                .append("\"countersign\":" + "\"" + leadersID.toString() + "\",")
+                .append("\"countersign_name\":" + "\"" + leadersName.toString() + "\",")
                 .append("\"comment\":" + "\"" + comment + "\"")
                 .append("}");
 
