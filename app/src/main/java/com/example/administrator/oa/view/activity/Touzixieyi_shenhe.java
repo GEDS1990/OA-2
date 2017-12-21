@@ -1,7 +1,11 @@
 package com.example.administrator.oa.view.activity;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
@@ -26,6 +30,7 @@ import com.example.administrator.oa.view.bean.ZuzhiUserBean;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.CommonUtil;
+import com.example.administrator.oa.view.utils.FileUtils;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.leon.lfilepickerlibrary.LFilePicker;
 import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
@@ -112,7 +117,6 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
     private List<ZuzhiUserBean> datas2 = new ArrayList<>();
 
     // 附件
-    private int REQUESTCODE_FROM_ACTIVITY = 1002;
     private String mFilename = "";
     private String mFilePath = "";
     private String mFilePathReturn = "";
@@ -186,10 +190,11 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
         switch (view.getId()) {
             case R.id.add_fujian:
                 if("0".equals(mAddFujian.getTag())) {
-                    new LFilePicker()
-                            .withActivity(this)
-                            .withRequestCode(REQUESTCODE_FROM_ACTIVITY)
-                            .start();
+//                    new LFilePicker()
+//                            .withActivity(this)
+//                            .withRequestCode(REQUESTCODE_FROM_ACTIVITY)
+//                            .start();
+                    showFileChooser();
                 }
                 break;
             case R.id.btn_uplaod:
@@ -231,15 +236,30 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUESTCODE_FROM_ACTIVITY) {
-                //List<String> list = data.getStringArrayListExtra(Constant.RESULT_INFO);//Constant.RESULT_INFO == "paths"
-                List<String> list = data.getStringArrayListExtra("paths");
-                if (list.size() == 1) {
-                    mBtnUplaod.setImageDrawable(getResources().getDrawable(R.drawable.upload));
-                    getFileInfo(list.get(0));
-                } else if (list.size() == 0) {
-                    Toast.makeText(this, "请重新选择附件", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "只能上传一个附件", Toast.LENGTH_SHORT).show();
+                Uri uri = data.getData();
+                String path = "";
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {//4.4以后
+                    path = FileUtils.getPath(Touzixieyi_shenhe.this, uri);
+                } else {//4.4以下下系统调用方法
+                    path = FileUtils.getRealPathFromURI(Touzixieyi_shenhe.this, uri);
+                }
+                if(!TextUtils.isEmpty(path)){
+                    getFileInfo(path);
+                }
+            } else if (requestCode == REQUESTCODE_SETTION_PERMISSION) {
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // 检查该权限是否已经获取
+                    int i = ContextCompat.checkSelfPermission(this, permissions[0]);
+                    // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
+                    if (i != PackageManager.PERMISSION_GRANTED) {
+                        // 提示用户应该去应用设置界面手动开启权限
+                        showDialogTipUserGoToAppSettting();
+                    } else {
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        showFileChooser();
+                    }
                 }
             }
         }

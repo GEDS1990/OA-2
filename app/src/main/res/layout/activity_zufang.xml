@@ -113,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/gray5"
                 android:padding="10dp"
-                android:text="合同主体"/>
+                android:text="签约主体"/>
 
             <LinearLayout
                 android:layout_width="match_parent"

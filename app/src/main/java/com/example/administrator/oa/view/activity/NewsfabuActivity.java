@@ -1,7 +1,16 @@
 package com.example.administrator.oa.view.activity;
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,6 +35,7 @@ import com.example.administrator.oa.view.bean.ZuzhiUserBean;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.CommonUtil;
+import com.example.administrator.oa.view.utils.FileUtils;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.leon.lfilepickerlibrary.LFilePicker;
 import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
@@ -111,7 +121,7 @@ public class NewsfabuActivity extends HeadBaseActivity {
     private String businessKey = "";
 
     // 附件信息
-    private int REQUESTCODE_FROM_ACTIVITY = 1002;
+//    private int REQUESTCODE_FROM_ACTIVITY = 1002;
     private String mFilename = "";
     private String mFilePath = "";
     private String mFilePathReturn = "";
@@ -380,10 +390,8 @@ public class NewsfabuActivity extends HeadBaseActivity {
                 break;
             case R.id.add_fujian:
                 if("0".equals(mAddFujian.getTag())) {
-                    new LFilePicker()
-                            .withActivity(this)
-                            .withRequestCode(REQUESTCODE_FROM_ACTIVITY)
-                            .start();
+                    // 检测是否有存储权限
+                    applyForPermission();
                 }
                 break;
             case R.id.btn_uplaod:
@@ -424,14 +432,30 @@ public class NewsfabuActivity extends HeadBaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUESTCODE_FROM_ACTIVITY) {
-                //List<String> list = data.getStringArrayListExtra(Constant.RESULT_INFO);//Constant.RESULT_INFO == "paths"
-                List<String> list = data.getStringArrayListExtra("paths");
-                if (list.size() == 1) {
-                    getFileInfo(list.get(0));
-                } else if (list.size() == 0) {
-                    Toast.makeText(this, "请重新选择附件", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "只能上传一个附件", Toast.LENGTH_SHORT).show();
+                Uri uri = data.getData();
+                String path = "";
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {//4.4以后
+                    path = FileUtils.getPath(NewsfabuActivity.this, uri);
+                } else {//4.4以下下系统调用方法
+                    path = FileUtils.getRealPathFromURI(NewsfabuActivity.this, uri);
+                }
+                if (!TextUtils.isEmpty(path)) {
+                    getFileInfo(path);
+                }
+            } else if (requestCode == REQUESTCODE_SETTION_PERMISSION) {
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // 检查该权限是否已经获取
+                    int i = ContextCompat.checkSelfPermission(this, permissions[0]);
+                    // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
+                    if (i != PackageManager.PERMISSION_GRANTED) {
+                        // 提示用户应该去应用设置界面手动开启权限
+                        showDialogTipUserGoToAppSettting();
+                    } else {
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        showFileChooser();
+                    }
                 }
             }
         }
@@ -442,54 +466,53 @@ public class NewsfabuActivity extends HeadBaseActivity {
      * @param filePath
      */
     private void getFileInfo(String filePath){
-        mRlFujian.setVisibility(View.VISIBLE);
-        mFilePath = filePath;
-        String[] strings = mFilePath.split("/");
-        int count = strings.length;
-        mFilename = strings[count - 1];
-        mFileName.setText(mFilename);
-        File file = new File(mFilePath);
-        mFilesize.setText(ShowLongFileSzie(file.length()));
+        File file = new File(filePath);
+        if(null != file) {
+            mRlFujian.setVisibility(View.VISIBLE);
+            mFilePath = filePath;
+            mFilename = file.getName();
+            mFileName.setText(mFilename);
+            mFilesize.setText(ShowLongFileSzie(file.length()));
 
-        if (0 >= file.length()) {
-            Toast.makeText(this, "附件大小为0k，请重新选择附件", Toast.LENGTH_SHORT).show();
-        }
-
-        if (mFilename.contains(".")) {
-            // 如果有两个后缀，则是非法文档
-            if(mFilename.split("\\.").length > 2){
-                Toast.makeText(this, "文档名格式不对", Toast.LENGTH_SHORT).show();
-                mFilePath = "";
-                mFilename = "";
-                mRlFujian.setVisibility(View.GONE);
-                return;
+            if (0 >= file.length()) {
+                Toast.makeText(this, "附件大小为0k，请重新选择附件", Toast.LENGTH_SHORT).show();
             }
-            switch (mFilename.split("\\.")[1]) {
-                case "TXT":
-                case "txt":
-                    mIcon.setImageResource(R.drawable.file_txt);
-                    break;
-                case "xlsx":
-                case "XLSX":
-                    mIcon.setImageResource(R.drawable.icon_official_excel);
-                    break;
-                case "docx":
-                case "DOCX":
-                    mIcon.setImageResource(R.drawable.file_word);
-                    break;
-                case "png":
-                case "PNG":
-                case "jpg":
-                case "JPG":
-                case "jpeg":
-                case "JPEG":
-                    mIcon.setImageResource(R.drawable.picture);
-                    break;
-                default:
-                    mIcon.setImageResource(R.drawable.unknow_type);
+
+            if (mFilename.contains(".")) {
+                // 如果有两个后缀，则是非法文档
+                if (mFilename.split("\\.").length > 2) {
+                    Toast.makeText(this, "文档名格式不对", Toast.LENGTH_SHORT).show();
+                    mFilePath = "";
+                    mFilename = "";
+                    mRlFujian.setVisibility(View.GONE);
+                    return;
+                }
+                switch (mFilename.split("\\.")[1]) {
+                    case "TXT":
+                    case "txt":
+                        mIcon.setImageResource(R.drawable.file_txt);
+                        break;
+                    case "xlsx":
+                    case "XLSX":
+                        mIcon.setImageResource(R.drawable.icon_official_excel);
+                        break;
+                    case "docx":
+                    case "DOCX":
+                        mIcon.setImageResource(R.drawable.file_word);
+                        break;
+                    case "png":
+                    case "PNG":
+                    case "jpg":
+                    case "JPG":
+                    case "jpeg":
+                    case "JPEG":
+                        mIcon.setImageResource(R.drawable.picture);
+                        break;
+                    default:
+                        mIcon.setImageResource(R.drawable.unknow_type);
+                }
             }
         }
-
     }
 
     /**

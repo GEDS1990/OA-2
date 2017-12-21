@@ -175,20 +175,23 @@ public class MessageFragent extends BaseFragment {
             public void onSucceed(int what, Response<MsgListBean> response) {
                 Log.w("44442", response.toString());
                 if (null != response && null != response.get() && null != response.get().getData()) {
-                if (null != mMsgAdapter) {
-                    if (1 < response.get().getData().size()) {
-                        List<MsgListBean> datas = response.get().getData();
-                        count = datas.get(datas.size() - 1).getCount();
-                        SPUtils.put(mainActivity, "messageCount", count);
-                        // 通知MainActivity更新新消息图标
-                        Intent intent = new Intent(application.mainAction);
-                        mainActivity.sendBroadcast(intent);
+                    List<MsgListBean> datas = response.get().getData();
+                    // 如果没有数据，就显示“暂无数据”
+                    if (null == datas || 1 >= datas.size()){
+                        mXxreMsg.setEmptyView(R.layout.emptyview);
+                    } else {
+                        if (null != mMsgAdapter) {
+                            count = datas.get(datas.size() - 1).getCount();
+                            SPUtils.put(mainActivity, "messageCount", count);
+                            // 通知MainActivity更新新消息图标
+                            Intent intent = new Intent(application.mainAction);
+                            mainActivity.sendBroadcast(intent);
 
-                        // 最后一条不是消息  只是未读件数统计  不需要表示出来
-                        datas.remove(datas.size() - 1);
-                        mMsgAdapter.replaceAll(datas);
+                            // 最后一条不是消息  只是未读件数统计  不需要表示出来
+                            datas.remove(datas.size() - 1);
+                            mMsgAdapter.replaceAll(datas);
+                        }
                     }
-                }
                 }
             }
 

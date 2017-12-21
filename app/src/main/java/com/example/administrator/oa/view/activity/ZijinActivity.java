@@ -102,7 +102,7 @@ public class ZijinActivity extends HeadBaseActivity {
     @Override
     protected void initView(RelativeLayout headView, RelativeLayout backBtn, RelativeLayout headerCenter,
                             RelativeLayout headerRight, View childView, LinearLayout statubar) {
-        ((TextView) headerCenter.getChildAt(0)).setText("资金调发");
+        ((TextView) headerCenter.getChildAt(0)).setText("资金调拨");
         initThisView();
     }
 

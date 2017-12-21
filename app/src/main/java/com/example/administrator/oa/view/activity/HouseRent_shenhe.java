@@ -73,7 +73,7 @@ public class HouseRent_shenhe extends HeadBaseActivity {
     @BindView(R.id.main_content)
     TextView mMainContent;
     @BindView(R.id.zichanyy_yijian)
-    EditText mZichanyyYijian;
+    TextView mZichanyyYijian;
     @BindView(R.id.xxre)
     XXRecycleView mXxre;
     @BindView(R.id.tv_huiqian)
@@ -264,8 +264,6 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                                     break;
                                 // 房屋租赁流程会签审核
                                 case "rental-leader":
-                                    mZichanyyYijian.setFocusable(false);
-                                    mZichanyyYijian.setGravity(Gravity.RIGHT);
                                     mLlHuiqianren.setVisibility(View.VISIBLE);
                                     mXxreHuiqianren.setVisibility(View.VISIBLE);
                                     mBtnCaogao.setText("不同意");
@@ -273,16 +271,12 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                                     break;
                                 // 房屋租赁流程会签
                                 case "rental-return":
-                                    mZichanyyYijian.setFocusable(false);
-                                    mZichanyyYijian.setGravity(Gravity.RIGHT);
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
                                     mBtnCaogao.setText("回退发起人");
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 房屋租赁流程通知
                                 case "rental-notice":
-                                    mZichanyyYijian.setFocusable(false);
-                                    mZichanyyYijian.setGravity(Gravity.RIGHT);
                                     mLlShenheyijian.setVisibility(View.VISIBLE);
                                     mShenheyijian.setFocusable(false);
                                     mBtnCaogao.setVisibility(View.GONE);
@@ -385,10 +379,10 @@ public class HouseRent_shenhe extends HeadBaseActivity {
         String bianhao = mBianhao.getText().toString();
         String zhubanren = mZhubanren.getText().toString();
 
-        if (TextUtils.isEmpty(zichanyy)) {
-            Toast.makeText(this, "请填写资产运营部意见", Toast.LENGTH_SHORT).show();
-            return;
-        }
+//        if (TextUtils.isEmpty(zichanyy)) {
+//            Toast.makeText(this, "请填写资产运营部意见", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
 
         StringBuffer leadersID = new StringBuffer();
         StringBuffer leadersName = new StringBuffer();

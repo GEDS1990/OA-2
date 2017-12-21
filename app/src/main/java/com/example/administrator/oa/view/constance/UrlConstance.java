@@ -18,14 +18,8 @@ public class UrlConstance {
     /**
      * 网络请求URL的公共部分
      */
-//    public static final String URL_HOST = "http://192.168.1.150:8089/rs/android/";
-    //public static final String URL_HOST = "http://192.168.173.1:8089/rs/android/";
-    //public static final String URL_HOST = "http://58.213.75.45:8096/NJSmartOA/rs/android/";
-    //public static final String URL_HOST = "http://192.168.10.125:8089/rs/android/";
+//    public static final String URL_HOST = "http://58.213.75.40/rs/android/";
     public static final String URL_HOST = "http://175av53846.iask.in/njsmartoa/rs/android/";
-    //public static final String URL_HOST = "http://175av53846.iask.in/NJSmartOA/rs/android/";
-    //public static final String URL_HOST = "http://175av53846.iask.in/NJSmartOA/rs/android/";
-    //public static final String URL_HOST = "http://192.168.1.20:8080/NJSmartOA/rs/android/";
 
     /**
      * 上传文件
@@ -151,6 +145,7 @@ public class UrlConstance {
      * 获取联系人列表
      */
     public static final String URL_CONTACTS_LIST = formatUrl("user/getContacts");
+//    public static final String URL_CONTACTS_LIST = "http://58.213.75.40/rs/portal/getContacts";
 
     /**
      * 草稿箱
