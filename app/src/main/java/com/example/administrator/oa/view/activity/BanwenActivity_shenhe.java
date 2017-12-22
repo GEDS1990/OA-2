@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.oa.R;
+import com.example.administrator.oa.view.bean.FilePreviewResponse;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
@@ -215,6 +216,15 @@ public class BanwenActivity_shenhe extends HeadBaseActivity {
                     if (!TextUtils.isEmpty(mFilePath) && !TextUtils.isEmpty(mFilename)) {
                         RequestServerUploadFile(mFilePath, mFilename);
                     }
+                }
+                break;
+            // 点击预览文件
+            case R.id.rl_fujian:
+                // 如果是已上传附件，则调用webview查看
+                if(!TextUtils.isEmpty(mFilePathReturn)){
+                    RequestServerForViewFile();
+                } else {
+                    FileUtils.openLocalFile(BanwenActivity_shenhe.this, mFilePath);
                 }
                 break;
             case R.id.btn_caogao:
@@ -492,9 +502,6 @@ public class BanwenActivity_shenhe extends HeadBaseActivity {
         mFilesize.setText(ShowLongFileSzie(file.length()));
         mFilePath = filePath;
         mFilename = name;
-//        if (0 >= file.length()) {
-//            Toast.makeText(this, "附件大小为0k，请重新选择附件", Toast.LENGTH_SHORT).show();
-//        }
         if (mFilename.contains(".")) {
             switch (mFilename.split("\\.")[1]) {
                 case "TXT":
@@ -521,6 +528,44 @@ public class BanwenActivity_shenhe extends HeadBaseActivity {
                     mIcon.setImageResource(R.drawable.unknow_type);
             }
         }
+
+    }
+
+    /**
+     * 预览附件
+     */
+    private void RequestServerForViewFile() {
+        //创建请求队列
+        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<FilePreviewResponse> request = new JavaBeanRequest<>(UrlConstance.URL_PREVIEW,
+                RequestMethod.POST, FilePreviewResponse.class);
+        request.add("filePath", mFilePathReturn);
+        ProcessQueue.add(0, request, new OnResponseListener<FilePreviewResponse>() {
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<FilePreviewResponse> response) {
+                if (null != response && null != response.get()) {
+                    if (response.get().getCode() == 200) {
+                        if(null != response.get().getData()) {
+                            FileUtils.openWebFile(BanwenActivity_shenhe.this, response.get().getData().getViewurl());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<FilePreviewResponse> response) {
+                Toast.makeText(BanwenActivity_shenhe.this, "预览失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+            }
+        });
 
     }
 

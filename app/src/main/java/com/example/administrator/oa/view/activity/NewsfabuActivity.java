@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -26,6 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.oa.R;
+import com.example.administrator.oa.view.bean.FilePreviewBean;
+import com.example.administrator.oa.view.bean.FilePreviewResponse;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
@@ -70,6 +73,8 @@ import butterknife.OnClick;
  */
 
 public class NewsfabuActivity extends HeadBaseActivity {
+    @BindView(R.id.webView)
+    WebView webView;
     @BindView(R.id.name)
     TextView mName;
     @BindView(R.id.fagao_bumen)
@@ -186,6 +191,13 @@ public class NewsfabuActivity extends HeadBaseActivity {
                 mProcessXxre.setAdapter(mAdapter);
             }
         }
+
+        webView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                webView.setVisibility(View.GONE);
+            }
+        });
     }
 
     /**
@@ -241,6 +253,8 @@ public class NewsfabuActivity extends HeadBaseActivity {
                                         }
                                         // 如果文件没有下载过，则开始下载
                                         checkFileExisted();
+                                        Log.d("fujianFile", mFileNameReturn);
+                                        Log.d("fujianFilePath", mFilePathReturn);
                                     }
                                     break;
                             }
@@ -407,7 +421,14 @@ public class NewsfabuActivity extends HeadBaseActivity {
                 break;
             case R.id.btn_cancel:
                 break;
+            // 点击预览文件
             case R.id.rl_fujian:
+                // 如果是已上传附件，则调用webview查看
+                if(!TextUtils.isEmpty(mFilePathReturn)){
+                    RequestServerForViewFile();
+                } else {
+                    FileUtils.openLocalFile(NewsfabuActivity.this, mFilePath);
+                }
                 break;
             case R.id.btn_caogao:
                 if(!TextUtils.isEmpty(mFilePath) && TextUtils.isEmpty(mFilePathReturn)){
@@ -473,11 +494,6 @@ public class NewsfabuActivity extends HeadBaseActivity {
             mFilename = file.getName();
             mFileName.setText(mFilename);
             mFilesize.setText(ShowLongFileSzie(file.length()));
-
-            if (0 >= file.length()) {
-                Toast.makeText(this, "附件大小为0k，请重新选择附件", Toast.LENGTH_SHORT).show();
-            }
-
             if (mFilename.contains(".")) {
                 // 如果有两个后缀，则是非法文档
                 if (mFilename.split("\\.").length > 2) {
@@ -516,6 +532,44 @@ public class NewsfabuActivity extends HeadBaseActivity {
     }
 
     /**
+     * 预览附件
+     */
+    private void RequestServerForViewFile() {
+        //创建请求队列
+        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<FilePreviewResponse> request = new JavaBeanRequest<>(UrlConstance.URL_PREVIEW,
+                RequestMethod.POST, FilePreviewResponse.class);
+        request.add("filePath", mFilePathReturn);
+        ProcessQueue.add(0, request, new OnResponseListener<FilePreviewResponse>() {
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<FilePreviewResponse> response) {
+                if (null != response && null != response.get()) {
+                    if (response.get().getCode() == 200) {
+                        if(null != response.get().getData()) {
+                            FileUtils.openWebFile(NewsfabuActivity.this, response.get().getData().getViewurl());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<FilePreviewResponse> response) {
+                Toast.makeText(NewsfabuActivity.this, "预览失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+            }
+        });
+
+    }
+
+    /**
      * 上传附件
      */
     private void RequestServer(String picpath, String filename) {
@@ -545,6 +599,7 @@ public class NewsfabuActivity extends HeadBaseActivity {
                     mBtnUplaod.setEnabled(false);
                     mAddFujian.setTag("1");
                     mFilePathReturn = response.get().getData();
+                    Log.d("fujianFilePath", mFilePathReturn);
                 }
             }
 

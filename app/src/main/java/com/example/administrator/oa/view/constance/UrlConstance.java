@@ -31,6 +31,11 @@ public class UrlConstance {
     public static final String URL_DOWNLOAD = "http://175av53846.iask.in/njsmartoa/uploadFileController/downloadFile.do";
 
     /**
+     * 预览文件
+     */
+    public static final String URL_PREVIEW = formatUrl("form/getFileView");
+
+    /**
      * 登录
      */
     public static final String URL_LOGIN = formatUrl("login");

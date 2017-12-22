@@ -173,7 +173,7 @@
                 android:layout_height="35dp"
                 android:layout_centerVertical="true"
                 android:layout_margin="@dimen/dp_13"
-                android:src="@drawable/icon_official_excel"
+                android:src="@drawable/unknow_type"
                 />
 
             <TextView

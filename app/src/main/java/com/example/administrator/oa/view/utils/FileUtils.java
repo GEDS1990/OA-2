@@ -3,12 +3,20 @@ package com.example.administrator.oa.view.utils;
 import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.webkit.MimeTypeMap;
+import android.widget.Toast;
+
+import java.io.File;
+import java.net.URL;
+import java.util.Locale;
 
 /**
  * Created by Administrator on 2017/12/20.
@@ -135,5 +143,65 @@ public class FileUtils {
         */
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+
+
+    /**
+     * 打开一个文件
+     *
+     * @param filePath
+     *            文件的绝对路径
+     */
+    public static void openLocalFile(Context context, final String filePath)
+    {
+        String ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase(Locale.US);
+        try
+        {
+            MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+            String temp = ext.substring(1);
+            String mime = mimeTypeMap.getMimeTypeFromExtension(temp);
+
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_VIEW);
+            File file = new File(filePath);
+            intent.setDataAndType(Uri.fromFile(file), mime);
+            context.startActivity(intent);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Toast.makeText(context, "该文件无法打开",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * 打开一个web文件
+     *
+     * @param filePath
+     *            文件的绝对路径
+     */
+    public static void openWebFile(Context context, final String filePath)
+    {
+        String ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase(Locale.US);
+        try
+        {
+            MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+            String temp = ext.substring(1);
+            String mime = mimeTypeMap.getMimeTypeFromExtension(temp);
+
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_VIEW);
+            Uri content_url = Uri.parse(filePath);
+            intent.setDataAndType(content_url, mime);
+            context.startActivity(intent);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            Toast.makeText(context, "该文件无法打开",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 }

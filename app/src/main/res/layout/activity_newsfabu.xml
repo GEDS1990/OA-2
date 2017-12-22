@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -153,7 +154,7 @@
                 android:layout_height="35dp"
                 android:layout_centerVertical="true"
                 android:layout_margin="@dimen/dp_13"
-                android:src="@drawable/icon_official_excel"
+                android:src="@drawable/unknow_type"
                 />
 
             <TextView
@@ -161,8 +162,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dp_13"
-                android:layout_toRightOf="@id/icon"
-                android:text="合同原件. excel"/>
+                android:layout_toRightOf="@id/icon"/>
 
             <TextView
                 android:id="@+id/filesize"
@@ -170,8 +170,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/file_name"
                 android:layout_marginTop="@dimen/dp_5"
-                android:layout_toRightOf="@id/icon"
-                android:text="3.45M"/>
+                android:layout_toRightOf="@id/icon"/>
 
             <!---->
             <ImageView
@@ -274,4 +273,14 @@
 
     </LinearLayout>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <WebView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:id="@+id/webView"
+            android:visibility="gone"/>
+    </FrameLayout>
 </RelativeLayout>

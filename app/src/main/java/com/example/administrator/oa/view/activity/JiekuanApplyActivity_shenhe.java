@@ -293,7 +293,7 @@ public class JiekuanApplyActivity_shenhe extends HeadBaseActivity {
                                     mShiyou.setText(value);
                                     break;
                                 case "jkje":
-                                    mMoney.setText(value+"元");
+                                    mMoney.setText(value);
                                     break;
                                 case "comment":
                                     mShenheyijian.setText(value);

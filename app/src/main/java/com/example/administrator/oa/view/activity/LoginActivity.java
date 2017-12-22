@@ -160,7 +160,11 @@ public class LoginActivity extends HeadBaseActivity {
                     SPUtils.put(LoginActivity.this, "userName", response.get().getData().getUserName());
                     SPUtils.put(LoginActivity.this, "departmentId", response.get().getData().getDepartmentId() + "");
                     SPUtils.put(LoginActivity.this, "userId", response.get().getData().getUserId());
-                    SPUtils.put(LoginActivity.this, "departmentName", response.get().getData().getDepartmentName());
+                    if(TextUtils.isEmpty(response.get().getData().getDepartmentName())) {
+                        SPUtils.put(LoginActivity.this, "departmentName", "无");
+                    } else {
+                        SPUtils.put(LoginActivity.this, "departmentName", response.get().getData().getDepartmentName());
+                    }
                     SPUtils.put(LoginActivity.this, "departments", response.get().getData().getDepartments());
                     SPUtils.put(LoginActivity.this, "userType", response.get().getData().getUserType());
                     SPUtils.put(LoginActivity.this, "email", response.get().getData().getEmail());
