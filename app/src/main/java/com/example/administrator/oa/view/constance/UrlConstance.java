@@ -11,6 +11,15 @@ public class UrlConstance {
         if (url.startsWith("http")) {
             return url;
         } else {
+            return URL_HOST + "rs/android/" + url;
+        }
+    }
+
+    public static String formatUrlWithOutRS(String url) {
+
+        if (url.startsWith("http")) {
+            return url;
+        } else {
             return URL_HOST + url;
         }
     }
@@ -18,17 +27,21 @@ public class UrlConstance {
     /**
      * 网络请求URL的公共部分
      */
-//    public static final String URL_HOST = "http://58.213.75.40/rs/android/";
-    public static final String URL_HOST = "http://175av53846.iask.in/njsmartoa/rs/android/";
+//    public static final String URL_HOST = "http://58.213.75.40/";
+    public static final String URL_HOST = "http://175av53846.iask.in/njsmartoa/";
 
     /**
      * 上传文件
      */
-    public static final String URL_UPLOAD = "http://175av53846.iask.in/njsmartoa/uploadFileController/uploadFile.do";
+    public static final String URL_UPLOAD = formatUrlWithOutRS("uploadFileController/uploadFile.do");
     /**
      * 下载文件
      */
-    public static final String URL_DOWNLOAD = "http://175av53846.iask.in/njsmartoa/uploadFileController/downloadFile.do";
+    public static final String URL_DOWNLOAD = formatUrlWithOutRS("uploadFileController/downloadFile.do");
+    /**
+     * 检测版本
+     */
+    public static final String URL_CHECKVERSION = formatUrlWithOutRS("uploadFileController/downloadUpdate.do");
 
     /**
      * 预览文件

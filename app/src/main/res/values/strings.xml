@@ -69,4 +69,14 @@
     <!--密码-->
     <string name="register_name_digits">._!?,/@*#;%0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLIMNOPQRSTUVWXYZ</string>
 
+    <!-- 下载服务 -->
+    <string name="update">正在下载最新版本...</string>
+    <string name="start_download">开始下载</string>
+    <string name="download_Name">智能派单</string>
+    <string name="download_Pec">0%</string>
+    <string name="download_install">下载完成,点击安装</string>
+    <string name="download_finish">下载完成请安装</string>
+    <string name="download_fail">下载失败，请检查网络</string>
+    <string name="downloading">正在下载</string>
+    <string name="downloadPec">%</string>
 </resources>

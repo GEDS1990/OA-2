@@ -3,13 +3,17 @@ package com.example.administrator.oa.view.utils;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
-
-import com.yanzhenjie.nohttp.OnUploadListener;
+import android.support.v4.content.FileProvider;
+import android.widget.Toast;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.security.MessageDigest;
 
 /**
@@ -92,6 +96,30 @@ public class CommonUtil {
     }
 
     /**
+     * 实时请求存储读写权限
+     * Checks if the app has permission to write to device storage
+     * If the app does not has permission then the user will be prompted to
+     * grant permissions
+     * @param activity
+     */
+    private static String[] PERMISSIONS_STATUSBAR = {
+            Manifest.permission.EXPAND_STATUS_BAR};
+    public static void verifyStatusBarPermissions(Context context) {
+        // 在API23+以上也就是安卓6.0以上的，进行了权限管理， 不止要在AndroidManifest.xml里面添加权限
+        // <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
+        // 还要在JAVA代码中运行时实时请求权限：
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.EXPAND_STATUS_BAR);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions((Activity) context, PERMISSIONS_STATUSBAR,
+                    REQUEST_EXTERNAL_STORAGE);
+        }
+    }
+
+    /**
      * 创建OA的文件夹
      */
     public static String createRootFile(Context context){
@@ -135,4 +163,133 @@ public class CommonUtil {
         return sdDir.toString();
     }
 
+    /**
+     * 显示toast
+     * @param content
+     *            显示的内容
+     */
+    private static Toast mToast;
+    public static void showToast(Context mContext, String content) {
+//        if (null != mContext) {
+//            Toast.makeText(mContext, content, Toast.LENGTH_LONG).show();
+//        }
+        if(null == mToast) {
+            mToast = Toast.makeText(mContext, content, Toast.LENGTH_SHORT);
+        } else {
+            mToast.setText(content);
+            mToast.setDuration(Toast.LENGTH_SHORT);
+        }
+        mToast.show();
+    }
+
+    /**
+     * sd卡中创建一个目标文件
+     *
+     * @param name
+     * @return
+     */
+    public static File createUpdateDir(String name) {
+        File sdcardDir = Environment.getExternalStorageDirectory();
+        String path = sdcardDir.getPath() + "/NJSPOA_UPDATE";
+        File file = null;
+        try {
+            if (Environment.MEDIA_MOUNTED.equals(Environment
+                    .getExternalStorageState())) {
+
+                File dir = new File(path);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+
+                file = new File(dir + File.separator + name);
+                if (file.exists()) {
+                    file.delete();
+                }
+                file.createNewFile();
+            }
+        } catch (Exception e) {
+        }
+        if (null != file) {
+            return file;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * 安装apk
+     * @param apkFile
+     * @param context
+     */
+    public static void installApk(Context context, File apkFile) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri contentUri = FileProvider.getUriForFile(context, "com.example.administrator.oa.fileprovider", apkFile);
+            intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+        } else {
+            intent.setDataAndType(Uri.fromFile(apkFile), "application/vnd.android.package-archive");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        if (context.getPackageManager().queryIntentActivities(intent, 0).size() > 0) {
+            context.startActivity(intent);
+        }
+    }
+
+    /**
+     * 收缩通知栏
+     * @param context
+     */
+    public static void collapsingNotification(Context context) {
+        verifyStatusBarPermissions(context);
+        Object service = context.getSystemService("statusbar");
+        if (null == service)
+            return;
+        try {
+            Class<?> clazz = Class.forName("android.app.StatusBarManager");
+            int sdkVersion = android.os.Build.VERSION.SDK_INT;
+            Method collapse = null;
+            if (sdkVersion <= 16) {
+                collapse = clazz.getMethod("collapse");
+            } else {
+                collapse = clazz.getMethod("collapsePanels");
+            }
+
+            collapse.setAccessible(true);
+            collapse.invoke(service);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 展开通知栏
+     * @param context
+     */
+    public static void expandNotification(Context context) {
+        Object service = context.getSystemService("statusbar");
+        if (null == service)
+            return;
+        try {
+            Class<?> clazz = Class.forName("android.app.StatusBarManager");
+            int sdkVersion = android.os.Build.VERSION.SDK_INT;
+            Method expand = null;
+            if (sdkVersion <= 16) {
+                expand = clazz.getMethod("expand");
+            } else {
+          /*
+           * Android SDK 16之后的版本展开通知栏有两个接口可以处理
+           * expandNotificationsPanel()
+           * expandSettingsPanel()
+           */
+                //expand =clazz.getMethod("expandNotificationsPanel");
+                expand = clazz.getMethod("expandSettingsPanel");
+            }
+
+            expand.setAccessible(true);
+            expand.invoke(service);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -17,6 +17,7 @@
     <uses-permission android:name="android.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
 
     <application
         android:name=".view.common.MyApp"
@@ -364,7 +365,8 @@
             android:windowSoftInputMode="stateHidden|stateUnchanged"/>
         <activity android:name=".view.activity.ChatMsgListActivity"/>
 
-
+        <!-- 升级服务 -->
+        <service android:name="com.example.administrator.oa.view.update.UpdateService"/>
     </application>
 
 </manifest>

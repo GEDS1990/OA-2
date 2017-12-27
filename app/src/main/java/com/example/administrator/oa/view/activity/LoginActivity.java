@@ -18,8 +18,6 @@ import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.LoginResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
-import com.example.administrator.oa.view.service.Global;
-import com.example.administrator.oa.view.service.UpdateService;
 import com.example.administrator.oa.view.utils.DeviceUtils;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -213,52 +211,5 @@ public class LoginActivity extends HeadBaseActivity {
 //        }, true, true);
 
 
-    }
-
-
-    /**
-     * 检查更新版本
-     */
-    public void checkVersion(final String uri) {
-
-        if (!Global.localVersion.equals(Global.serverVersion)) {
-            //发现新版本，提示用户更新
-            AlertDialog.Builder alert = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-            alert.setTitle("软件升级")
-                    .setMessage("发现新版本,建议立即更新使用.")
-                    .setPositiveButton("更新", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            //开启更新服务UpdateService
-                            //这里为了把update更好模块化，可以传一些updateService依赖的值
-                            //如布局ID，资源ID，动态获取的标题,这里以app_name为例
-
-                            mRxPermissions.request(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET)
-                                    .subscribe(new Action1<Boolean>() {
-                                        @Override
-                                        public void call(Boolean granted) {
-                                            if (granted) { // 在android 6.0之前会默认返回true
-
-                                                Intent updateIntent = new Intent(LoginActivity.this, UpdateService.class);
-                                                updateIntent.putExtra("app_name", "高街");
-                                                updateIntent.putExtra("downurl", uri);
-                                                startService(updateIntent);
-
-                                            } else {
-                                                Toast.makeText(LoginActivity.this, "权限获取失败，请到设置中开启", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                    });
-                        }
-                    })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alert.create().show();
-        } else {
-            //清理工作，略去
-            //cheanUpdateFile(),文章后面我会附上代码
-        }
     }
 }

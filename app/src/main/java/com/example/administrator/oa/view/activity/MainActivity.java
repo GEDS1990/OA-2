@@ -1,13 +1,24 @@
 package com.example.administrator.oa.view.activity;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -16,12 +27,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.oa.R;
+import com.example.administrator.oa.view.bean.VersionResponse;
 import com.example.administrator.oa.view.common.MyApp;
+import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.fragment.LiuChongFragment;
 import com.example.administrator.oa.view.fragment.MeFragment;
 import com.example.administrator.oa.view.fragment.GonggGaoFragment;
 import com.example.administrator.oa.view.fragment.MessageFragent;
+import com.example.administrator.oa.view.net.JavaBeanRequest;
+import com.example.administrator.oa.view.update.UpdateService;
+import com.example.administrator.oa.view.utils.DeviceUtils;
 import com.example.administrator.oa.view.utils.SPUtils;
+import com.yanzhenjie.nohttp.NoHttp;
+import com.yanzhenjie.nohttp.RequestMethod;
+import com.yanzhenjie.nohttp.rest.OnResponseListener;
+import com.yanzhenjie.nohttp.rest.Request;
+import com.yanzhenjie.nohttp.rest.RequestQueue;
+import com.yanzhenjie.nohttp.rest.Response;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -54,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private MeFragment fg4;
 
     private MyApp application;
+    private static String downUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
         application = (MyApp) getApplicationContext();
         IntentFilter filter = new IntentFilter(application.mainAction);
         registerReceiver(broadcastReceiver, filter);
+
+        // 检测版本
+        checkVersion();
     }
 
     @OnClick({R.id.fl_workbench, R.id.fl_manager, R.id.fl_omos, R.id.fl_mime})
@@ -167,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        // TODO Auto-generated method stub
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             exitBy2Click(); //调用双击退出函数
         }
@@ -222,5 +247,199 @@ public class MainActivity extends AppCompatActivity {
         } else {
             txtImgRed.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * 检查更新版本
+     */
+    public void checkVersion() {
+        RequestQueue Queue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<VersionResponse> request = new JavaBeanRequest<>(UrlConstance.URL_CHECKVERSION,
+                RequestMethod.POST, VersionResponse.class);
+        //添加url?key=value形式的参数
+        request.add("versionNum", DeviceUtils.getVersionName(MainActivity.this));
+        request.add("type", 1);
+        Queue.add(1, request, new OnResponseListener<VersionResponse>() {
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<VersionResponse> response) {
+                if (null != response && null != response.get()) {
+                    if(201 == response.get().getCode() && null != response.get().getPath()){
+                        downUrl = response.get().getPath();
+                        Log.d("versison", downUrl);
+                        showVersionDialog();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<VersionResponse> response) {
+            }
+
+            @Override
+            public void onFinish(int what) {
+            }
+        });
+    }
+
+    /**
+     * 提示更新的对话框
+     */
+    private void showVersionDialog(){
+        //发现新版本，提示用户更新
+        AlertDialog.Builder alert = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+        alert.setTitle("软件升级")
+                .setMessage("发现新版本,建议立即更新使用.")
+                .setPositiveButton("更新", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 检测权限
+                        applyForPermission();
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alert.create().show();
+    }
+
+    // 要申请的权限
+    protected  String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    // 文件请求权限
+    protected int REQUESTCODE_REQUEST_PERMISSION = 1002;
+    // 手动设置权限
+    protected int REQUESTCODE_SETTION_PERMISSION = 1003;
+    /**
+     * 申请权限
+     * @return
+     */
+    protected void applyForPermission(){
+        // 版本判断。当手机系统大于 23 时，才有必要去判断权限是否获取
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // 检查该权限是否已经获取
+            int i = ContextCompat.checkSelfPermission(this, permissions[0]);
+            // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
+            if (i != PackageManager.PERMISSION_GRANTED) {
+                // 如果没有授予该权限，就去提示用户请求
+                showDialogTipUserRequestPermission();
+            } else {
+                startUpdateService();
+            }
+        }
+    }
+
+    /**
+     * 启动版本更新服务
+     */
+    protected void startUpdateService() {
+        Intent updateIntent = new Intent(MainActivity.this, UpdateService.class);
+        updateIntent.putExtra("downUrl", downUrl);
+        startService(updateIntent);
+    }
+
+    // 提示用户该请求权限的弹出框
+    protected void showDialogTipUserRequestPermission() {
+        new android.support.v7.app.AlertDialog.Builder(this)
+                .setTitle("存储权限不可用")
+                .setMessage("下载新版本需要获取存储权限")
+                .setPositiveButton("立即开启", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startRequestPermission();
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).setCancelable(false).show();
+    }
+
+    // 开始提交请求权限
+    private void startRequestPermission() {
+        ActivityCompat.requestPermissions(this, permissions, REQUESTCODE_REQUEST_PERMISSION);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUESTCODE_SETTION_PERMISSION) {
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // 检查该权限是否已经获取
+                    int i = ContextCompat.checkSelfPermission(this, permissions[0]);
+                    // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
+                    if (i != PackageManager.PERMISSION_GRANTED) {
+                        // 提示用户应该去应用设置界面手动开启权限
+                        showDialogTipUserGoToAppSettting();
+                    } else {
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        startUpdateService();
+                    }
+                }
+            }
+        }
+    }
+
+    // 用户权限 申请 的回调方法
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUESTCODE_REQUEST_PERMISSION) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    // 判断用户是否 点击了不再提醒。(检测该权限是否还可以申请)
+                    boolean b = shouldShowRequestPermissionRationale(permissions[0]);
+                    if (!b) {
+                        // 用户还是想用我的 APP 的
+                        // 提示用户去应用设置界面手动开启权限
+                        showDialogTipUserGoToAppSettting();
+                    }
+                } else {
+                    startUpdateService();
+                }
+            }
+        }
+    }
+
+    /**
+     * 提示用户去应用设置界面手动开启权限
+     */
+    protected android.support.v7.app.AlertDialog dialog;
+    protected void showDialogTipUserGoToAppSettting() {
+        dialog = new android.support.v7.app.AlertDialog.Builder(this)
+                .setTitle("存储权限不可用")
+                .setMessage("下载新版本需要获取存储权限")
+                .setPositiveButton("立即开启", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 跳转到应用设置界面
+                        goToAppSetting();
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setCancelable(false).show();
+    }
+
+    /**
+     * 跳转到当前应用的设置界面
+     */
+    private void goToAppSetting() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivityForResult(intent, REQUESTCODE_SETTION_PERMISSION);
     }
 }
