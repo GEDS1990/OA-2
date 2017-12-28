@@ -367,6 +367,21 @@
 
         <!-- 升级服务 -->
         <service android:name="com.example.administrator.oa.view.update.UpdateService"/>
+
+        <!-- 解决7.0升级更新后自动安装的问题 -->
+        <!--grantUriPermissions：必须是true，表示授予 URI 临时访问权限-->
+        <!--exported：必须是false-->
+        <!--resource：中的@xml/file_paths是我们接下来要在资源文件目录下添加的文件-->
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_path" />
+        </provider>
     </application>
 
 </manifest>

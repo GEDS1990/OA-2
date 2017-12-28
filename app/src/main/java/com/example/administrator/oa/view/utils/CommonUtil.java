@@ -223,13 +223,14 @@ public class CommonUtil {
      */
     public static void installApk(Context context, File apkFile) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // 7.0需要在manifest里注册provider开放权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             Uri contentUri = FileProvider.getUriForFile(context, "com.example.administrator.oa.fileprovider", apkFile);
             intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
         } else {
             intent.setDataAndType(Uri.fromFile(apkFile), "application/vnd.android.package-archive");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
         if (context.getPackageManager().queryIntentActivities(intent, 0).size() > 0) {
             context.startActivity(intent);
@@ -241,7 +242,8 @@ public class CommonUtil {
      * @param context
      */
     public static void collapsingNotification(Context context) {
-        verifyStatusBarPermissions(context);
+        // 申请通知栏的权限，没多大用处
+//        verifyStatusBarPermissions(context);
         Object service = context.getSystemService("statusbar");
         if (null == service)
             return;

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 
@@ -79,6 +80,8 @@ public class UpdateService extends IntentService {
 		if (downloadManager.query(MyApp.downloadId) == DownloadManager.STATUS_NOT_FOUND) {
 			// 创建文件这里要注意，很容易导致文件解析失败
 			updateFile = CommonUtil.createUpdateDir(app_name);
+			// 这里是尝试将下载的apk放在app内部的/data下面
+//            updateFile = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), app_name);
 			url = intent.getStringExtra("downUrl");
 			notificationControl = new DownloadNotificationUtil(updateFile.getPath(), context);
 			initDownload();
