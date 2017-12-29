@@ -1,10 +1,12 @@
 package com.example.administrator.oa.view.bean;
 
+import android.support.annotation.NonNull;
+
 /**
  * Created by Administrator on 2017/7/25.
  */
 
-public class GoodsRegistrationBean {
+public class GoodsRegistrationBean implements Comparable<GoodsRegistrationBean>{
     String goods;
     String format;
     String num;
@@ -13,6 +15,14 @@ public class GoodsRegistrationBean {
 
 
     public GoodsRegistrationBean(String goods, String format, String num, String remarks) {
+        this.goods = goods;
+        this.format = format;
+        this.num = num;
+        this.remarks = remarks;
+    }
+
+    public GoodsRegistrationBean(int index, String goods, String format, String num, String remarks) {
+        this.index = index;
         this.goods = goods;
         this.format = format;
         this.num = num;
@@ -60,5 +70,14 @@ public class GoodsRegistrationBean {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    @Override
+    public int compareTo(@NonNull GoodsRegistrationBean o) {
+        int i = this.getIndex() - o.getIndex();//先按照年龄排序
+//        if(i == 0){
+//            return this.score - o.getScore();//如果年龄相等了再用分数进行排序
+//        }
+        return i;
     }
 }

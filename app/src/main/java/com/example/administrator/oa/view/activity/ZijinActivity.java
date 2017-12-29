@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.FormBianmaBean;
+import com.example.administrator.oa.view.bean.GoodsRegistrationBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
@@ -36,6 +37,7 @@ import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -196,9 +198,13 @@ public class ZijinActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    ArrayList<String> pay = new ArrayList<>(10);
-                    ArrayList<String> income = new ArrayList<>(10);
-                    ArrayList<String> money = new ArrayList<>(10);
+                    ArrayList<ZijinDiaoboBean> pay = new ArrayList<ZijinDiaoboBean>();
+                    // 先将物品明细的good存入列表，好定物品明细的数量
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if (!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue()) && bean.getLabel().startsWith("pay")) {
+                            pay.add(new ZijinDiaoboBean(Integer.valueOf(bean.getLabel().replace("pay", "")), bean.getValue(), "", ""));
+                        }
+                    }
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if (!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
                             Log.d("Caogao", bean.getName());
@@ -212,23 +218,24 @@ public class ZijinActivity extends HeadBaseActivity {
                                     break;
                             }
                             // 处理物品明细
-                            if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
-                                if (bean.getLabel().startsWith("pay")) {
-                                    pay.add(bean.getValue());
-                                }
-                                if (bean.getLabel().startsWith("income")) {
-                                    income.add(bean.getValue());
-                                }
-                                if (bean.getLabel().startsWith("money")) {
-                                    money.add( bean.getValue());
+                            if (!TextUtils.isEmpty(bean.getLabel())) {
+                                for (int j = 0; j < pay.size(); j++) {
+                                    if (bean.getLabel().startsWith("income") &&
+                                            Integer.valueOf(bean.getLabel().replace("income", "")) == (pay.get(j).getIndex())) {
+                                        pay.get(j).setShoukuanAccount(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("money") &&
+                                            Integer.valueOf(bean.getLabel().replace("money", "")) == (pay.get(j).getIndex())) {
+                                        pay.get(j).setMoney(bean.getValue());
+                                    }
                                 }
                             }
                         }
                     }
+                    // 排序
+                    Collections.sort(pay);
                     // 把放入list里的物品明细添加进adapter里，展示出来
-                    for (int i = 0;i< pay.size();i++) {
-                        mGoodAdapter.add(new ZijinDiaoboBean(pay.get(i), income.get(i), money.get(i)));
-                    }
+                    mGoodAdapter.addAll(pay);
                 }
             }
 
@@ -306,9 +313,13 @@ public class ZijinActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    ArrayList<String> pay = new ArrayList<>(10);
-                    ArrayList<String> income = new ArrayList<>(10);
-                    ArrayList<String> money = new ArrayList<>(10);
+                    ArrayList<ZijinDiaoboBean> pay = new ArrayList<ZijinDiaoboBean>();
+                    // 先将物品明细的good存入列表，好定物品明细的数量
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if (!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue()) && bean.getLabel().startsWith("pay")) {
+                            pay.add(new ZijinDiaoboBean(Integer.valueOf(bean.getLabel().replace("pay", "")), bean.getValue(), "", ""));
+                        }
+                    }
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if (!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
                             //当有type为userpicker的时候说明是可以发起会签的节点
@@ -327,23 +338,23 @@ public class ZijinActivity extends HeadBaseActivity {
                             }
                         }
                         // 处理物品明细
-                        if (!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
-                            if (bean.getLabel().startsWith("pay")) {
-                                pay.add(bean.getValue());
-                            }
-                            if (bean.getLabel().startsWith("income")) {
-                                income.add(bean.getValue());
-                            }
-                            if (bean.getLabel().startsWith("money")) {
-                                money.add(bean.getValue());
+                        if (!TextUtils.isEmpty(bean.getLabel())) {
+                            for (int j = 0; j < pay.size(); j++) {
+                                if (bean.getLabel().startsWith("income") &&
+                                        Integer.valueOf(bean.getLabel().replace("income", "")) == (pay.get(j).getIndex())) {
+                                    pay.get(j).setShoukuanAccount(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("money") &&
+                                        Integer.valueOf(bean.getLabel().replace("money", "")) == (pay.get(j).getIndex())) {
+                                    pay.get(j).setMoney(bean.getValue());
+                                }
                             }
                         }
                     }
-
+                    // 排序
+                    Collections.sort(pay);
                     // 把放入list里的物品明细添加进adapter里，展示出来
-                    for (int i = 0;i< pay.size();i++) {
-                        mGoodAdapter.add(new ZijinDiaoboBean(pay.get(i), income.get(i), money.get(i)));
-                    }
+                    mGoodAdapter.addAll(pay);
                 }
             }
 

@@ -41,6 +41,7 @@ import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -213,10 +214,13 @@ public class GudingZichanActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    ArrayList<String> goods = new ArrayList<>();
-                    ArrayList<String> format = new ArrayList<>();
-                    ArrayList<String> num = new ArrayList<>();
-                    ArrayList<String> remarks = new ArrayList<>();
+                    ArrayList<GoodsRegistrationBean> goods = new ArrayList<GoodsRegistrationBean>();
+                    // 先将物品明细的good存入列表，好定物品明细的数量
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue()) && bean.getLabel().startsWith("goods")) {
+                            goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods","")), bean.getValue(), "", "", ""));
+                        }
+                    }
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if(!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
                             Log.d("Caogao", bean.getName());
@@ -225,7 +229,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
                             String label = bean.getName();
                             String value = bean.getValue();
                             switch (label) {
-                                case "minister_name":
+                                case "minister":
                                     if(!TextUtils.isEmpty(bean.getLabel())) {
                                         mTvBumenleader.setTag(value);
                                         mTvBumenleader.setText(bean.getLabel());
@@ -236,28 +240,28 @@ public class GudingZichanActivity extends HeadBaseActivity {
                                     break;
                             }
                         }
-                        if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
-                            if (bean.getLabel().startsWith("goods") ) {
-                                goods.add(bean.getValue());
-                            }
-                            if (bean.getLabel().startsWith("format")) {
-                                format.add(bean.getValue());
-                            }
-                            if (bean.getLabel().startsWith("num")) {
-                                num.add(bean.getValue());
-                            }
-                            if (bean.getLabel().startsWith("remarks")) {
-                                remarks.add(bean.getValue());
+                        // 处理物品明细
+                        if(!TextUtils.isEmpty(bean.getLabel())) {
+                            for(int j = 0; j<goods.size(); j++){
+                                if (bean.getLabel().startsWith("format") &&
+                                        Integer.valueOf(bean.getLabel().replace("format","")) == (goods.get(j).getIndex())) {
+                                    goods.get(j).setFormat(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("num") &&
+                                        Integer.valueOf(bean.getLabel().replace("num","")) == (goods.get(j).getIndex())) {
+                                    goods.get(j).setNum(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("remarks") &&
+                                        Integer.valueOf(bean.getLabel().replace("remarks","")) == (goods.get(j).getIndex())) {
+                                    goods.get(j).setRemarks(bean.getValue());
+                                }
                             }
                         }
                     }
+                    // 排序
+                    Collections.sort(goods);
                     // 把放入list里的物品明细添加进adapter里，展示出来
-                    for (int i = 0;i< goods.size();i++) {
-                        if(remarks.size() < goods.size()){
-                            remarks.add(i, "");
-                        }
-                        mGoodAdapter.add(new GoodsRegistrationBean(goods.get(i), format.get(i), num.get(i), remarks.get(i)));
-                    }
+                    mGoodAdapter.addAll(goods);
                 }
             }
 
@@ -336,10 +340,13 @@ public class GudingZichanActivity extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    ArrayList<String> goods = new ArrayList<>();
-                    ArrayList<String> format = new ArrayList<>();
-                    ArrayList<String> num = new ArrayList<>();
-                    ArrayList<String> remarks = new ArrayList<>();
+                    ArrayList<GoodsRegistrationBean> goods = new ArrayList<GoodsRegistrationBean>();
+                    // 先将物品明细的good存入列表，好定物品明细的数量
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue()) && bean.getLabel().startsWith("goods")) {
+                            goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods","")), bean.getValue(), "", "", ""));
+                        }
+                    }
 
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if (!TextUtils.isEmpty(bean.getName()) && !TextUtils.isEmpty(bean.getValue())) {
@@ -351,7 +358,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
                             switch (label) {
                                 // 负责人
                                 case "minister":
-                                    if(!TextUtils.isEmpty(bean.getLabel())) {
+                                    if (!TextUtils.isEmpty(bean.getLabel())) {
                                         mTvBumenleader.setTag(value);
                                         mTvBumenleader.setText(bean.getLabel());
                                     }
@@ -367,30 +374,29 @@ public class GudingZichanActivity extends HeadBaseActivity {
                                     mDate.setText(value);
                                     break;
                             }
-                            if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
-                                if (bean.getLabel().startsWith("goods") ) {
-                                    goods.add(bean.getValue());
-                                }
-                                if (bean.getLabel().startsWith("format")) {
-                                    format.add(bean.getValue());
-                                }
-                                if (bean.getLabel().startsWith("num")) {
-                                    num.add(bean.getValue());
-                                }
-                                if (bean.getLabel().startsWith("remarks")) {
-                                    remarks.add(bean.getValue());
+                            // 处理物品明细
+                            if (!TextUtils.isEmpty(bean.getLabel())) {
+                                for (int j = 0; j < goods.size(); j++) {
+                                    if (bean.getLabel().startsWith("format") &&
+                                            Integer.valueOf(bean.getLabel().replace("format", "")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setFormat(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("num") &&
+                                            Integer.valueOf(bean.getLabel().replace("num", "")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setNum(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("remarks") &&
+                                            Integer.valueOf(bean.getLabel().replace("remarks", "")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setRemarks(bean.getValue());
+                                    }
                                 }
                             }
                         }
                     }
-
+                    // 排序
+                    Collections.sort(goods);
                     // 把放入list里的物品明细添加进adapter里，展示出来
-                    for (int i = 0;i< goods.size();i++) {
-                        if(remarks.size() < goods.size()){
-                            remarks.add(i, "");
-                        }
-                        mGoodAdapter.add(new GoodsRegistrationBean(goods.get(i), format.get(i), num.get(i), remarks.get(i)));
-                    }
+                    mGoodAdapter.addAll(goods);
                 }
             }
 

@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.GoodsApplyBlankBean;
+import com.example.administrator.oa.view.bean.GoodsRegistrationBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
@@ -40,6 +41,7 @@ import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -93,8 +95,8 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
     private CommonRecyclerAdapter<ZuzhiUserBean> mHuiqianAdapter;
     private XXDialog mxxDialog2;
     private XXDialog mxxUsersDialog;
-    private List<GoodsApplyBlankBean> data3 = new ArrayList<>();
-    private CommonRecyclerAdapter<GoodsApplyBlankBean> mGoodApplyAdapter;
+    private List<GoodsRegistrationBean> data3 = new ArrayList<>();
+    private CommonRecyclerAdapter<GoodsRegistrationBean> mGoodApplyAdapter;
 
     @Override
     protected int getChildLayoutRes() {
@@ -158,9 +160,9 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
 
         //展示申请的物品明细单
         mXxreGoodsApply.setLayoutManager(new LinearLayoutManager(this));
-        mGoodApplyAdapter = new CommonRecyclerAdapter<GoodsApplyBlankBean>(this, data3, R.layout.item_goodsapply_shenhe) {
+        mGoodApplyAdapter = new CommonRecyclerAdapter<GoodsRegistrationBean>(this, data3, R.layout.item_goodsapply_shenhe) {
             @Override
-            public void convert(CommonViewHolder holder, GoodsApplyBlankBean item, int i, boolean b) {
+            public void convert(CommonViewHolder holder, GoodsRegistrationBean item, int i, boolean b) {
                 holder.setText(R.id.number, "( " + (i + 1) + " )");
                 holder.setText(R.id.name, item.getGoods());
                 holder.setText(R.id.wuping_guige, item.getFormat());
@@ -258,11 +260,13 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
             public void onSucceed(int what, Response<QingjiaShenheResponse> response) {
                 if (null != response && null != response.get() && null != response.get().getData()) {
                     List<QingjiaShenheBean> shenheBeen = response.get().getData();
-                    ArrayList<String> goods = new ArrayList<>();
-                    ArrayList<String> format = new ArrayList<>();
-                    ArrayList<String> num = new ArrayList<>();
-                    ArrayList<String> remarks = new ArrayList<>();
-
+                    ArrayList<GoodsRegistrationBean> goods = new ArrayList<GoodsRegistrationBean>();
+                    // 先将物品明细的good存入列表，好定物品明细的数量
+                    for (QingjiaShenheBean bean : shenheBeen) {
+                        if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue()) && bean.getLabel().startsWith("goods")) {
+                            goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods","")), bean.getValue(), "", "", ""));
+                        }
+                    }
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
                             Log.d("FormName", bean.getFormName());
@@ -330,36 +334,29 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
                                     }
                                     break;
                             }
-                            if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue())) {
-                                if (bean.getLabel().startsWith("goods") ) {
-                                    goods.add(bean.getValue());
-                                }
-                                if (bean.getLabel().startsWith("format")) {
-                                    format.add(bean.getValue());
-                                }
-                                if (bean.getLabel().startsWith("num")) {
-                                    num.add(bean.getValue());
-                                }
-                                if (bean.getLabel().startsWith("remarks")) {
-                                    remarks.add(bean.getValue());
+                            // 处理物品明细
+                            if(!TextUtils.isEmpty(bean.getLabel())) {
+                                for(int j = 0; j<goods.size(); j++){
+                                    if (bean.getLabel().startsWith("format") &&
+                                            Integer.valueOf(bean.getLabel().replace("format","")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setFormat(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("num") &&
+                                            Integer.valueOf(bean.getLabel().replace("num","")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setNum(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("remarks") &&
+                                            Integer.valueOf(bean.getLabel().replace("remarks","")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setRemarks(bean.getValue());
+                                    }
                                 }
                             }
                         }
-
-                        //当有type为userpicker的时候说明是可以发起会签的节点
-//                        if ("userpicker".equals(bean.getType())) {
-//                            mLlHuiqianren.setVisibility(View.VISIBLE);
-//                            mXxreHuiqianren.setVisibility(View.VISIBLE);
-//                        }
                     }
-
+                    // 排序
+                    Collections.sort(goods);
                     // 把放入list里的物品明细添加进adapter里，展示出来
-                    for (int i = 0;i< goods.size();i++) {
-                        if(remarks.size() < goods.size()){
-                            remarks.add(i, "");
-                        }
-                        mGoodApplyAdapter.add(new GoodsApplyBlankBean(goods.get(i), format.get(i), num.get(i), remarks.get(i)));
-                    }
+                    mGoodApplyAdapter.addAll(goods);
                 }
             }
 
@@ -415,7 +412,7 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
 
         for (int i = 0; i < 10; i++) {
             if (i <= mGoodApplyAdapter.getDatas().size() - 1) {
-                GoodsApplyBlankBean bean = mGoodApplyAdapter.getDatas().get(i);
+                GoodsRegistrationBean bean = mGoodApplyAdapter.getDatas().get(i);
                 json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
                         .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")

@@ -58,7 +58,7 @@ public class QiyeTuizu_shenhe extends HeadBaseActivity {
     @BindView(R.id.Oldaddress)
     TextView mOldaddress;
     @BindView(R.id.rencaibuyijian)
-    TextView mRencaibuyijian;
+    EditText mRencaibuyijian;
     @BindView(R.id.content)
     TextView mContent;
     @BindView(R.id.xxre)
@@ -244,12 +244,12 @@ public class QiyeTuizu_shenhe extends HeadBaseActivity {
                             switch (bean.getFormCode()) {
                                 // 投资协议会签审核
                                 case "lease-invest":
-//                                    mLlNiban.setVisibility(View.VISIBLE);
-//                                    mBtnCaogao.setText("不同意");
-//                                    mBtnCommit.setText("同意");
+                                    mBtnCaogao.setVisibility(View.GONE);
+                                    mBtnCommit.setText("完成");
                                     break;
                                 // 企业退租领导审核表
                                 case "lease-leader":
+                                    mRencaibuyijian.setFocusable(false);
                                     mLlHuiqianren.setVisibility(View.VISIBLE);
                                     mXxreHuiqianren.setVisibility(View.VISIBLE);
                                     mBtnCaogao.setText("不同意");
@@ -257,12 +257,14 @@ public class QiyeTuizu_shenhe extends HeadBaseActivity {
                                     break;
                                 // 投资协议通知
                                 case "lease-return":
+                                    mRencaibuyijian.setFocusable(false);
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
                                     mBtnCaogao.setText("回退发起人");
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 投资协议通知
                                 case "lease-notice":
+                                    mRencaibuyijian.setFocusable(false);
                                     mLlShenheyijian.setVisibility(View.VISIBLE);
                                     mShenheyijian.setFocusable(false);
                                     mBtnCaogao.setVisibility(View.GONE);
