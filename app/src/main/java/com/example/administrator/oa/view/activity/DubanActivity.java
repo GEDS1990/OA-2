@@ -337,8 +337,7 @@ public class DubanActivity extends HeadBaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.gzdbd_bianhao:
-                if("0".equals(mBianhao.getTag())) {
-                    mBianhao.setTag("1");
+                if(TextUtils.isEmpty(mBianhao.getText().toString())){
                     houQuFormCode();
                 }
                 break;

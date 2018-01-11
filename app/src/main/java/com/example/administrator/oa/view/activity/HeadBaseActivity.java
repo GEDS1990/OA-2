@@ -235,11 +235,11 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
             @Override
             public void onTimeSelect(Date date, View v) {//选中事件回调
                 if (startTime.compareTo(getTime(date)) < 0) {
-                    if ("按小时请假".equals(type) && 8 < getTimeDifferenceHour(startTime, getTime(date))){
-                        Toast.makeText(HeadBaseActivity.this, "按小时请假时，不可超过8小时", Toast.LENGTH_SHORT).show();
-                    } else {
+//                    if ("按小时请假".equals(type) && 8 < getTimeDifferenceHour(startTime, getTime(date))){
+//                        Toast.makeText(HeadBaseActivity.this, "按小时请假时，不可超过8小时", Toast.LENGTH_SHORT).show();
+//                    } else {
                         tv.setText(getTime(date));
-                    }
+//                    }
                 } else {
                     Toast.makeText(HeadBaseActivity.this, "结束时间不可早于开始时间", Toast.LENGTH_SHORT).show();
                 }

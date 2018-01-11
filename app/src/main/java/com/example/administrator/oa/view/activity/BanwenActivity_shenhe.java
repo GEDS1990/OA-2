@@ -232,7 +232,7 @@ public class BanwenActivity_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "回退发起人":
+                    case "驳回":
                         RequestServerTuihui();
                         break;
                 }
@@ -347,10 +347,16 @@ public class BanwenActivity_shenhe extends HeadBaseActivity {
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if(!TextUtils.isEmpty(bean.getFormName()) && !TextUtils.isEmpty(bean.getFormCode())) {
                             switch (bean.getFormCode()) {
-                                // 拟办节点
+                                // 办文流程部长审核
+                                case "article-request1":
+                                    mLlNiban.setVisibility(View.GONE);
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
+                                    break;
+                                // 办文流程综管部长审核
                                 case "article-colligate":
-                                    mBtnCaogao.setVisibility(View.GONE);
-                                    mBtnCommit.setText("完成");
+                                    mBtnCaogao.setText("不同意");
+                                    mBtnCommit.setText("同意");
                                     break;
                                 // 办文流程审核
                                 case "article-leader":
@@ -366,7 +372,7 @@ public class BanwenActivity_shenhe extends HeadBaseActivity {
                                     mNiban.setFocusable(false);
                                     mNiban.setGravity(Gravity.RIGHT);
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
-                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCaogao.setText("驳回");
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 办文流程通知
@@ -399,6 +405,7 @@ public class BanwenActivity_shenhe extends HeadBaseActivity {
                                     break;
                                 case "imitate":
                                     mNiban.setText(value);
+                                    mNiban.setSelection(mNiban.getText().toString().length());
                                     break;
                                 case "comment":
                                     mShenheyijian.setText(value);

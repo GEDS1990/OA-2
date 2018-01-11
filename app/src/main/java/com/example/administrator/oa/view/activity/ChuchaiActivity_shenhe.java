@@ -129,7 +129,7 @@ public class ChuchaiActivity_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "回退发起人":
+                    case "驳回":
 //                        RequestServerTuihui();
                         break;
                 }

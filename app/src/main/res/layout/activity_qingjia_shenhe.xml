@@ -82,7 +82,8 @@
                 android:background="@color/white"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="@dimen/dp_13">
+                android:padding="@dimen/dp_13"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="0dp"
@@ -191,7 +192,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="请假时长(小时/天)"
+                    android:text="请假时长(天)"
                     android:textColor="@color/black"
                     android:textSize="@dimen/dp_15"/>
 

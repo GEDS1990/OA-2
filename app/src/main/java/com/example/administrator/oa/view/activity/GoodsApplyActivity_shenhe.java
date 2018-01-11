@@ -187,7 +187,7 @@ public class GoodsApplyActivity_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "回退发起人":
+                    case "驳回":
                         RequestServerTuihui();
                         break;
                 }
@@ -282,7 +282,7 @@ public class GoodsApplyActivity_shenhe extends HeadBaseActivity {
                                 // 物品领用会签
                                 case "goods-return":
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
-                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCaogao.setText("驳回");
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 物品领用通知

@@ -52,10 +52,6 @@ public class QingJiaActivity extends HeadBaseActivity {
     TextView mQingjiaBumen;
     @BindView(R.id.ll_bumen)
     LinearLayout mLlBumen;
-    @BindView(R.id.qingjia_fangshi)
-    TextView mQingjiaFangshi;
-    @BindView(R.id.ll_fangshi)
-    LinearLayout mLlFangshi;
     @BindView(R.id.qingjia_type)
     TextView mQingjiaType;
     @BindView(R.id.ll_leixing)
@@ -175,25 +171,6 @@ public class QingJiaActivity extends HeadBaseActivity {
             }
         });
 
-        mQingjiaFangshi.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if ("按小时请假".equals(mQingjiaFangshi.getText().toString())
-                        && 8 < getTimeDifferenceHour(mQingjiaStart.getText().toString(), mQingjiaStop.getText().toString())){
-                    mQingjiaStop.setText("");
-                }
-            }
-        });
     }
 
     /**
@@ -231,9 +208,6 @@ public class QingJiaActivity extends HeadBaseActivity {
                             switch (label) {
                                 case "type":
                                     mQingjiaType.setText(value);
-                                    break;
-                                case "day":
-                                    mQingjiaFangshi.setText(value);
                                     break;
                                 case "startTime":
                                     mQingjiaStart.setText(value);
@@ -342,9 +316,6 @@ public class QingJiaActivity extends HeadBaseActivity {
                                 case "type":
                                     mQingjiaType.setText(value);
                                     break;
-                                case "day":
-                                    mQingjiaFangshi.setText(value);
-                                    break;
                                 case "startTime":
                                     mQingjiaStart.setText(value);
                                     break;
@@ -379,12 +350,6 @@ public class QingJiaActivity extends HeadBaseActivity {
             R.id.btn_commit})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.ll_fangshi:
-                List<String> datas_fanshi = new ArrayList();
-                datas_fanshi.add("按小时请假");
-                datas_fanshi.add("按天请假");
-                chooseDate(datas_fanshi, mQingjiaFangshi, "请假方式");
-                break;
             case R.id.ll_leixing:
                 List<String> datas_type = new ArrayList();
                 datas_type.add("事假");
@@ -394,15 +359,14 @@ public class QingJiaActivity extends HeadBaseActivity {
                 chooseDate(datas_type, mQingjiaType, "请假类型");
                 break;
             case R.id.ll_start:
-                selectDate(mQingjiaFangshi.getText().toString(), mQingjiaStart, "");
+                selectDate("", mQingjiaStart, "");
                 break;
             case R.id.ll_stop:
-                selectDate(mQingjiaFangshi.getText().toString(), mQingjiaStop, mQingjiaStart.getText().toString());
+                selectDate("", mQingjiaStop, mQingjiaStart.getText().toString());
                 break;
             case R.id.btn_caogao:
 //                Toast.makeText(this, "该功能暂未启用", Toast.LENGTH_SHORT).show();
-                RequestServerQingjia_Save(mQingjiaFangshi.getText().toString().trim(),
-                        mQingjiaType.getText().toString().trim(),
+                RequestServerQingjia_Save(mQingjiaType.getText().toString().trim(),
                         mQingjiaStart.getText().toString().trim(),
                         mQingjiaStop.getText().toString().trim(),
                         mQingjiaTianshu.getText().toString().trim(),
@@ -431,8 +395,6 @@ public class QingJiaActivity extends HeadBaseActivity {
             Toast.makeText(this, "请假人缺失", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mQingjiaBumen.getText().toString().trim())) {
             Toast.makeText(this, "申请部门缺失", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(mQingjiaFangshi.getText().toString().trim())) {
-            Toast.makeText(this, "请选择请假方式", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mQingjiaType.getText().toString().trim())) {
             Toast.makeText(this, "请选择请假类型", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mQingjiaStart.getText().toString().trim())) {
@@ -453,8 +415,7 @@ public class QingJiaActivity extends HeadBaseActivity {
             if(!TextUtils.isEmpty(formCode) && !"caogao".equals(formCode)){
                 RequestServerReCommit();
             } else {
-                RequestServerQingjia2(mQingjiaFangshi.getText().toString().trim(),
-                        mQingjiaType.getText().toString().trim(),
+                RequestServerQingjia2(mQingjiaType.getText().toString().trim(),
                         mQingjiaStart.getText().toString().trim(),
                         mQingjiaStop.getText().toString().trim(),
                         mQingjiaTianshu.getText().toString().trim(),
@@ -469,7 +430,7 @@ public class QingJiaActivity extends HeadBaseActivity {
     /**
      * 请求网络接口,发起流程
      */
-    private void RequestServerQingjia2(String fanghsi, String type, String start, String stop,
+    private void RequestServerQingjia2(String type, String start, String stop,
                                        String shichang, String reason) {
         String sessionId = SPUtils.getString(this, "sessionId");
 
@@ -481,7 +442,6 @@ public class QingJiaActivity extends HeadBaseActivity {
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"startTime\":" + "\"" + start + "\",")
                 .append("\"endTime\":" + "\"" + stop + "\",")
-                .append("\"day\":" + "\"" + fanghsi + "\",")
                 .append("\"number\":" + "\"" + shichang + "\",")
                 .append("\"type\":" + "\"" + type + "\",")
                 .append("\"reason\":" + "\"" + reason + "\"")
@@ -540,7 +500,7 @@ public class QingJiaActivity extends HeadBaseActivity {
     /**
      * 保存草稿箱
      */
-    private void RequestServerQingjia_Save(String fanghsi, String type, String start, String stop,
+    private void RequestServerQingjia_Save(String type, String start, String stop,
                                        String shichang, String reason) {
         StringBuilder json = new StringBuilder();
         json.append("{")
@@ -550,7 +510,6 @@ public class QingJiaActivity extends HeadBaseActivity {
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"startTime\":" + "\"" + start + "\",")
                 .append("\"endTime\":" + "\"" + stop + "\",")
-                .append("\"day\":" + "\"" + fanghsi + "\",")
                 .append("\"number\":" + "\"" + shichang + "\",")
                 .append("\"type\":" + "\"" + type + "\",")
                 .append("\"reason\":" + "\"" + reason + "\"")
@@ -615,7 +574,6 @@ public class QingJiaActivity extends HeadBaseActivity {
         String name = mQingjiaName.getText().toString();
         String starttime = mQingjiaStart.getText().toString();
         String stoptime = mQingjiaStop.getText().toString();
-        String fangshi = mQingjiaFangshi.getText().toString();
         String tianshu = mQingjiaTianshu.getText().toString();
         String type = mQingjiaType.getText().toString();
         String reason = mQingjiaShiyou.getText().toString();
@@ -626,7 +584,6 @@ public class QingJiaActivity extends HeadBaseActivity {
                 .append("\"name\":" + "\"" + name + "\",")
                 .append("\"startTime\":" + "\"" + starttime + "\",")
                 .append("\"endTime\":" + "\"" + stoptime + "\",")
-                .append("\"day\":" + "\"" + fangshi + "\",")
                 .append("\"number\":" + "\"" + tianshu + "\",")
                 .append("\"type\":" + "\"" + type + "\",")
                 .append("\"reason\":" + "\"" + reason + "\"")

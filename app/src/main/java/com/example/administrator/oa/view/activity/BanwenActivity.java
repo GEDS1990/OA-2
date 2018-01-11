@@ -356,8 +356,7 @@ public class BanwenActivity extends HeadBaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.bwlc_bianhao:
-                if("0".equals(mBianhao.getTag())) {
-                    mBianhao.setTag("1");
+                if(TextUtils.isEmpty(mBianhao.getText().toString())){
                     houQuFormCode();
                 }
                 break;
@@ -752,7 +751,7 @@ public class BanwenActivity extends HeadBaseActivity {
      */
     private void jianYanshuju() {
         if (TextUtils.isEmpty(mBianhao.getText().toString().trim())) {
-            Toast.makeText(this, "请点击获取编号", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "请点击获取文号", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mDanweiDanwei.getText().toString().trim())) {
             Toast.makeText(this, "请填写来文单位", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mTitle.getText().toString().trim())) {

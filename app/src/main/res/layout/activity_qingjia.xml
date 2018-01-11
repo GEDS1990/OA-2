@@ -63,7 +63,8 @@
                 android:background="@color/white"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="@dimen/dp_13">
+                android:padding="@dimen/dp_13"
+                android:visibility="gone">
 
                 <TextView
                     style="@style/WorkInfoLeftTextView"
@@ -158,7 +159,7 @@
 
                 <TextView
                     style="@style/WorkInfoLeftTextView"
-                    android:text="请假时长(小时/天)"/>
+                    android:text="请假时长(天)"/>
 
                 <EditText
                     android:id="@+id/qingjia_tianshu"
@@ -168,7 +169,7 @@
                     android:layout_weight="1"
                     android:background="@color/white"
                     android:hint="请输入请假时长(必填)"
-                    android:phoneNumber="true"
+                    android:inputType="number|numberDecimal"
                     android:singleLine="true"
                     android:textSize="@dimen/dp_15"/>
             </LinearLayout>

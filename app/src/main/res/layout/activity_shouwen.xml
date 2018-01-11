@@ -254,7 +254,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dp_13"
                 android:layout_toRightOf="@id/icon"
-                android:text="合同原件. excel"/>
+                android:layout_marginRight="40dp"
+                android:singleLine="true"
+                android:ellipsize="middle"/>
 
             <TextView
                 android:id="@+id/filesize"
@@ -262,8 +264,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/file_name"
                 android:layout_marginTop="@dimen/dp_5"
-                android:layout_toRightOf="@id/icon"
-                android:text="3.45M"/>
+                android:layout_toRightOf="@id/icon"/>
 
             <!---->
             <ImageView

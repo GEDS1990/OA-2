@@ -230,7 +230,7 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "回退发起人":
+                    case "驳回":
                         RequestServerTuihui();
                         break;
                 }
@@ -351,7 +351,7 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
                                 // 投资协议会签
                                 case "protocol-return":
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
-                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCaogao.setText("驳回");
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 投资协议通知

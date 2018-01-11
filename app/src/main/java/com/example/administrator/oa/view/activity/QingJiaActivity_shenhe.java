@@ -45,8 +45,6 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
     TextView mQingjiaName;
     @BindView(R.id.qingjia_bumen)
     TextView mQingjiaBumen;
-    @BindView(R.id.qingjia_fangshi)
-    TextView mQingjiaFangshi;
     @BindView(R.id.qingjia_tianshu)
     TextView mQingjiaTianshu;
     @BindView(R.id.qingjia_shiyou)
@@ -209,9 +207,6 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
                                 case "type":
                                     mQingjiaType.setText(value);
                                     break;
-                                case "day":
-                                    mQingjiaFangshi.setText(value);
-                                    break;
                                 case "startTime":
                                     mStartTime.setText(value);
                                     break;
@@ -255,7 +250,6 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
         String name = mQingjiaName.getText().toString();
         String starttime = mStartTime.getText().toString();
         String stoptime = mStopTime.getText().toString();
-        String fangshi = mQingjiaFangshi.getText().toString();
         String tianshu = mQingjiaTianshu.getText().toString();
         String type = mQingjiaType.getText().toString();
         String reason = mQingjiaShiyou.getText().toString();
@@ -266,7 +260,6 @@ public class QingJiaActivity_shenhe extends HeadBaseActivity {
                 .append("\"name\":" + "\"" + name + "\",")
                 .append("\"startTime\":" + "\"" + starttime + "\",")
                 .append("\"endTime\":" + "\"" + stoptime + "\",")
-                .append("\"day\":" + "\"" + fangshi + "\",")
                 .append("\"number\":" + "\"" + tianshu + "\",")
                 .append("\"type\":" + "\"" + type + "\",")
                 .append("\"reason\":" + "\"" + reason + "\",")

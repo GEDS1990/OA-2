@@ -182,7 +182,7 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "回退发起人":
+                    case "驳回":
                         RequestServerTuihui();
                         break;
                 }
@@ -272,7 +272,7 @@ public class HouseRent_shenhe extends HeadBaseActivity {
                                 // 房屋租赁流程会签
                                 case "rental-return":
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
-                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCaogao.setText("驳回");
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 房屋租赁流程通知

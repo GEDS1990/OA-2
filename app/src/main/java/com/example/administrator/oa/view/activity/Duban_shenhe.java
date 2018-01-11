@@ -161,7 +161,7 @@ public class Duban_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "回退发起人":
+                    case "驳回":
                         RequestServerTuihui();
                         break;
                 }
@@ -261,7 +261,7 @@ public class Duban_shenhe extends HeadBaseActivity {
                                     mShenheyijian.setFocusable(false);
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
                                     mTvBanliren.setTag("1");
-                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCaogao.setText("驳回");
                                     mBtnCommit.setText("同意");
                                     break;
                             }

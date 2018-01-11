@@ -167,7 +167,7 @@ public class JiekuanApplyActivity_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "回退发起人":
+                    case "驳回":
                         RequestServerTuihui();
                         break;
                 }
@@ -254,7 +254,7 @@ public class JiekuanApplyActivity_shenhe extends HeadBaseActivity {
                                     mShenheyijian.requestFocus();
                                     mShenheyijian.setFocusable(true);
                                     mShenheyijian.setFocusableInTouchMode(true);
-                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCaogao.setText("驳回");
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 现金借款审核

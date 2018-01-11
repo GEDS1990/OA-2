@@ -172,7 +172,7 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
                     case "不同意":
                         RequestServerCommit("不同意");
                         break;
-                    case "回退发起人":
+                    case "驳回":
                         RequestServerTuihui();
                         break;
                 }
@@ -259,7 +259,7 @@ public class YongyinApplyActivity_shenhe extends HeadBaseActivity {
                                 // 用印会签
                                 case "seal-join-comment":
                                     mLlHuiqianyijian.setVisibility(View.VISIBLE);
-                                    mBtnCaogao.setText("回退发起人");
+                                    mBtnCaogao.setText("驳回");
                                     mBtnCommit.setText("完成");
                                     break;
                                 // 用印通知
