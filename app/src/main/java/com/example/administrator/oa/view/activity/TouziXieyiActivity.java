@@ -643,7 +643,7 @@ public class TouziXieyiActivity extends HeadBaseActivity {
             getFileInfo(filePath);
             mFilesize.setText(ShowLongFileSzie(fileSize));
             mPb.setProgress(0);
-            mBtnUplaod.setVisibility(View.VISIBLE);
+            mBtnUplaod.setVisibility(View.GONE);
             mBtnUplaod.setImageDrawable(getResources().getDrawable(R.drawable.download));
             mBtnUplaod.setEnabled(true);
             mBtnUplaod.setTag("down");

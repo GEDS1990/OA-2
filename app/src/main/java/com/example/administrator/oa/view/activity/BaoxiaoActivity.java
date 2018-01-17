@@ -7,7 +7,11 @@ import android.os.Build;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -31,6 +35,7 @@ import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.CommonUtil;
 import com.example.administrator.oa.view.utils.FileUtils;
+import com.example.administrator.oa.view.utils.NumberToCN;
 import com.example.administrator.oa.view.utils.SPUtils;
 import com.leon.lfilepickerlibrary.LFilePicker;
 import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
@@ -53,6 +58,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,6 +141,9 @@ public class BaoxiaoActivity extends HeadBaseActivity {
     // 已下载的大小
     long downLoadFileSize;
 
+    // 只有获取信息时，才不联动报销金额
+    boolean canChangeRMB = true;
+
     @Override
     protected int getChildLayoutRes() {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
@@ -161,6 +170,7 @@ public class BaoxiaoActivity extends HeadBaseActivity {
         formCode = getIntent().getStringExtra("formCode");
         // 如果formcode不是空的，则进入草稿
         if(!TextUtils.isEmpty(formCode)) {
+            canChangeRMB = false;
             // 草稿
             if("caogao".equals(formCode)) {
                 businessKey = getIntent().getStringExtra("businessKey");
@@ -189,7 +199,71 @@ public class BaoxiaoActivity extends HeadBaseActivity {
                 mProcessXxre.setAdapter(mAdapter);
             }
         }
+
+        //设置输入字符
+        mMoneyNum.setFilters(new InputFilter[]{inputFilter});
+        // 对报销金额进行文本监听
+        mMoneyNum.addTextChangedListener(new TextWatcher() {
+            String oldNum;
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                oldNum = mMoneyNum.getText().toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(canChangeRMB) {
+                    //如果输入框为空则不处理
+                    if (TextUtils.isEmpty(s)) {
+                        return;
+                    }
+                    //第一个字符不可以为小数点
+                    if (s.length() == 1 && s.toString().equals(".")) {
+                        mMoneyNum.setText("");
+                        return;
+                    }
+                    // 如果第一个数字是0，那它后面只能是小数点
+                    if (s.length() == 2 && s.toString().startsWith("0") && !s.toString().equals("0.")) {
+                        mMoneyNum.setText("0");
+                        return;
+                    }
+
+                    mMoneyNum.setSelection(s.toString().length());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(canChangeRMB && !oldNum.equals(mMoneyNum.getText().toString())){
+                    mMoneyRmb.setText("");
+                }
+            }
+        });
     }
+
+    /**
+     * 控制人民币的输入
+     */
+    private InputFilter inputFilter = new InputFilter() {
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            // 删除等特殊字符，直接返回
+            if (TextUtils.isEmpty(source)) {
+                return null;
+            }
+            String dValue = dest.toString();
+            String[] splitArray = dValue.split("\\.");
+            if (splitArray.length > 1) {
+                String dotValue = splitArray[1];
+                // 2 表示输入框的小数位数
+                int diff = dotValue.length() + 1 - 2;
+                if (diff > 0) {
+                    return source.subSequence(start, end - diff);
+                }
+            }
+            return null;
+        }
+    };
 
     /**
      * 获取草稿信息
@@ -254,6 +328,7 @@ public class BaoxiaoActivity extends HeadBaseActivity {
                         }
                     }
                 }
+                canChangeRMB = true;
             }
 
             @Override
@@ -376,6 +451,7 @@ public class BaoxiaoActivity extends HeadBaseActivity {
                         }
                     }
                 }
+                canChangeRMB = true;
             }
 
             @Override
@@ -393,11 +469,21 @@ public class BaoxiaoActivity extends HeadBaseActivity {
     }
 
     // R.id.ll_fenguanleader, R.id.ll_buzhang,
-    @OnClick({R.id.ll_start, R.id.add_fujian, R.id.btn_uplaod, R.id.btn_cancel, R.id.rl_fujian, R.id.btn_caogao, R.id.btn_commit})
+    @OnClick({R.id.ll_start, R.id.add_fujian, R.id.btn_uplaod, R.id.btn_cancel, R.id.rl_fujian,
+            R.id.btn_caogao, R.id.btn_commit, R.id.btnChangeNumber})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll_start:
                 selectDate("", mStart, "");
+                break;
+            case R.id.btnChangeNumber:
+                if(!TextUtils.isEmpty(mMoneyNum.getText().toString())) {
+                    BigDecimal numberOfMoney = new BigDecimal(mMoneyNum.getText().toString());
+                    String s = NumberToCN.number2CNMontrayUnit(numberOfMoney);
+                    mMoneyRmb.setText(s);
+                } else {
+                    CommonUtil.showToast(BaoxiaoActivity.this, "请先填写报销金额数字");
+                }
                 break;
 //            case R.id.ll_fenguanleader:
 //                RequestServerGetZuzhi("请选择分管领导审核", mTvFenguanleader);
@@ -475,10 +561,10 @@ public class BaoxiaoActivity extends HeadBaseActivity {
             Toast.makeText(this, "请选择报销时间", Toast.LENGTH_SHORT).show();
 //        } else if (TextUtils.isEmpty(mTvBuzhang.getText().toString().trim())) {
 //            Toast.makeText(this, "请选择是否需要部长审核", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(mMoneyRmb.getText().toString().trim())) {
-            Toast.makeText(this, "请填写报销金额(大写)", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mMoneyNum.getText().toString().trim())) {
-            Toast.makeText(this, "请填写报销金额(数字)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "请填写报销金额数字", Toast.LENGTH_SHORT).show();
+        } else if (TextUtils.isEmpty(mMoneyRmb.getText().toString().trim())) {
+            Toast.makeText(this, "请点击大写转换", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mBaoxiaoYuanyin.getText().toString().trim())) {
             Toast.makeText(this, "请填写报销事由", Toast.LENGTH_SHORT).show();
 //        } else if (TextUtils.isEmpty(mTvFenguanleader.getText().toString().trim())) {
@@ -703,7 +789,7 @@ public class BaoxiaoActivity extends HeadBaseActivity {
             getFileInfo(filePath);
             mFilesize.setText(ShowLongFileSzie(fileSize));
             mPb.setProgress(0);
-            mBtnUplaod.setVisibility(View.VISIBLE);
+            mBtnUplaod.setVisibility(View.GONE);
             mBtnUplaod.setImageDrawable(getResources().getDrawable(R.drawable.download));
             mBtnUplaod.setEnabled(true);
             mBtnUplaod.setTag("down");

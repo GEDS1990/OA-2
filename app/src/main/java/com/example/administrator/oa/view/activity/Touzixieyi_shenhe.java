@@ -473,7 +473,7 @@ public class Touzixieyi_shenhe extends HeadBaseActivity{
             getFileInfo(filePath);
             mFilesize.setText(ShowLongFileSzie(fileSize));
             mPb.setProgress(0);
-            mBtnUplaod.setVisibility(View.VISIBLE);
+            mBtnUplaod.setVisibility(View.GONE);
             mBtnUplaod.setEnabled(true);
             mBtnUplaod.setTag("down");
             return false;

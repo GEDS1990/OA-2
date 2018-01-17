@@ -2,6 +2,8 @@ package com.example.administrator.oa.view.activity;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,7 +20,6 @@ import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryRes;
-import com.example.administrator.oa.view.bean.QingjiaResponse;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
@@ -171,7 +172,63 @@ public class QingJiaActivity extends HeadBaseActivity {
             }
         });
 
+        //设置输入字符
+        mQingjiaTianshu.setFilters(new InputFilter[]{inputFilter});
+        // 对报销金额进行文本监听
+        mQingjiaTianshu.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //如果输入框为空则不处理
+                if (TextUtils.isEmpty(s)) {
+                    return;
+                }
+                //第一个字符不可以为小数点
+                if (s.length() == 1 && s.toString().equals(".")) {
+                    mQingjiaTianshu.setText("");
+                    return;
+                }
+                // 如果第一个数字是0，那它后面只能是小数点
+                if (s.length() == 2 && s.toString().startsWith("0") && !s.toString().equals("0.")) {
+                    mQingjiaTianshu.setText("0");
+                    return;
+                }
+
+                mQingjiaTianshu.setSelection(s.toString().length());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
     }
+
+    /**
+     * 控制人民币的输入
+     */
+    private InputFilter inputFilter = new InputFilter() {
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            // 删除等特殊字符，直接返回
+            if (TextUtils.isEmpty(source)) {
+                return null;
+            }
+            String dValue = dest.toString();
+            String[] splitArray = dValue.split("\\.");
+            if (splitArray.length > 1) {
+                String dotValue = splitArray[1];
+                // 2 表示输入框的小数位数
+                int diff = dotValue.length() + 1 - 2;
+                if (diff > 0) {
+                    return source.subSequence(start, end - diff);
+                }
+            }
+            return null;
+        }
+    };
 
     /**
      * 获取草稿信息
