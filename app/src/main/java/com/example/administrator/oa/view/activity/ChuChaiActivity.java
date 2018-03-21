@@ -1,5 +1,6 @@
 package com.example.administrator.oa.view.activity;
 
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -70,6 +71,12 @@ public class ChuChaiActivity extends HeadBaseActivity {
     EditText mChuchaiShiyou;
     @BindView(R.id.chuchai_beizhu)
     EditText mChuchaiBeizhu;
+    @BindView(R.id.tv_tongxingren)
+    TextView tv_tongxingren;
+    @BindView(R.id.ll_tongxingren)
+    LinearLayout ll_tongxingren;
+    @BindView(R.id.xxre_huiqianren)
+    XXRecycleView mXxreHuiqianren;
     @BindView(R.id.btn_caogao)
     Button mBtnCaogao;
     @BindView(R.id.btn_commit)
@@ -99,6 +106,9 @@ public class ChuChaiActivity extends HeadBaseActivity {
     // 草稿信息
     private String processDefinitionId = "";
     private String businessKey = "";
+
+    private List<ZuzhiUserBean> datas2 = new ArrayList<>();
+    private CommonRecyclerAdapter<ZuzhiUserBean> mHuiqianAdapter;
 
     @Override
     protected int getChildLayoutRes() {
@@ -172,6 +182,22 @@ public class ChuChaiActivity extends HeadBaseActivity {
                 }
             }
         });
+
+        //添加会签人
+        mXxreHuiqianren.setLayoutManager(new GridLayoutManager(this, 4));
+        mHuiqianAdapter = new CommonRecyclerAdapter<ZuzhiUserBean>(this, datas2, R.layout.item_add_person) {
+            @Override
+            public void convert(CommonViewHolder holder, final ZuzhiUserBean item, int i, boolean b) {
+                holder.setText(R.id.name, item.getName());
+                holder.getView(R.id.delete).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mHuiqianAdapter.remove(item);
+                    }
+                });
+            }
+        };
+        mXxreHuiqianren.setAdapter(mHuiqianAdapter);
     }
 
     /**
@@ -224,6 +250,16 @@ public class ChuChaiActivity extends HeadBaseActivity {
                                     break;
                                 case "other":
                                     mChuchaiBeizhu.setText(value);
+                                    break;
+                                case "peer":
+                                    if (TextUtils.isEmpty(bean.getLabel())) {
+                                        return;
+                                    }
+                                    String[] ids = value.split(",");
+                                    String[] names = bean.getLabel().split(",");
+                                    for (int i=0; i<ids.length;i++) {
+                                        mHuiqianAdapter.add(new ZuzhiUserBean(ids[i], names[i]));
+                                    }
                                     break;
                             }
                         }
@@ -361,7 +397,7 @@ public class ChuChaiActivity extends HeadBaseActivity {
     }
 
     // , R.id.ll_fenguanleader, R.id.ll_buzhang
-    @OnClick({R.id.ll_gongju, R.id.ll_start, R.id.ll_stop, R.id.btn_caogao, R.id.btn_commit})
+    @OnClick({R.id.ll_gongju, R.id.ll_start, R.id.ll_stop, R.id.btn_caogao, R.id.btn_commit, R.id.ll_tongxingren})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll_gongju:
@@ -399,6 +435,12 @@ public class ChuChaiActivity extends HeadBaseActivity {
 //                datas_buzhang.add("否");
 //                chooseDate(datas_buzhang, mTvBuzhang, "是否需要部长审核");
 //                break;
+            case R.id.ll_tongxingren:
+                if("0".equals(ll_tongxingren.getTag())) {
+                    ll_tongxingren.setTag("1");
+                    RequestServerGetZuzhi(ll_tongxingren, tv_tongxingren, "请选择出差同行人", mHuiqianAdapter);
+                }
+                break;
         }
     }
 
@@ -452,6 +494,22 @@ public class ChuChaiActivity extends HeadBaseActivity {
         //创建请求
         Request<ProcessJieguoResponse> request = new JavaBeanRequest<>(UrlConstance.URL_STARTPROCESS,
                 RequestMethod.POST, ProcessJieguoResponse.class);
+
+        StringBuffer leadersID = new StringBuffer();
+        StringBuffer leadersName = new StringBuffer();
+
+        for (ZuzhiUserBean bean : mHuiqianAdapter.getDatas()) {
+            leadersID.append(bean.getId()).append(",");
+            leadersName.append(bean.getName()).append(",");
+        }
+
+        if (leadersID.toString().endsWith(",")) {
+            leadersID.deleteCharAt(leadersID.toString().length() - 1);
+        }
+        if (leadersName.toString().endsWith(",")) {
+            leadersName.deleteCharAt(leadersName.toString().length() - 1);
+        }
+
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"departments\":" + "\"" + mDepartmentName + "\",")
@@ -463,6 +521,9 @@ public class ChuChaiActivity extends HeadBaseActivity {
                 .append("\"endTime\":" + "\"" + stop + "\",")
                 .append("\"address\":" + "\"" + adress + "\",")
                 .append("\"reason\":" + "\"" + reason + "\",")
+                // peer是同行人
+                .append("\"peer\":" + "\"" + leadersID.toString() + "\",")
+                .append("\"peer_name\":" + "\"" + leadersName.toString() + "\",")
                 .append("\"other\":" + "\"" + beizhu + "\"")
 //                .append("\"manager\":" + "\"" + mZuzhiUserBean.getId() + "\",")
 //                .append("\"manager_name\":" + "\"" + mZuzhiUserBean.getName() + "\",")
@@ -519,6 +580,22 @@ public class ChuChaiActivity extends HeadBaseActivity {
         //创建请求
         Request<ProcessJieguoResponse> request = new JavaBeanRequest<>(UrlConstance.URL_SAVEDRAFT,
                 RequestMethod.POST, ProcessJieguoResponse.class);
+
+        StringBuffer leadersID = new StringBuffer();
+        StringBuffer leadersName = new StringBuffer();
+
+        for (ZuzhiUserBean bean : mHuiqianAdapter.getDatas()) {
+            leadersID.append(bean.getId()).append(",");
+            leadersName.append(bean.getName()).append(",");
+        }
+
+        if (leadersID.toString().endsWith(",")) {
+            leadersID.deleteCharAt(leadersID.toString().length() - 1);
+        }
+        if (leadersName.toString().endsWith(",")) {
+            leadersName.deleteCharAt(leadersName.toString().length() - 1);
+        }
+
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"departments\":" + "\"" + mDepartmentName + "\",")
@@ -530,6 +607,9 @@ public class ChuChaiActivity extends HeadBaseActivity {
                 .append("\"address\":" + "\"" + adress + "\",")
                 .append("\"reason\":" + "\"" + reason + "\",")
                 .append("\"businessKey\":" + "\"" + businessKey + "\",")
+                // peer是同行人
+                .append("\"peer\":" + "\"" + leadersID.toString() + "\",")
+                .append("\"peer_name\":" + "\"" + leadersName.toString() + "\",")
                 .append("\"other\":" + "\"" + beizhu + "\"")
 //                .append("\"manager\":" + "\"" + mZuzhiUserBean.getId() + "\",")
 //                .append("\"manager_name\":" + "\"" + mZuzhiUserBean.getName() + "\",")
@@ -591,6 +671,21 @@ public class ChuChaiActivity extends HeadBaseActivity {
         String beizhu = mChuchaiBeizhu.getText().toString();
         String reason = mChuchaiShiyou.getText().toString();
 
+        StringBuffer leadersID = new StringBuffer();
+        StringBuffer leadersName = new StringBuffer();
+
+        for (ZuzhiUserBean bean : mHuiqianAdapter.getDatas()) {
+            leadersID.append(bean.getId()).append(",");
+            leadersName.append(bean.getName()).append(",");
+        }
+
+        if (leadersID.toString().endsWith(",")) {
+            leadersID.deleteCharAt(leadersID.toString().length() - 1);
+        }
+        if (leadersName.toString().endsWith(",")) {
+            leadersName.deleteCharAt(leadersName.toString().length() - 1);
+        }
+
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"departments_name\":" + "\"" + bumen + "\",")
@@ -600,6 +695,9 @@ public class ChuChaiActivity extends HeadBaseActivity {
                 .append("\"endTime\":" + "\"" + stoptime + "\",")
                 .append("\"address\":" + "\"" + address + "\",")
                 .append("\"reason\":" + "\"" + reason + "\",")
+                // peer是同行人
+                .append("\"peer\":" + "\"" + leadersID.toString() + "\",")
+                .append("\"peer_name\":" + "\"" + leadersName.toString() + "\",")
                 .append("\"beizhu\":" + "\"" + beizhu + "\"")
                 .append("}");
 

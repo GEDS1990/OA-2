@@ -11,6 +11,8 @@ public class GoodsRegistrationBean implements Comparable<GoodsRegistrationBean>{
     String format;
     String num;
     String remarks;
+    String price;
+    String total;
     int index;
 
 
@@ -27,6 +29,15 @@ public class GoodsRegistrationBean implements Comparable<GoodsRegistrationBean>{
         this.format = format;
         this.num = num;
         this.remarks = remarks;
+    }
+
+    public GoodsRegistrationBean(String goods, String format, String num, String price, String total, String remarks) {
+        this.goods = goods;
+        this.format = format;
+        this.num = num;
+        this.remarks = remarks;
+        this.price = price;
+        this.total = total;
     }
 
     public GoodsRegistrationBean() {
@@ -62,6 +73,22 @@ public class GoodsRegistrationBean implements Comparable<GoodsRegistrationBean>{
 
     public void setNum(String num) {
         this.num = num;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    public String getTotal() {
+        return total;
+    }
+
+    public void setTotal(String total) {
+        this.total = total;
     }
 
     public String getRemarks() {

@@ -45,6 +45,8 @@ import com.example.administrator.oa.view.activity.ShouWenActivity;
 import com.example.administrator.oa.view.activity.ShouwenProcess_shenhe;
 import com.example.administrator.oa.view.activity.TouziXieyiActivity;
 import com.example.administrator.oa.view.activity.Touzixieyi_shenhe;
+import com.example.administrator.oa.view.activity.WenjianLiuzhuanActivity;
+import com.example.administrator.oa.view.activity.Wenjianliuzhuan_shenhe;
 import com.example.administrator.oa.view.activity.WorkConnection_shenhe;
 import com.example.administrator.oa.view.activity.YongcheActivity;
 import com.example.administrator.oa.view.activity.YongcheActivity_shenhe;
@@ -55,7 +57,27 @@ import com.example.administrator.oa.view.activity.ZijinShenqingFeiHetongActivity
 import com.example.administrator.oa.view.activity.ZijingDiaofaActivity_shenhe;
 import com.example.administrator.oa.view.activity.ZufangActivity;
 import com.example.administrator.oa.view.activity.workConectionActivity;
-import com.example.administrator.oa.view.bean.ProcessTaskTypeResponse;
+import com.example.administrator.oa.view.activity.yiban.BanwenActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.BaoXiaoApplyActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.ChuchaiActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.Duban_Yiban;
+import com.example.administrator.oa.view.activity.yiban.FundApplyFeiHetong_Yiban;
+import com.example.administrator.oa.view.activity.yiban.GoodsApplyActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.GudingzichanApplyActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.HeTongActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.HouseRent_Yiban;
+import com.example.administrator.oa.view.activity.yiban.JiekuanApplyActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.NewsFabuActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.QingJiaActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.QiyeTuizu_Yiban;
+import com.example.administrator.oa.view.activity.yiban.Qiyekaohe_Yiban;
+import com.example.administrator.oa.view.activity.yiban.ShouwenProcess_Yiban;
+import com.example.administrator.oa.view.activity.yiban.Touzixieyi_Yiban;
+import com.example.administrator.oa.view.activity.yiban.Wenjianliuzhuan_Yiban;
+import com.example.administrator.oa.view.activity.yiban.WorkConnection_Yiban;
+import com.example.administrator.oa.view.activity.yiban.YongcheActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.YongyinApplyActivity_Yiban;
+import com.example.administrator.oa.view.activity.yiban.ZijingDiaofaActivity_Yiban;
 import com.example.administrator.oa.view.bean.QingjiaShenheBean;
 import com.example.administrator.oa.view.bean.QingjiaShenheResponse;
 import com.example.administrator.oa.view.bean.TaksDaibanBean;
@@ -77,13 +99,12 @@ import com.yanzhenjie.nohttp.rest.Response;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 /**
  * Created by Administrator on 2017/6/28.
  */
 
-public class daiBanFragment extends Fragment {
+public class YiBanFragment extends Fragment {
 
     private String mTitle;
     private XXRecycleView xxre;
@@ -93,8 +114,8 @@ public class daiBanFragment extends Fragment {
     private Dialog mLoadingDialog;
     private String formCode;
 
-    public static daiBanFragment getInstance(String title) {
-        daiBanFragment sf = new daiBanFragment();
+    public static YiBanFragment getInstance(String title) {
+        YiBanFragment sf = new YiBanFragment();
         sf.mTitle = title;
         return sf;
     }
@@ -133,7 +154,7 @@ public class daiBanFragment extends Fragment {
                 String processId = mAdapter.getDatas().get(i - xxre.getHeaderCount()).getProcessId();
                 String taskId = mAdapter.getDatas().get(i - xxre.getHeaderCount()).getId();
                 String processType = mAdapter.getDatas().get(i - xxre.getHeaderCount()).getPresentationSubject().split("\\-")[0];
-                String formCode = mAdapter.getDatas().get(i - xxre.getHeaderCount()).getFormCode();
+//                String formCode = mAdapter.getDatas().get(i - xxre.getHeaderCount()).getFormCode();
 //                NeedHuiQian(processId, taskId, processType, formCode);
                 getFormCode(processId, taskId, processType);
 
@@ -169,7 +190,7 @@ public class daiBanFragment extends Fragment {
         //创建请求队列
         RequestQueue Queue = NoHttp.newRequestQueue();
         //创建请求
-        Request<TaksDaibanResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_DAIBAN_TASK_LIST,
+        Request<TaksDaibanResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_YIBAN_TASK_LIST,
                 RequestMethod.POST, TaksDaibanResponse.class);
         //添加url?key=value形式的参数
         request.addHeader("sessionId", sessionId);
@@ -214,49 +235,6 @@ public class daiBanFragment extends Fragment {
             }
         });
     }
-
-    /**
-     * 判断当前节点类型
-     *
-//     * @param taskId
-     */
-//    private void NeedHuiQian(final String processId, final String taskId, final String processType) {
-//        //创建请求队列
-//        RequestQueue Queue = NoHttp.newRequestQueue();
-//        final Request<ProcessTaskTypeResponse> request = new JavaBeanRequest<>(UrlConstance.URL_PROCESS_TASKTYPE,
-//                RequestMethod.POST, ProcessTaskTypeResponse.class);
-//        //添加url?key=value形式的参数
-//        request.add("taskId", taskId);
-//        Queue.add(0, request, new OnResponseListener<ProcessTaskTypeResponse>() {
-//            @Override
-//            public void onStart(int what) {
-//                if (mLoadingDialog != null) {
-//                    mLoadingDialog.show();
-//                }
-//            }
-//
-//            @Override
-//            public void onSucceed(int what, Response<ProcessTaskTypeResponse> response) {
-//                Log.w("2222", response.toString());
-//                if (response != null && response.get() != null && response.get().getData() != null) {
-//                    String processTaskType = response.get().getData().getType();
-//                    goFaqiliuchong(processId, taskId, processTaskType);
-//                }
-//            }
-//
-//            @Override
-//            public void onFailed(int what, Response<ProcessTaskTypeResponse> response) {
-//                Toast.makeText(mActivity, "获取流程节点类型失败", Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onFinish(int what) {
-//                if (mLoadingDialog != null) {
-//                    mLoadingDialog.dismiss();
-//                }
-//            }
-//        });
-//    }
 
     private void getFormCode(final String processId, final String taskId, final String processType){
         RequestQueue Queue = NoHttp.newRequestQueue();
@@ -310,144 +288,67 @@ public class daiBanFragment extends Fragment {
         bundle.putString("processTaskType", processType);
         switch (processId) {
             case "1":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(QingJiaActivity.class, bundle);
-                } else {
-                    readyGo(QingJiaActivity_shenhe.class, bundle);//不会签节点
-                }
+                readyGo(QingJiaActivity_Yiban.class, bundle);//不会签节点
                 break;
             case "3":
-                if(null != formCode && formCode.equals("loan")){
-                    readyGo(JieKuanActivity.class, bundle);
-                } else {
-                    readyGo(JiekuanApplyActivity_shenhe.class, bundle);//0k
-                }
+                readyGo(JiekuanApplyActivity_Yiban.class, bundle);//0k
                 break;
             case "4":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(QiyeKaoheActivity.class, bundle);
-                } else {
-                    readyGo(Qiyekaohe_shenhe.class, bundle);
-                }
+                readyGo(Qiyekaohe_Yiban.class, bundle);
                 break;
             case "5":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(ChuChaiActivity.class, bundle);
-                } else {
-                    readyGo(ChuchaiActivity_shenhe.class, bundle);//不会签节点
-                }
+                readyGo(ChuchaiActivity_Yiban.class, bundle);//不会签节点
                 break;
             case "6":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(workConectionActivity.class, bundle);
-                } else {
-                    readyGo(WorkConnection_shenhe.class, bundle);
-                }
+                readyGo(WorkConnection_Yiban.class, bundle);
                 break;
             case "7":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(QiyeTuizuActivity.class, bundle);
-                } else {
-                    readyGo(QiyeTuizu_shenhe.class, bundle);//0k
-                }
+                readyGo(QiyeTuizu_Yiban.class, bundle);//0k
                 break;
             case "9":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(BanwenActivity.class, bundle);
-                } else {
-                    readyGo(BanwenActivity_shenhe.class, bundle);//0k
-                }
+                readyGo(BanwenActivity_Yiban.class, bundle);//0k
                 break;
             case "10":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(ShouWenActivity.class, bundle);
-                } else {
-                    readyGo(ShouwenProcess_shenhe.class, bundle);//0k
-                }
+                readyGo(ShouwenProcess_Yiban.class, bundle);//0k
                 break;
             case "11":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(YongcheActivity.class, bundle);
-                } else {
-                    readyGo(YongcheActivity_shenhe.class, bundle);//不会签节点
-                }
+                readyGo(YongcheActivity_Yiban.class, bundle);//不会签节点
                 break;
             case "12":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(NewsfabuActivity.class, bundle);
-                } else {
-                    readyGo(NewsFabuActivity_shenhe.class, bundle);//0k
-                }
+                readyGo(NewsFabuActivity_Yiban.class, bundle);//0k
                 break;
             case "13":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(TouziXieyiActivity.class, bundle);
-                } else {
-                    readyGo(Touzixieyi_shenhe.class, bundle);//0k
-                }
+                readyGo(Touzixieyi_Yiban.class, bundle);//0k
                 break;
             case "14":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(ZufangActivity.class, bundle);
-                } else {
-                    readyGo(HouseRent_shenhe.class, bundle);//0k
-                }
+                readyGo(HouseRent_Yiban.class, bundle);//0k
                 break;
             case "15":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(DizhiyihaoActivity.class, bundle);
-                } else {
-                    readyGo(GoodsApplyActivity_shenhe.class, bundle);//0k
-                }
+                readyGo(GoodsApplyActivity_Yiban.class, bundle);//0k
                 break;
             case "16":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(GudingZichanActivity.class, bundle);
-                } else {
-                    readyGo(GudingzichanApplyActivity_shenhe.class, bundle);//0k
-                }
+                readyGo(GudingzichanApplyActivity_Yiban.class, bundle);//0k
                 break;
             case "18":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(YongyinActivity.class, bundle);
-                } else {
-                    readyGo(YongyinApplyActivity_shenhe.class, bundle);//0k
-                }
+                readyGo(YongyinApplyActivity_Yiban.class, bundle);//0k
                 break;
             case "20":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(BaoxiaoActivity.class, bundle);
-                } else {
-                    readyGo(BaoXiaoApplyActivity_shenhe.class, bundle);
-                }
+                readyGo(BaoXiaoApplyActivity_Yiban.class, bundle);
                 break;
             case "21":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(HetongActivity.class, bundle);
-                } else {
-                    readyGo(HeTongActivity_shenhe.class, bundle);//0k
-                }
+                readyGo(HeTongActivity_Yiban.class, bundle);//0k
                 break;
             case "25":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(ZijinActivity.class, bundle);
-                } else {
-                    readyGo(ZijingDiaofaActivity_shenhe.class, bundle);//0k
-                }
+                readyGo(ZijingDiaofaActivity_Yiban.class, bundle);//0k
                 break;
             case "27":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(ZijinShenqingFeiHetongActivity.class, bundle);
-                } else {
-                    readyGo(FundApplyFeiHetong_shenhe.class, bundle);//0k
-                }
+                readyGo(FundApplyFeiHetong_Yiban.class, bundle);//0k
                 break;
             case "28":
-                if(null != formCode && formCode.endsWith("-request")){
-                    readyGo(DubanActivity.class, bundle);
-                } else {
-                    readyGo(Duban_shenhe.class, bundle);//ok
-                }
+                readyGo(Duban_Yiban.class, bundle);//ok
+                break;
+            case "30":
+                readyGo(Wenjianliuzhuan_Yiban.class, bundle);
                 break;
             case "资金申请（合同付款）":
                 readyGo(FundApplyHetong_shenhe.class, bundle);//0k
@@ -478,5 +379,17 @@ public class daiBanFragment extends Fragment {
     public void onResume() {
         super.onResume();
         RequestServer(false);
+    }
+
+    /**
+     * 当界面重新展示时（fragment.show）,调用onrequest刷新界面
+     */
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        // TODO Auto-generated method stub
+        super.onHiddenChanged(hidden);
+        if (!hidden && null != mAdapter) {
+            RequestServer(false);
+        }
     }
 }

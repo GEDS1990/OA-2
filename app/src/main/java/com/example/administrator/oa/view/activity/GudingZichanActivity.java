@@ -1,7 +1,9 @@
 package com.example.administrator.oa.view.activity;
 
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -75,6 +77,10 @@ public class GudingZichanActivity extends HeadBaseActivity {
     EditText mWupingGuige;
     @BindView(R.id.wuping_count)
     EditText mWupingCount;
+    @BindView(R.id.goodsPrice)
+    EditText goodsPrice;
+    @BindView(R.id.goodsTotal)
+    TextView goodsTotal;
     @BindView(R.id.beizhu)
     EditText mBeizhu;
 //    @BindView(R.id.tv_buzhang)
@@ -85,8 +91,8 @@ public class GudingZichanActivity extends HeadBaseActivity {
 //    TextView mTvFenguanleader;
 //    @BindView(R.id.ll_fenguanleader)
 //    LinearLayout mLlFenguanleader;
-    @BindView(R.id.tv_bumenleader)
-    TextView mTvBumenleader;
+    @BindView(R.id.editReason)
+    EditText editReason;
     @BindView(R.id.ll_bumenleader)
     LinearLayout mLlBumenleader;
     private CommonRecyclerAdapter<GoodsRegistrationBean> mGoodAdapter;
@@ -167,14 +173,16 @@ public class GudingZichanActivity extends HeadBaseActivity {
         }
 
         mXxre.setLayoutManager(new LinearLayoutManager(this));
-        mGoodAdapter = new CommonRecyclerAdapter<GoodsRegistrationBean>(this, mGoodDatas, R.layout.item_wupin_lingqu) {
+        mGoodAdapter = new CommonRecyclerAdapter<GoodsRegistrationBean>(this, mGoodDatas, R.layout.item_gudingzichan) {
             @Override
             public void convert(CommonViewHolder holder, final GoodsRegistrationBean item, int position, boolean b) {
 
                 holder.setText(R.id.number, "( " + (position + 1) + " )");
-                holder.setText(R.id.name, item.getGoods());
+                holder.setText(R.id.goodsName, item.getGoods());
                 holder.setText(R.id.wuping_guige, item.getFormat());
                 holder.setText(R.id.wuping_count, item.getNum());
+                holder.setText(R.id.goodsPrice, item.getPrice());
+                holder.setText(R.id.goodsTotal, item.getTotal());
                 holder.setText(R.id.beizhu, item.getRemarks());
 
                 holder.getView(R.id.delet).setOnClickListener(new View.OnClickListener() {
@@ -186,6 +194,55 @@ public class GudingZichanActivity extends HeadBaseActivity {
             }
         };
         mXxre.setAdapter(mGoodAdapter);
+
+        // 自动计算总数
+        countTotalMoney();
+    }
+
+    private void countTotalMoney(){
+        mWupingCount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!TextUtils.isEmpty(mWupingCount.getText().toString())&&!TextUtils.isEmpty(goodsPrice.getText().toString())) {
+                    double price = Double.valueOf(goodsPrice.getText().toString());
+                    int num = Integer.valueOf(mWupingCount.getText().toString());
+                    double total = price * num;
+                    goodsTotal.setText(String.valueOf(total));
+                }
+            }
+        });
+
+        goodsPrice.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!TextUtils.isEmpty(mWupingCount.getText().toString())&&!TextUtils.isEmpty(goodsPrice.getText().toString())) {
+                    double price = Double.valueOf(goodsPrice.getText().toString());
+                    int num = Integer.valueOf(mWupingCount.getText().toString());
+                    double total = price * num;
+                    goodsTotal.setText(String.valueOf(total));
+                }
+            }
+        });
     }
 
     /**
@@ -229,11 +286,10 @@ public class GudingZichanActivity extends HeadBaseActivity {
                             String label = bean.getName();
                             String value = bean.getValue();
                             switch (label) {
-                                case "minister":
-                                    if(!TextUtils.isEmpty(bean.getLabel())) {
-                                        mTvBumenleader.setTag(value);
-                                        mTvBumenleader.setText(bean.getLabel());
-                                    }
+                                // 申请原因
+                                case "reason":
+                                    editReason.setText(value);
+                                    editReason.setSelection(editReason.getText().toString().length());
                                     break;
                                 case "date":
                                     mDate.setText(value);
@@ -250,6 +306,14 @@ public class GudingZichanActivity extends HeadBaseActivity {
                                 if (bean.getLabel().startsWith("num") &&
                                         Integer.valueOf(bean.getLabel().replace("num","")) == (goods.get(j).getIndex())) {
                                     goods.get(j).setNum(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("price") &&
+                                        Integer.valueOf(bean.getLabel().replace("price","")) == (goods.get(j).getIndex())) {
+                                    goods.get(j).setPrice(bean.getValue());
+                                }
+                                if (bean.getLabel().startsWith("total") &&
+                                        Integer.valueOf(bean.getLabel().replace("total","")) == (goods.get(j).getIndex())) {
+                                    goods.get(j).setTotal(bean.getValue());
                                 }
                                 if (bean.getLabel().startsWith("remarks") &&
                                         Integer.valueOf(bean.getLabel().replace("remarks","")) == (goods.get(j).getIndex())) {
@@ -356,12 +420,10 @@ public class GudingZichanActivity extends HeadBaseActivity {
                             String label = bean.getName();
                             String value = bean.getValue();
                             switch (label) {
-                                // 负责人
-                                case "minister":
-                                    if (!TextUtils.isEmpty(bean.getLabel())) {
-                                        mTvBumenleader.setTag(value);
-                                        mTvBumenleader.setText(bean.getLabel());
-                                    }
+                                // 申请原因
+                                case "reason":
+                                    editReason.setText(value);
+                                    editReason.setSelection(editReason.getText().toString().length());
                                     break;
                                 // 部门
                                 case "departments":
@@ -384,6 +446,14 @@ public class GudingZichanActivity extends HeadBaseActivity {
                                     if (bean.getLabel().startsWith("num") &&
                                             Integer.valueOf(bean.getLabel().replace("num", "")) == (goods.get(j).getIndex())) {
                                         goods.get(j).setNum(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("price") &&
+                                            Integer.valueOf(bean.getLabel().replace("price","")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setPrice(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("total") &&
+                                            Integer.valueOf(bean.getLabel().replace("total","")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setTotal(bean.getValue());
                                     }
                                     if (bean.getLabel().startsWith("remarks") &&
                                             Integer.valueOf(bean.getLabel().replace("remarks", "")) == (goods.get(j).getIndex())) {
@@ -426,7 +496,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
                 RequestServerGoodsLingqu_Save(mDate.getText().toString().trim(),
 //                    mTvFenguanleader.getText().toString().trim(),
 //                    mTvBuzhang.getText().toString().trim(),
-                        mTvBumenleader.getText().toString().trim()
+                        editReason.getText().toString().trim()
                 );
                 break;
             case R.id.btn_commit:
@@ -436,6 +506,8 @@ public class GudingZichanActivity extends HeadBaseActivity {
                 String name = mGoodsName.getText().toString().trim();
                 String wuping_guige = mWupingGuige.getText().toString().trim();
                 String wuping_count = mWupingCount.getText().toString().trim();
+                String price = goodsPrice.getText().toString().trim();
+                String total = goodsTotal.getText().toString().trim();
                 String beizhu = mBeizhu.getText().toString().trim();
                 if (mGoodAdapter != null && mGoodAdapter.getDatas().size() <= 10) {
                     if (TextUtils.isEmpty(name)) {
@@ -444,12 +516,16 @@ public class GudingZichanActivity extends HeadBaseActivity {
                         Toast.makeText(this, "请输入物品规格", Toast.LENGTH_SHORT).show();
                     } else if (TextUtils.isEmpty(wuping_count)) {
                         Toast.makeText(this, "请输入物品数量", Toast.LENGTH_SHORT).show();
+                    } else if (TextUtils.isEmpty(price)) {
+                        Toast.makeText(this, "请输入物品单价", Toast.LENGTH_SHORT).show();
                     } else {
-                        mGoodAdapter.add(new GoodsRegistrationBean(name, wuping_guige, wuping_count, beizhu));
+                        mGoodAdapter.add(new GoodsRegistrationBean(name, wuping_guige, wuping_count, price, total, beizhu));
                         mXxre.scrollToPosition(mGoodAdapter.getItemCount() - 1);
                         mGoodsName.setText("");
                         mWupingGuige.setText("");
                         mWupingCount.setText("");
+                        goodsPrice.setText("");
+                        goodsTotal.setText("");
                         mBeizhu.setText("");
                     }
                 } else {
@@ -465,13 +541,12 @@ public class GudingZichanActivity extends HeadBaseActivity {
 //            case R.id.ll_fenguanleader:
 //                RequestServerLogin(mTvFenguanleader, "请选择分管领导");
 //                break;
-            case R.id.ll_bumenleader:
-//                RequestServerLogin(mTvBumenleader, "请选择部门负责人");
-                if("0".equals(mLlBumenleader.getTag())) {
-                    mLlBumenleader.setTag("1");
-                    RequestServerGetZuzhi(mLlBumenleader, mTvBumenleader, "请选择部门负责人", null);
-                }
-                break;
+//            case R.id.ll_bumenleader:
+//                if("0".equals(mLlBumenleader.getTag())) {
+//                    mLlBumenleader.setTag("1");
+//                    RequestServerGetZuzhi(mLlBumenleader, mTvBumenleader, "请选择部门负责人", null);
+//                }
+//                break;
         }
     }
 
@@ -486,8 +561,8 @@ public class GudingZichanActivity extends HeadBaseActivity {
             Toast.makeText(this, "部门缺失", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(mDate.getText().toString().trim())) {
             Toast.makeText(this, "请选择领用时间", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(mTvBumenleader.getText().toString().trim())) {
-            Toast.makeText(this, "请选择部门负责人", Toast.LENGTH_SHORT).show();
+        } else if (TextUtils.isEmpty(editReason.getText().toString().trim())) {
+            Toast.makeText(this, "请填写申请原因", Toast.LENGTH_SHORT).show();
         } else if (mGoodAdapter.getDatas().size() < 1) {
             Toast.makeText(this, "请填写物品明细单，并确认添加", Toast.LENGTH_SHORT).show();
 //        } else if (TextUtils.isEmpty(mTvBuzhang.getText().toString().trim())) {
@@ -502,7 +577,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
                 RequestServerGoodsLingqu(mDate.getText().toString().trim(),
 //                    mTvFenguanleader.getText().toString().trim(),
 //                    mTvBuzhang.getText().toString().trim(),
-                        mTvBumenleader.getText().toString().trim()
+                        editReason.getText().toString().trim()
                 );
             }
         }
@@ -527,8 +602,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
                 .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"date\":" + "\"" + time + "\",")
-                .append("\"minister_name\":" + "\"" + mTvBumenleader.getText().toString().trim() + "\",")
-                .append("\"minister\":" + "\"" + mTvBumenleader.getTag().toString() + "\",");
+                .append("\"reason\":" + "\"" + editReason.getText().toString().trim() + "\",");
 //                .append("\"comment\":" + "\"" + comment + "\",");
 
         for (int i = 0; i < 10; i++) {
@@ -537,11 +611,15 @@ public class GudingZichanActivity extends HeadBaseActivity {
                 json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
                         .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")
+                        .append("\"price" + (i + 1) + "\":" + "\"" + bean.getPrice() + "\",")
+                        .append("\"total" + (i + 1) + "\":" + "\"" + bean.getTotal() + "\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"" + bean.getRemarks() + "\",");
             } else {
                 json.append("\"goods" + (i + 1) + "\":" + "\"\",")
                         .append("\"format" + (i + 1) + "\":" + "\"\",")
                         .append("\"num" + (i + 1) + "\":" + "\"\",")
+                        .append("\"price" + (i + 1) + "\":" + "\"\",")
+                        .append("\"total" + (i + 1) + "\":" + "\"\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"\",");
             }
         }
@@ -554,7 +632,6 @@ public class GudingZichanActivity extends HeadBaseActivity {
         request.add("processDefinitionId", processDefinitionId);
         request.add("businessKey", businessKey);
         request.add("data", json.toString());
-        Log.w("99999", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
             @Override
@@ -606,8 +683,7 @@ public class GudingZichanActivity extends HeadBaseActivity {
                 .append("\"businessKey\":" + "\"" + businessKey + "\",")
                 .append("\"name\":" + "\"" + mUserName + "\",")
                 .append("\"date\":" + "\"" + time + "\",")
-                .append("\"minister_name\":" + "\"" + mTvBumenleader.getText().toString().trim() + "\",")
-                .append("\"minister\":" + "\"" + mTvBumenleader.getTag().toString() + "\",");
+                .append("\"reason\":" + "\"" + editReason.getText().toString().trim() + "\",");
 //                .append("\"comment\":" + "\"" + comment + "\",");
 
         for (int i = 0; i < 10; i++) {
@@ -616,11 +692,15 @@ public class GudingZichanActivity extends HeadBaseActivity {
                 json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
                         .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")
+                        .append("\"price" + (i + 1) + "\":" + "\"" + bean.getPrice() + "\",")
+                        .append("\"total" + (i + 1) + "\":" + "\"" + bean.getTotal() + "\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"" + bean.getRemarks() + "\",");
             } else {
                 json.append("\"goods" + (i + 1) + "\":" + "\"\",")
                         .append("\"format" + (i + 1) + "\":" + "\"\",")
                         .append("\"num" + (i + 1) + "\":" + "\"\",")
+                        .append("\"price" + (i + 1) + "\":" + "\"\",")
+                        .append("\"total" + (i + 1) + "\":" + "\"\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"\",");
             }
         }
@@ -675,14 +755,13 @@ public class GudingZichanActivity extends HeadBaseActivity {
         String bumen = mBumen.getText().toString();
         String name = mName.getText().toString();
         String date = mDate.getText().toString();
-        String fuzeren = mTvBumenleader.getText().toString();
 
         StringBuilder json = new StringBuilder();
         json.append("{")
                 .append("\"departments_name\":" + "\"" + bumen + "\",")
                 .append("\"name\":" + "\"" + name + "\",")
                 .append("\"date\":" + "\"" + date + "\",")
-                .append("\"minister_name\":" + "\"" + fuzeren + "\",");
+                .append("\"reason\":" + "\"" + editReason.getText().toString().trim() + "\",");
 //                .append("\"leader\":" + "\"" + leadersID.toString() + "\",")
 //                .append("\"leader_name\":" + "\"" + leadersName.toString() + "\",")
 //                .append("\"comment\":" + "\"" + comment + "\",");
@@ -693,11 +772,15 @@ public class GudingZichanActivity extends HeadBaseActivity {
                 json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
                         .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")
+                        .append("\"price" + (i + 1) + "\":" + "\"" + bean.getPrice() + "\",")
+                        .append("\"total" + (i + 1) + "\":" + "\"" + bean.getTotal() + "\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"" + bean.getRemarks() + "\",");
             } else {
                 json.append("\"goods" + (i + 1) + "\":" + "\"\",")
                         .append("\"format" + (i + 1) + "\":" + "\"\",")
                         .append("\"num" + (i + 1) + "\":" + "\"\",")
+                        .append("\"price" + (i + 1) + "\":" + "\"\",")
+                        .append("\"total" + (i + 1) + "\":" + "\"\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"\",");
             }
         }

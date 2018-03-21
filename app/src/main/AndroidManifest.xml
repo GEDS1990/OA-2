@@ -24,7 +24,6 @@
         android:allowBackup="true"
         android:icon="@drawable/logo_launch"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
@@ -191,6 +190,12 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             />
+        <!--文件流程-->   <!-- 有附件 -->  <!-- 有负责人 -->
+        <activity
+            android:name=".view.activity.WenjianLiuzhuanActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
 
 
         <!--                    审核界面                      -->
@@ -297,6 +302,12 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             />
+        <!--文件流转审核-->
+        <activity
+            android:name=".view.activity.Wenjianliuzhuan_shenhe"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
         <!--企业退租流程审核-->
         <activity
             android:name=".view.activity.QiyeTuizu_shenhe"
@@ -353,6 +364,142 @@
         <!--预算合约部合同流程-->
         <activity
             android:name=".view.activity.YusuanheyueActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+
+        <!--        已办查看界面      -->
+        <!--请假流程-审核-->
+        <activity
+            android:name=".view.activity.yiban.QingJiaActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--借款申请审核-->
+        <activity
+            android:name=".view.activity.yiban.JiekuanApplyActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--出差申请审核-->
+        <activity
+            android:name=".view.activity.yiban.ChuchaiActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--工作联系单-->
+        <activity
+            android:name=".view.activity.yiban.WorkConnection_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--办文审核-->
+        <activity
+            android:name=".view.activity.yiban.BanwenActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--用车申请审核-->
+        <activity
+            android:name=".view.activity.yiban.YongcheActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--新闻发布审核-->
+        <activity
+            android:name=".view.activity.yiban.NewsFabuActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--物品申请审核-->
+        <activity
+            android:name=".view.activity.yiban.GoodsApplyActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--固定资产申请审核-->
+        <activity
+            android:name=".view.activity.yiban.GudingzichanApplyActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--用印申请审核-->
+        <activity
+            android:name=".view.activity.yiban.YongyinApplyActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--报销申请审核-->
+        <activity
+            android:name=".view.activity.yiban.BaoXiaoApplyActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--合同申请审核-->
+        <activity
+            android:name=".view.activity.yiban.HeTongActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--资金调拨申请审核-->
+        <activity
+            android:name=".view.activity.yiban.ZijingDiaofaActivity_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--&lt;!&ndash;资金申请审核(合同付款)&ndash;&gt;-->
+        <!--<activity-->
+            <!--android:name=".view.activity.yiban.FundApplyHetong_Yiban"-->
+            <!--android:screenOrientation="portrait"-->
+            <!--android:windowSoftInputMode="stateHidden|stateUnchanged"-->
+            <!--/>-->
+        <!--资金申请审核(非合同付款)-->
+        <activity
+            android:name=".view.activity.yiban.FundApplyFeiHetong_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--督办流程审核-->
+        <activity
+            android:name=".view.activity.yiban.Duban_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--收文流程审核-->
+        <activity
+            android:name=".view.activity.yiban.ShouwenProcess_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--文件流转审核-->
+        <activity
+            android:name=".view.activity.yiban.Wenjianliuzhuan_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--企业退租流程审核-->
+        <activity
+            android:name=".view.activity.yiban.QiyeTuizu_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+        <!--租房流程审核-->
+        <activity
+            android:name=".view.activity.yiban.HouseRent_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"/>
+        <!--企业考核流程审核-->
+        <activity
+            android:name=".view.activity.yiban.Qiyekaohe_Yiban"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            />
+
+        <!--投资协议流程审核-->
+        <activity
+            android:name=".view.activity.yiban.Touzixieyi_Yiban"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             />

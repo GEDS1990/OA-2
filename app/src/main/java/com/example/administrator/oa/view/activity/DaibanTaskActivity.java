@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.fragment.daibantasfragments.CaoGaoXiangFragment;
-import com.example.administrator.oa.view.fragment.daibantasfragments.daiBanFragment;
-import com.example.administrator.oa.view.fragment.daibantasfragments.yiBanFragment;
+import com.example.administrator.oa.view.fragment.daibantasfragments.DaiBanFragment;
+import com.example.administrator.oa.view.fragment.daibantasfragments.YiBanFragment;
 import com.flyco.tablayout.SlidingTabLayout;
 import com.flyco.tablayout.listener.CustomTabEntity;
 import com.flyco.tablayout.listener.OnTabSelectListener;
@@ -32,7 +32,7 @@ public class DaibanTaskActivity extends HeadBaseActivity implements OnTabSelectL
     @BindView(R.id.vp_2)
     ViewPager mVp2;
 
-    private String[] mTitles = {"待办", "草稿箱"};
+    private String[] mTitles = {"待办", "已办", "草稿箱"};
 
     private ArrayList<Fragment> mFragments = new ArrayList<>();
     private ArrayList<CustomTabEntity> mTabEntities = new ArrayList<>();
@@ -51,7 +51,8 @@ public class DaibanTaskActivity extends HeadBaseActivity implements OnTabSelectL
 
     private void initThisView() {
 
-        mFragments.add(daiBanFragment.getInstance("Switch ViewPager " + "代办"));
+        mFragments.add(DaiBanFragment.getInstance("Switch ViewPager " + "待办"));
+        mFragments.add(YiBanFragment.getInstance("Switch ViewPager " + "已办"));
         mFragments.add(CaoGaoXiangFragment.getInstance("Switch ViewPager " + "草稿箱"));
 
         mTablayout.setViewPager(mVp2, mTitles, this, mFragments);

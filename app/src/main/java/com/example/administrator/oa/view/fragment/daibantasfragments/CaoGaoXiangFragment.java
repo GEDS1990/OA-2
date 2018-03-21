@@ -27,6 +27,7 @@ import com.example.administrator.oa.view.activity.QiyeKaoheActivity;
 import com.example.administrator.oa.view.activity.QiyeTuizuActivity;
 import com.example.administrator.oa.view.activity.ShouWenActivity;
 import com.example.administrator.oa.view.activity.TouziXieyiActivity;
+import com.example.administrator.oa.view.activity.WenjianLiuzhuanActivity;
 import com.example.administrator.oa.view.activity.YongcheActivity;
 import com.example.administrator.oa.view.activity.YongyinActivity;
 import com.example.administrator.oa.view.activity.ZhaobiaoFileActivity;
@@ -262,7 +263,9 @@ public class CaoGaoXiangFragment extends Fragment {
             case "28":
                 readyGo(DubanActivity.class, bundle);//ok-
                 break;
-
+            case "30":
+                readyGo(WenjianLiuzhuanActivity.class, bundle);//ok-
+                break;
             case "资金申请（合同付款）":
                 readyGo(ZijinShenqingActivity.class, bundle);//ok-
                 break;

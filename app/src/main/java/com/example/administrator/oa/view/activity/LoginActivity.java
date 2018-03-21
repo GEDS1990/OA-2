@@ -116,7 +116,7 @@ public class LoginActivity extends HeadBaseActivity {
 
         //String okpwdMD5 = "";
         if (TextUtils.isEmpty(phoneNum) || TextUtils.isEmpty(pwd)) {
-            Toast.makeText(this, "手机号和密码不能为空", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "用户名和密码不能为空", Toast.LENGTH_SHORT).show();
         } else {
             //okpwdMD5 = CommonUtil2.MD5(pwd);//对密码继续md5加密
             //执行联网请求

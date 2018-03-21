@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import com.example.administrator.oa.R;
 import com.example.administrator.oa.view.bean.GoodsApplyBlankBean;
+import com.example.administrator.oa.view.bean.GoodsNameBean;
+import com.example.administrator.oa.view.bean.GoodsNameResponse;
 import com.example.administrator.oa.view.bean.GoodsRegistrationBean;
 import com.example.administrator.oa.view.bean.ProcessJieguoResponse;
 import com.example.administrator.oa.view.bean.ProcessShenheHistoryBean;
@@ -28,6 +30,7 @@ import com.example.administrator.oa.view.bean.organization_structure.Organizatio
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
 import com.example.administrator.oa.view.utils.SPUtils;
+import com.leon.lfilepickerlibrary.utils.StringUtils;
 import com.lsh.XXRecyclerview.CommonRecyclerAdapter;
 import com.lsh.XXRecyclerview.CommonViewHolder;
 import com.lsh.XXRecyclerview.XXRecycleView;
@@ -69,9 +72,9 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
     @BindView(R.id.add)
     TextView mAdd;
     @BindView(R.id.goodsName)
-    EditText mGoodsName;
-    @BindView(R.id.wuping_guige)
-    EditText mWupingGuige;
+    TextView mGoodsName;
+//    @BindView(R.id.wuping_guige)
+//    EditText mWupingGuige;
     @BindView(R.id.wuping_count)
     EditText mWupingCount;
     @BindView(R.id.beizhu)
@@ -168,8 +171,7 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
             public void convert(CommonViewHolder holder, final GoodsRegistrationBean item, int position, boolean b) {
 
                 holder.setText(R.id.number, "( " + (position + 1) + " )");
-                holder.setText(R.id.name, item.getGoods());
-                holder.setText(R.id.wuping_guige, item.getFormat());
+                holder.setText(R.id.goodsName, item.getGoods());
                 holder.setText(R.id.wuping_count, item.getNum());
                 holder.setText(R.id.beizhu, item.getRemarks());
 
@@ -214,7 +216,12 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
                     // 先将物品明细的good存入列表，好定物品明细的数量
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue()) && bean.getLabel().startsWith("goods")) {
-                            goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods","")), bean.getValue(), "", "", ""));
+                            if(bean.getValue().contains("+_+")) {
+                                String[] strs = bean.getValue().split("\\+_+");
+                                goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods", "")), strs[0], "", "", ""));
+                            } else {
+                                goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods", "")), bean.getValue(), "", "", ""));
+                            }
                         }
                     }
 
@@ -240,10 +247,10 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
                             // 处理物品明细
                             if(!TextUtils.isEmpty(bean.getLabel())) {
                                 for(int j = 0; j<goods.size(); j++){
-                                    if (bean.getLabel().startsWith("format") &&
-                                            Integer.valueOf(bean.getLabel().replace("format","")) == (goods.get(j).getIndex())) {
-                                        goods.get(j).setFormat(bean.getValue());
-                                    }
+//                                    if (bean.getLabel().startsWith("format") &&
+//                                            Integer.valueOf(bean.getLabel().replace("format","")) == (goods.get(j).getIndex())) {
+//                                        goods.get(j).setFormat(bean.getValue());
+//                                    }
                                     if (bean.getLabel().startsWith("num") &&
                                             Integer.valueOf(bean.getLabel().replace("num","")) == (goods.get(j).getIndex())) {
                                         goods.get(j).setNum(bean.getValue());
@@ -341,7 +348,12 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
                     // 先将物品明细的good存入列表，好定物品明细的数量
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue()) && bean.getLabel().startsWith("goods")) {
-                            goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods","")), bean.getValue(), "", "", ""));
+                            if(bean.getValue().contains("+_+")) {
+                                String[] strs = bean.getValue().split("\\+_+");
+                                goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods", "")), strs[0], "", "", ""));
+                            } else {
+                                goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods", "")), bean.getValue(), "", "", ""));
+                            }
                         }
                     }
                     for (QingjiaShenheBean bean : shenheBeen) {
@@ -375,10 +387,10 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
                             // 处理物品明细
                             if(!TextUtils.isEmpty(bean.getLabel())) {
                                 for(int j = 0; j<goods.size(); j++){
-                                    if (bean.getLabel().startsWith("format") &&
-                                            Integer.valueOf(bean.getLabel().replace("format","")) == (goods.get(j).getIndex())) {
-                                        goods.get(j).setFormat(bean.getValue());
-                                    }
+//                                    if (bean.getLabel().startsWith("format") &&
+//                                            Integer.valueOf(bean.getLabel().replace("format","")) == (goods.get(j).getIndex())) {
+//                                        goods.get(j).setFormat(bean.getValue());
+//                                    }
                                     if (bean.getLabel().startsWith("num") &&
                                             Integer.valueOf(bean.getLabel().replace("num","")) == (goods.get(j).getIndex())) {
                                         goods.get(j).setNum(bean.getValue());
@@ -414,7 +426,7 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
     }
 
     // R.id.ll_buzhang,
-    @OnClick({R.id.ll_start, R.id.btn_caogao, R.id.btn_commit, R.id.add, R.id.ll_bumen})
+    @OnClick({R.id.ll_start, R.id.btn_caogao, R.id.btn_commit, R.id.ll_wpmcjgg, R.id.add, R.id.ll_bumen})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll_start:
@@ -428,22 +440,26 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
             case R.id.btn_commit:
                 jianYanshuju();
                 break;
+            // 选择物品名称及规格
+            case R.id.ll_wpmcjgg:
+                HuoquWupinGuigeCode();
+                break;
             case R.id.add:
                 String name = mGoodsName.getText().toString().trim();
-                String wuping_guige = mWupingGuige.getText().toString().trim();
+                String wuping_guige = mGoodsName.getTag().toString().trim();
                 String wuping_count = mWupingCount.getText().toString().trim();
                 String beizhu = mBeizhu.getText().toString().trim();
                 if (TextUtils.isEmpty(name)) {
-                    Toast.makeText(this, "请输入物品名称", Toast.LENGTH_SHORT).show();
-                } else if (TextUtils.isEmpty(wuping_guige)) {
-                    Toast.makeText(this, "请输入物品规格", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "请选择物品名称及规格", Toast.LENGTH_SHORT).show();
+//                } else if (TextUtils.isEmpty(wuping_guige)) {
+//                    Toast.makeText(this, "请输入物品规格", Toast.LENGTH_SHORT).show();
                 } else if (TextUtils.isEmpty(wuping_count)) {
                     Toast.makeText(this, "请输入物品数量", Toast.LENGTH_SHORT).show();
                 } else {
                     mGoodAdapter.add(new GoodsRegistrationBean(name, wuping_guige, wuping_count, beizhu));
                     mXxre.scrollToPosition(mGoodAdapter.getItemCount() - 1);
                     mGoodsName.setText("");
-                    mWupingGuige.setText("");
+                    mGoodsName.setTag("");
                     mWupingCount.setText("");
                     mBeizhu.setText("");
                 }
@@ -462,6 +478,46 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
                 }
                 break;
         }
+    }
+
+    /**
+     * 请求网络接口 获取物品名称及规格
+     */
+    private void HuoquWupinGuigeCode() {
+
+        //创建请求队列
+        RequestQueue requestQueue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<GoodsNameResponse> request = new JavaBeanRequest<>(UrlConstance.URL_GET_GOODSNAMEANDFORMAT,
+                RequestMethod.POST,GoodsNameResponse.class);
+        request.add("typecode", "itemName");
+        //添加url?key=value形式的参数
+        requestQueue.add(0, request, new OnResponseListener<GoodsNameResponse>() {
+
+            @Override
+            public void onStart(int what) {
+            }
+
+            @Override
+            public void onSucceed(int what, Response<GoodsNameResponse> response) {
+                Log.w("2222", response.toString());
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    List<GoodsNameBean> data = response.get().getData();
+                    chooseGoodsNameAndSize(data, mGoodsName, "选择物品名称及规格");
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<GoodsNameResponse> response) {
+                Toast.makeText(DizhiyihaoActivity.this, "请求数据失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+
+            }
+        });
+
     }
 
     /**
@@ -513,13 +569,13 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
                 .append("\"date\":" + "\"" + mDate.getText().toString().trim() + "\",")
                 .append("\"minister_name\":" + "\"" + mBumenFuzeren.getText().toString().trim() + "\",")
                 .append("\"minister\":" + "\"" + mBumenFuzeren.getTag().toString() + "\",");
+
 //                .append("\"comment\":" + "\"" + comment + "\",");
 
         for (int i = 0; i < 10; i++) {
             if (i <= mGoodAdapter.getDatas().size() - 1) {
                 GoodsRegistrationBean bean = mGoodAdapter.getDatas().get(i);
-                json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
-                        .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
+                json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods()+"+_+"+ bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"" + bean.getRemarks() + "\",");
             } else {
@@ -538,7 +594,6 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
         request.add("processDefinitionId", processDefinitionId);
         request.add("businessKey", businessKey);
         request.add("data", json.toString());
-        Log.w("99999", json.toString());
         Queue.add(0, request, new OnResponseListener<ProcessJieguoResponse>() {
 
             @Override
@@ -597,13 +652,13 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
         for (int i = 0; i < 10; i++) {
             if (i <= mGoodAdapter.getDatas().size() - 1) {
                 GoodsRegistrationBean bean = mGoodAdapter.getDatas().get(i);
-                json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
-                        .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
+                json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods()+"+_+"+ bean.getFormat() + "\",")
+//                        .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"" + bean.getRemarks() + "\",");
             } else {
                 json.append("\"goods" + (i + 1) + "\":" + "\"\",")
-                        .append("\"format" + (i + 1) + "\":" + "\"\",")
+//                        .append("\"format" + (i + 1) + "\":" + "\"\",")
                         .append("\"num" + (i + 1) + "\":" + "\"\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"\",");
             }
@@ -674,13 +729,11 @@ public class DizhiyihaoActivity extends HeadBaseActivity {
         for (int i = 0; i < 10; i++) {
             if (i <= mGoodAdapter.getDatas().size() - 1) {
                 GoodsRegistrationBean bean = mGoodAdapter.getDatas().get(i);
-                json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
-                        .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
+                json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods()+"+_+"+ bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"" + bean.getRemarks() + "\",");
             } else {
                 json.append("\"goods" + (i + 1) + "\":" + "\"\",")
-                        .append("\"format" + (i + 1) + "\":" + "\"\",")
                         .append("\"num" + (i + 1) + "\":" + "\"\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"\",");
             }

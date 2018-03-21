@@ -31,6 +31,7 @@ import com.example.administrator.oa.view.activity.QiyeKaoheActivity;
 import com.example.administrator.oa.view.activity.QiyeTuizuActivity;
 import com.example.administrator.oa.view.activity.ShouWenActivity;
 import com.example.administrator.oa.view.activity.TouziXieyiActivity;
+import com.example.administrator.oa.view.activity.WenjianLiuzhuanActivity;
 import com.example.administrator.oa.view.activity.YongcheActivity;
 import com.example.administrator.oa.view.activity.YongyinActivity;
 import com.example.administrator.oa.view.activity.ZhaobiaoFileActivity;
@@ -43,6 +44,7 @@ import com.example.administrator.oa.view.bean.LiuChongDingyiBean;
 import com.example.administrator.oa.view.bean.ProcessDetailBean;
 import com.example.administrator.oa.view.bean.ProcessListResponse;
 import com.example.administrator.oa.view.bean.ProcessTypeListBean;
+import com.example.administrator.oa.view.bean.UndoTaskNumResponse;
 import com.example.administrator.oa.view.constance.UrlConstance;
 import com.example.administrator.oa.view.constance.commonConstance;
 import com.example.administrator.oa.view.net.JavaBeanRequest;
@@ -80,6 +82,8 @@ public class LiuChongFragment extends BaseFragment {
     RelativeLayout mBtn2;
     @BindView(R.id.arl)
     AutoRollLayout mArl;
+    @BindView(R.id.txtImgRed)
+    TextView txtImgRed;
     @BindView(R.id.xxre_common_liuchong)
     XXRecycleView mXxreCommonLiuchong;
     @BindView(R.id.scrollView)
@@ -91,7 +95,8 @@ public class LiuChongFragment extends BaseFragment {
     private MainActivity mActivity;
     View mChildHeadView;
     LinearLayout myStatusBar;
-
+    // 消息未读件数
+    private String count;
     @Override
     protected int getChildLayoutRes() {
         return R.layout.fragment_manager;
@@ -136,6 +141,7 @@ public class LiuChongFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         mArl.setAutoRoll(true);
+        getTaskNum();
     }
 
     @Override
@@ -159,6 +165,8 @@ public class LiuChongFragment extends BaseFragment {
     private void initThisView() {
         // 获取工作台数据
         RequestServerLogin();
+        // 获取待办任务数
+        getTaskNum();
         // 加载数据
         setDatas();
     }
@@ -203,6 +211,52 @@ public class LiuChongFragment extends BaseFragment {
             @Override
             public void onFailed(int what, Response<ProcessListResponse> response) {
                 Toast.makeText(mActivity, "获取信息失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFinish(int what) {
+                if (null != mLoadingDialog) {
+                    mLoadingDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取待办任务数
+     */
+    private void getTaskNum() {
+        //创建请求队列
+        RequestQueue ProcessQueue = NoHttp.newRequestQueue();
+        //创建请求
+        Request<UndoTaskNumResponse> request = new JavaBeanRequest(UrlConstance.URL_GET_UNDOTASKNUM,
+                RequestMethod.POST, UndoTaskNumResponse.class);
+        request.addHeader("sessionId", SPUtils.getString(mActivity, "sessionId"));
+        ProcessQueue.add(0, request, new OnResponseListener<UndoTaskNumResponse>() {
+
+            @Override
+            public void onStart(int what) {
+                if (null != mLoadingDialog) {
+                    mLoadingDialog.show();
+                }
+            }
+
+            @Override
+            public void onSucceed(int what, Response<UndoTaskNumResponse> response) {
+                Log.w("getTaskNum", response.toString());
+                if (null != response && null != response.get() && null != response.get().getData()) {
+                    if(!"0".equals(response.get().getData().get(0).getCount())) {
+                        txtImgRed.setText(response.get().getData().get(0).getCount());
+                        txtImgRed.setVisibility(View.VISIBLE);
+                    } else {
+                        txtImgRed.setVisibility(View.INVISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailed(int what, Response<UndoTaskNumResponse> response) {
+                response.getException();
             }
 
             @Override
@@ -333,6 +387,9 @@ public class LiuChongFragment extends BaseFragment {
             case "招投标文件":
                 readyGo(ZhaobiaoFileActivity.class, bundle);//ok
                 break;
+            case "文件流转":
+                readyGo(WenjianLiuzhuanActivity.class, bundle);//ok
+                break;
         }
     }
 
@@ -345,7 +402,11 @@ public class LiuChongFragment extends BaseFragment {
         super.onHiddenChanged(hidden);
         if (!hidden && null != mCommonAdapter && 0 >= mCommonAdapter.getDatas().size()) {
             RequestServerLogin();
+            // 获取待办任务数
+            getTaskNum();
         }
     }
+
+
 }
 

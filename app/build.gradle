@@ -7,8 +7,8 @@ android {
         applicationId "com.example.administrator.oa"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -56,4 +56,7 @@ dependencies {
     compile 'com.contrarywind:Android-PickerView:3.2.5'
     compile 'com.leon:lfilepickerlibrary:1.2.0'
     compile 'com.mani:ThinDownloadManager:1.2.5'
+
+    // 预览pdf文件
+//    compile 'com.lidong.pdf:android_pdf:1.0.1'
 }

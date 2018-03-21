@@ -164,8 +164,7 @@ public class GoodsApplyActivity_shenhe extends HeadBaseActivity {
             @Override
             public void convert(CommonViewHolder holder, GoodsRegistrationBean item, int i, boolean b) {
                 holder.setText(R.id.number, "( " + (i + 1) + " )");
-                holder.setText(R.id.name, item.getGoods());
-                holder.setText(R.id.wuping_guige, item.getFormat());
+                holder.setText(R.id.goodsName, item.getGoods());
                 holder.setText(R.id.wuping_count, item.getNum());
                 holder.setText(R.id.beizhu, item.getRemarks());
             }
@@ -263,7 +262,12 @@ public class GoodsApplyActivity_shenhe extends HeadBaseActivity {
                     // 先将物品明细的good存入列表，好定物品明细的数量
                     for (QingjiaShenheBean bean : shenheBeen) {
                         if(!TextUtils.isEmpty(bean.getLabel()) && !TextUtils.isEmpty(bean.getValue()) && bean.getLabel().startsWith("goods")) {
-                            goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods","")), bean.getValue(), "", "", ""));
+                            if(bean.getValue().contains("+_+")) {
+                                String[] strs = bean.getValue().split("\\+_+");
+                                goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods", "")), strs[0], "", "", ""));
+                            } else {
+                                goods.add(new GoodsRegistrationBean(Integer.valueOf(bean.getLabel().replace("goods", "")), bean.getValue(), "", "", ""));
+                            }
                         }
                     }
 
@@ -416,12 +420,10 @@ public class GoodsApplyActivity_shenhe extends HeadBaseActivity {
             if (i <= mGoodApplyAdapter.getDatas().size() - 1) {
                 GoodsRegistrationBean bean = mGoodApplyAdapter.getDatas().get(i);
                 json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
-                        .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"" + bean.getRemarks() + "\",");
             } else {
                 json.append("\"goods" + (i + 1) + "\":" + "\"\",")
-                        .append("\"format" + (i + 1) + "\":" + "\"\",")
                         .append("\"num" + (i + 1) + "\":" + "\"\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"\",");
             }

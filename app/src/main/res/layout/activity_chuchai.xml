@@ -21,7 +21,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
+                android:layout_marginBottom="1dp"
                 android:background="@color/white"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -204,6 +204,30 @@
                     android:maxLines="9"
                     android:textSize="@dimen/dp_15"/>
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_tongxingren"
+                style="@style/WorkInfoLinearLayout"
+                android:layout_marginTop="@dimen/dp_10">
+
+                <TextView
+                    style="@style/WorkInfoLeftTextView"
+                    android:text="出差同行人："/>
+
+                <TextView
+                    android:id="@+id/tv_tongxingren"
+                    style="@style/WorkInfoHuiqianrenTextView"
+                    android:hint="请选择出差同行人（可多选）"/>
+
+                <ImageView
+                    style="@style/WorkInfoRightArrow"
+                    android:src="@drawable/icon_reimbursement_mail"/>
+            </LinearLayout>
+
+            <com.lsh.XXRecyclerview.XXRecycleView
+                android:id="@+id/xxre_huiqianren"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
             <!--<LinearLayout-->
                 <!--android:id="@+id/ll_fenguanleader"-->

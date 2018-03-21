@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import com.bigkoo.pickerview.TimePickerView;
 import com.example.administrator.oa.R;
+import com.example.administrator.oa.view.bean.GoodsNameBean;
 import com.example.administrator.oa.view.bean.YingzhangTypeBean;
 import com.example.administrator.oa.view.bean.ZuzhiUserBean;
 import com.example.administrator.oa.view.bean.ZuzhiUserListResponse;
@@ -318,6 +319,12 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
 
     XXDialog mxxDialog;
 
+    /**
+     * 印鉴名称的选择
+     * @param data
+     * @param tv
+     * @param title
+     */
     public void chooseNameAndId(final List<YingzhangTypeBean> data, final TextView tv, final String title) {
         if(null != mxxDialog){
             mxxDialog.dismiss();
@@ -345,6 +352,47 @@ public abstract class HeadBaseActivity extends AppCompatActivity implements View
                     public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
                         tv.setText(adapter.getDatas().get(i).getName());
                         tv.setTag(adapter.getDatas().get(i).getId());
+                        mxxDialog.dismiss();
+                    }
+                });
+
+            }
+        }.showDialog();
+    }
+
+    /**
+     * 物品名称的选择
+     * @param data
+     * @param tv
+     * @param title
+     */
+    public void chooseGoodsNameAndSize(final List<GoodsNameBean> data, final TextView tv, final String title) {
+        if(null != mxxDialog){
+            mxxDialog.dismiss();
+        }
+        mxxDialog = new XXDialog(this, R.layout.dialog_chooselist) {
+            @Override
+            public void convert(DialogViewHolder holder) {
+                XXRecycleView xxre = (XXRecycleView) holder.getView(R.id.dialog_xxre);
+                holder.setText(R.id.dialog_title, title);
+                xxre.setLayoutManager(new LinearLayoutManager(HeadBaseActivity.this));
+                List<String> datas = new ArrayList();
+                final CommonRecyclerAdapter<GoodsNameBean> adapter = new CommonRecyclerAdapter<GoodsNameBean>
+                        (HeadBaseActivity.this, data, R.layout.simple_list_item) {
+                    @Override
+                    public void convert(CommonViewHolder holder1, GoodsNameBean item, int i, boolean b) {
+                        holder1.setText(R.id.tv, item.getValue());
+                        holder1.getView(R.id.more).setVisibility(View.GONE);
+                        holder1.getView(R.id.users).setVisibility(View.GONE);
+                    }
+                };
+                xxre.setAdapter(adapter);
+                adapter.replaceAll(data);
+                adapter.setOnItemClickListener(new CommonRecyclerAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClickListener(CommonViewHolder commonViewHolder, int i) {
+                        tv.setText(adapter.getDatas().get(i).getValue());
+                        tv.setTag(adapter.getDatas().get(i).getCode());
                         mxxDialog.dismiss();
                     }
                 });

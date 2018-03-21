@@ -57,8 +57,8 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
     TextView mName;
     @BindView(R.id.bumen)
     TextView mBumen;
-    @BindView(R.id.fuzeren)
-    TextView mFuzeren;
+    @BindView(R.id.txtReason)
+    TextView txtReason;
     @BindView(R.id.date)
     TextView mDate;
     @BindView(R.id.xxre)
@@ -160,13 +160,15 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
 
         //展示申请的物品明细单
         mXxreGoodsApply.setLayoutManager(new LinearLayoutManager(this));
-        mGoodApplyAdapter = new CommonRecyclerAdapter<GoodsRegistrationBean>(this, data3, R.layout.item_goodsapply_shenhe) {
+        mGoodApplyAdapter = new CommonRecyclerAdapter<GoodsRegistrationBean>(this, data3, R.layout.item_gudingzichan_shenhe) {
             @Override
             public void convert(CommonViewHolder holder, GoodsRegistrationBean item, int i, boolean b) {
                 holder.setText(R.id.number, "( " + (i + 1) + " )");
-                holder.setText(R.id.name, item.getGoods());
+                holder.setText(R.id.goodsName, item.getGoods());
                 holder.setText(R.id.wuping_guige, item.getFormat());
                 holder.setText(R.id.wuping_count, item.getNum());
+                holder.setText(R.id.goodsPrice, item.getPrice());
+                holder.setText(R.id.goodsTotal, item.getTotal());
                 holder.setText(R.id.beizhu, item.getRemarks());
             }
         };
@@ -306,9 +308,9 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
                             String label = bean.getName();
                             String value = bean.getValue();
                             switch (label) {
-                                // 负责人
-                                case "minister_name":
-                                    mFuzeren.setText(value);
+                                // 申请原因
+                                case "reason":
+                                    txtReason.setText(value);
                                     break;
                                 // 部门
                                 case "departments":
@@ -344,6 +346,14 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
                                     if (bean.getLabel().startsWith("num") &&
                                             Integer.valueOf(bean.getLabel().replace("num","")) == (goods.get(j).getIndex())) {
                                         goods.get(j).setNum(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("price") &&
+                                            Integer.valueOf(bean.getLabel().replace("price","")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setPrice(bean.getValue());
+                                    }
+                                    if (bean.getLabel().startsWith("total") &&
+                                            Integer.valueOf(bean.getLabel().replace("total","")) == (goods.get(j).getIndex())) {
+                                        goods.get(j).setTotal(bean.getValue());
                                     }
                                     if (bean.getLabel().startsWith("remarks") &&
                                             Integer.valueOf(bean.getLabel().replace("remarks","")) == (goods.get(j).getIndex())) {
@@ -383,7 +393,7 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
         String bumen = mBumen.getText().toString();
         String name = mName.getText().toString();
         String date = mDate.getText().toString();
-        String fuzeren = mFuzeren.getText().toString();
+        String fuzeren = txtReason.getText().toString();
 
         StringBuffer leadersID = new StringBuffer();
         StringBuffer leadersName = new StringBuffer();
@@ -405,7 +415,7 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
                 .append("\"departments_name\":" + "\"" + bumen + "\",")
                 .append("\"name\":" + "\"" + name + "\",")
                 .append("\"date\":" + "\"" + date + "\",")
-                .append("\"minister_name\":" + "\"" + fuzeren + "\",")
+                .append("\"reason\":" + "\"" + fuzeren + "\",")
                 .append("\"leader\":" + "\"" + leadersID.toString() + "\",")
                 .append("\"leader_name\":" + "\"" + leadersName.toString() + "\",")
                 .append("\"comment\":" + "\"" + comment + "\",");
@@ -416,11 +426,15 @@ public class GudingzichanApplyActivity_shenhe extends HeadBaseActivity {
                 json.append("\"goods" + (i + 1) + "\":" + "\"" + bean.getGoods() + "\",")
                         .append("\"format" + (i + 1) + "\":" + "\"" + bean.getFormat() + "\",")
                         .append("\"num" + (i + 1) + "\":" + "\"" + bean.getNum() + "\",")
+                        .append("\"price" + (i + 1) + "\":" + "\"" + bean.getPrice() + "\",")
+                        .append("\"total" + (i + 1) + "\":" + "\"" + bean.getTotal() + "\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"" + bean.getRemarks() + "\",");
             } else {
                 json.append("\"goods" + (i + 1) + "\":" + "\"\",")
                         .append("\"format" + (i + 1) + "\":" + "\"\",")
                         .append("\"num" + (i + 1) + "\":" + "\"\",")
+                        .append("\"price" + (i + 1) + "\":" + "\"\",")
+                        .append("\"total" + (i + 1) + "\":" + "\"\",")
                         .append("\"remarks" + (i + 1) + "\":" + "\"\",");
             }
         }

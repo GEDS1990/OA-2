@@ -63,6 +63,8 @@ public class ChuchaiActivity_shenhe extends HeadBaseActivity {
     TextView mChuchaiDidian;
     @BindView(R.id.chuchai_shiyou)
     TextView mChuchaiShiyou;
+    @BindView(R.id.chuchai_txr)
+    TextView chuchai_txr;
     @BindView(R.id.chuchai_beizhu)
     TextView mChuchaiBeizhu;
     @BindView(R.id.xxre)
@@ -239,6 +241,10 @@ public class ChuchaiActivity_shenhe extends HeadBaseActivity {
                                 case "reason":
                                     mChuchaiShiyou.setText(value);
                                     break;
+                                // 同行人
+                                case "peer":
+                                    chuchai_txr.setText(bean.getLabel());
+                                    break;
                                 case "address":
                                     mChuchaiDidian.setText(value);
                                     break;
@@ -302,6 +308,7 @@ public class ChuchaiActivity_shenhe extends HeadBaseActivity {
                 .append("\"address\":" + "\"" + address + "\",")
                 .append("\"reason\":" + "\"" + reason + "\",")
                 .append("\"beizhu\":" + "\"" + beizhu + "\",")
+                .append("\"peer\":" + "\"" + chuchai_txr.getText().toString() + "\",")
                 .append("\"comment\":" + "\"" + comment + "\"")
                 .append("}");
 

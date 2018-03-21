@@ -28,7 +28,11 @@ public class UrlConstance {
      * 网络请求URL的公共部分
      */
 //    public static final String URL_HOST = "http://58.213.75.40/";
+    //普通用户密码 njsp123456;admin密码njspad12
     public static final String URL_HOST = "http://175av53846.iask.in/njsmartoa/";
+//    public static final String URL_HOST = "http://oa.njitrip.com/";
+
+
 
     /**
      * 上传文件
@@ -140,7 +144,8 @@ public class UrlConstance {
      * 提交某一项具体任务数据接口
      * task/voteReturn
      */
-    public static final String URL_HUIQIAN_TUIHUI = formatUrl("task/voteReturn");
+//    public static final String URL_HUIQIAN_TUIHUI = formatUrl("task/voteReturn");
+    public static final String URL_HUIQIAN_TUIHUI = formatUrl("task/rollbackPrevious");
 
     /**
      * 获取印章类型接口
@@ -189,4 +194,14 @@ public class UrlConstance {
      * 获取合同选择接口
      */
     public static final String URL_GET_HETONG_TYPE = formatUrl("form/getContractInfoList");
+
+    /**
+     * 获取待办任务数接口
+     */
+    public static final String URL_GET_UNDOTASKNUM = formatUrl("task/tasksPersonalCount");
+
+    /**
+     * 获取低值易耗品的物品名称及规格接口
+     */
+    public static final String URL_GET_GOODSNAMEANDFORMAT = formatUrl("form/dictCode");
 }

@@ -812,7 +812,7 @@ public class BanwenActivity_shenhe extends HeadBaseActivity {
                 public void onSucceed(int what, Response<ProcessJieguoResponse> response) {
                     if (null != response && null != response.get()) {
                         if (200 == response.get().getCode()) {
-                            Toast.makeText(BanwenActivity_shenhe.this, "退回成功", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(BanwenActivity_shenhe.this, "驳回成功", Toast.LENGTH_SHORT).show();
                             finish();
                         }
                     }

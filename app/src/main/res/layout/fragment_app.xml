@@ -8,15 +8,15 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:orientation="horizontal"
-        android:padding="@dimen/dp_30"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="8dp"
         android:background="@color/black">
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/dp_30"
-        android:layout_marginRight="@dimen/dp_30"
         android:background="@drawable/logo"
-        />
+        android:layout_gravity="center"/>
     </LinearLayout>
     <com.lsh.XXRecyclerview.XXRecycleView
         android:id="@+id/lianxiren"

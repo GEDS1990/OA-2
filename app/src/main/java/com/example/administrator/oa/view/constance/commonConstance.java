@@ -26,6 +26,7 @@ public interface commonConstance {
             {R.string.guding, R.string.guding, R.drawable.icon_definition_fixed, R.string.public_pro},
             {R.string.zijin_hetong, R.string.zijin_hetong, R.drawable.icon_definition_fund_contract, R.string.public_pro},
             {R.string.zijin_feihetong, R.string.zijin_feihetong, R.drawable.icon_definition_fund, R.string.public_pro},
+            {R.string.wenjianliuzhuan, R.string.wenjianliuzhuan, R.drawable.icon_definition_in, R.string.public_pro},
 
 //            企业服务部流程
             {R.string.qiye_kaohe, R.string.qiye_kaohe, R.drawable.icon_definition_assessment, R.string.enterprise_service_pro},

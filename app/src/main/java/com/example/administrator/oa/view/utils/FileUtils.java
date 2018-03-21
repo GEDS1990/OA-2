@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -193,8 +194,14 @@ public class FileUtils {
 
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_VIEW);
+            // 部分手机存在兼容性问题，这里的url需要以
             Uri content_url = Uri.parse(filePath);
-            intent.setDataAndType(content_url, mime);
+            Log.d("fileurl = ", filePath);
+            if(mime.contains("image")) {
+                intent.setDataAndType(content_url, mime);
+            } else {
+                intent.setData(content_url);
+            }
             context.startActivity(intent);
         }
         catch (Exception e)

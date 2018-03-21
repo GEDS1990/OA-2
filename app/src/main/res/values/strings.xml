@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">南京研创园OA</string>
+    <string name="app_name">江北新区研创园</string>
     <string name="setting">设置</string>
     <string name="fankui">意见反馈</string>
     <string name="fankuisuggest">请在此输入你的建议吧！谢谢~</string>
@@ -29,6 +29,7 @@
     <string name="guding">固定资产领用</string>
     <string name="zijin_hetong">资金申请（合同付款）</string>
     <string name="zijin_feihetong">资金申请（非合同）</string>
+    <string name="wenjianliuzhuan">文件流转</string>
 
 
     <!--企业服务部流程-->

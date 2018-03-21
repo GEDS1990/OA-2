@@ -70,18 +70,13 @@ public class BanwenActivity extends HeadBaseActivity {
     EditText mTitle;
     @BindView(R.id.beizhu)
     EditText mBeizhu;
+    // 附件的字段
     @BindView(R.id.icon)
     ImageView mIcon;
     @BindView(R.id.file_name)
     TextView mFileName;
     @BindView(R.id.filesize)
     TextView mFilesize;
-    @BindView(R.id.btn_cancel)
-    ImageView mBtnCancel;
-    @BindView(R.id.btn_caogao)
-    Button mBtnCaogao;
-    @BindView(R.id.btn_commit)
-    Button mBtnCommit;
     @BindView(R.id.add_fujian)
     RelativeLayout mAddFujian;
     @BindView(R.id.pb)
@@ -90,7 +85,12 @@ public class BanwenActivity extends HeadBaseActivity {
     ImageView mBtnUplaod;
     @BindView(R.id.rl_fujian)
     RelativeLayout mRlFujian;
-
+    @BindView(R.id.btn_cancel)
+    ImageView mBtnCancel;
+    @BindView(R.id.btn_caogao)
+    Button mBtnCaogao;
+    @BindView(R.id.btn_commit)
+    Button mBtnCommit;
     // 流程审核记录
     @BindView(R.id.txtProcess)
     TextView txtProcess;
